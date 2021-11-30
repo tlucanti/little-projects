@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:40:07 by kostya            #+#    #+#             */
-/*   Updated: 2021/11/30 21:25:19 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/01 00:23:16 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,18 @@ void	ft_info(const char *__restrict parent, int errorcode, const char *__restric
 void	ft_exit(int status) __NORET __NOEXC;
 void	print_help_message(void) __NORET __NOEXC;
 
+
 // errrors
-# define E_BADOPTION	(-1)
-# define E_BADPERIOD	(-2)
-# define E_BADARG		(-3)
+typedef enum	s_error
+{
+	E_CLIENT_WRITE		= -1,
+	E_CLIENT_READ		= -2,
+	E_RESPONSE_FORMAT	= -3,
+	E_BUTTON_VALUE		= -4,
+
+	I_CLIENT_INFO		=
+	I_SERVER_INFO		=
+}				e_error;
 
 // oks
 # define K_EXIT			(-4)

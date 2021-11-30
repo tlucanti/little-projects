@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:34:33 by kostya            #+#    #+#             */
-/*   Updated: 2021/11/29 19:38:08 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/01 00:22:22 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,22 +42,24 @@ void	ft_message(unsigned int type, const char *__restrict parent,
 }
 
 __NOEXC __WUR
-static const char	*ft_strerror(int errorcode)
+static const char	*ft_strerror(e_error errorcode)
 {
 	if (errorcode == 0)
 		return ("");
-	else if (errorcode == E_BADOPTION)
-		return ("Invalid option");
-	else if (errorcode == E_BADPERIOD)
-		return ("Invalid period value");
-	else if (errorcode == E_BADARG)
-		return ("Invalid arguments");
-	else if (errorcode == K_EXIT)
-		return ("exit");
-	else if (errorcode == K_PERIODCH)
-		return ("period changed to");
-	else if (errorcode == I_HELP)
-		return ("Try " TERM_WHITE "'./lab3 " TERM_YELLOW "--help'" RESET
+	else if (errorcode == E_CLIENT_WRITE)
+		return ("cannot write data to server");
+	else if (errorcode == E_CLIENT_READ)
+		return ("cannot read data from server");
+	else if (errorcode == E_RESPONSE_FORMAT)
+		return ("invalid response format");
+	else if (errorcode == E_BUTTON_VALUE)
+		return ("invalid button value");
+
+	else if (errorcode == I_CLIENT_INFO)
+		return ("Try " TERM_WHITE "'./client " TERM_YELLOW "--help'" RESET
+			" for more information");
+	else if (errorcode == I_SEVER_INFO)
+		return ("Try " TERM_WHITE "'./sever " TERM_YELLOW "--help'" RESET
 			" for more information");
 	return (strerror(errorcode));
 }
