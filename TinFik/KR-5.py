@@ -1,10 +1,11 @@
 
 # ------------------------------------------------------------------------------
 POLY_SIZE   = 15        # polynom size: x^15
-POLYNOM     = 0b10011   # binary polynom: x5-x4-x3-x2-x1-x0
+POLYNOM1    = 0b010011  # binary polynom: x5-x4-x3-x2-x1-x0
+POLYNOM2    = 0b011111  # binary polynom: x5-x4-x3-x2-x1-x0
 E           = 0o15234   # octal input
+T           = 2         # error count
 # ------------------------------------------------------------------------------
-T           = 1
 
 def true_bin(n, l):
     b = bin(n)[2:]
@@ -77,11 +78,22 @@ def matmul(I, G):
         res[x] = resI % 2
     return res
 
+p1 = list(map(int, bin(POLYNOM1)[2:]))[::-1]
+p2 = list(map(int, bin(POLYNOM2)[2:]))[::-1]
+POLYNOM = [0] * (len(p1) + len(p2))
+for i in range(len(p1)):
+    for j in range(len(p2)):
+        POLYNOM[i + j] += p1[i] * p2[j]
+for i in range(len(POLYNOM)):
+    POLYNOM[i] = POLYNOM[i] % 2
+POLYNOM = int(''.join(map(str, POLYNOM[::-1])), 2)
+
 print()
 print('-------------------------------------------------------')
 print('Finding an error with inputs:')
-print(f'Polynom = {bin(POLYNOM)[2:]}')
-print(f'E       = {bin(E)[2:]}(2) = {oct(E)[2:]}(8)')
+print(f'Polynoms = {bin(POLYNOM1)[2:]}, {bin(POLYNOM2)[2:]}')
+print(f'POLYNOM  = {bin(POLYNOM)[2:]}')
+print(f'E        = {bin(E)[2:]}(2) = {oct(E)[2:]}(8)')
 print('-------------------------------------------------------')
 
 print()
@@ -147,7 +159,7 @@ if not ok:
 e_str = true_bin(e, POLY_SIZE)
 e_true = (int(e_str + e_str, 2) >> i) % pow(2, POLY_SIZE)
 E_true = E ^ e_true
-I_true = int(true_bin(E_true, POLY_SIZE)[:-4][::-1], 2)
+I_true = int(true_bin(E_true, POLY_SIZE)[:-8][::-1], 2)
 print()
 print('e <- {:<2} = {}(2)'.format(i, true_bin(e, POLY_SIZE)))
 print(f'e       = {true_bin(e_true, POLY_SIZE)}(2) = {oct(e_true)[2:]}(8)')
