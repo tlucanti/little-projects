@@ -3,7 +3,7 @@
 POLY_SIZE   = 15        # polynom size: x^15
 POLYNOM1    = 0b010011  # binary polynom: x5-x4-x3-x2-x1-x0
 POLYNOM2    = 0b011111  # binary polynom: x5-x4-x3-x2-x1-x0
-E           = 0o15234   # octal input
+E           = 0o12005   # octal input
 T           = 2         # error count
 # ------------------------------------------------------------------------------
 
@@ -65,6 +65,8 @@ def xor_div(e, polynom):
             if e_str[0] == '1':
                 res += 1
             e_str = e_str[1:]
+        residues.append(res)
+    if len(residues) == 0:
         residues.append(res)
     return residues, shift
 
@@ -137,8 +139,9 @@ for i in range(15):
         print(' ' * space, bin(POLYNOM)[2:])
         space += sh[j]
         print(' ' * space, '_', bin(res[j])[2:], sep='')
-    print(' ' * space, bin(POLYNOM)[2:])
-    print(' ' * (len(bin(E_shift)) - len(bin(res[-1]))), bin(res[-1])[2:])
+    if len(res) > 1:
+        print(' ' * space, bin(POLYNOM)[2:])
+        print(' ' * (len(bin(E_shift)) - len(bin(res[-1]))), bin(res[-1])[2:])
 
     W = bin(res[-1]).count('1')
     if W <= T:
