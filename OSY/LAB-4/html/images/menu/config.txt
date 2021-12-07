@@ -1,0 +1,2 @@
+opacity - 70 %
+brightness - 60 %

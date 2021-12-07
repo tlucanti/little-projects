@@ -6,16 +6,22 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/29 22:35:59 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/01 00:30:11 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/07 19:18:47 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lab4.h"
 #include "../inc/client.h"
+#include "../inc/error.h"
 
 static int		init_socket(char *ip) __NOEXC __WUR;
+static void		*run_led(t_shared_led *shared_led) __NOEXC;
+static int		parse_argv(int argc, char ** __restrict argv) __NOEXC;
+static void		send_leds(int sock, unsigned int leds) __NOEXC;
+static void		parse_data(char *response, t_shared_led *shared_led) __NOEXC;
+int		isbutton(e_button button) __NOEXC __WUR __INLINE;
 
-__NOEXC
+__NOEXC __NORET
 int		main(int argc, char ** __restrict argv)
 {
 	int				sock;
@@ -27,17 +33,16 @@ int		main(int argc, char ** __restrict argv)
 	sock = parse_argv(argc, argv);
 	shared_led.socket = sock;
 	shared_led.new_data = 0;
-	pthread_create(&pthread, NULL, run_led, (void *)&shared_led);
-	if (sock == -1)
-		return 1;
+	pthread_create(&pthread, NULL, (void *(*)(void *))(void *)run_led,
+		(void *)&shared_led);
 	sprintf(request, "client [%d]: waiting for response", getpid());
 
 	while (1)
 	{
-		int		bytes;
+		ssize_t		bytes;
 
 		printf("sending data to server: <%s>\n", request);
-		bytes = write(sock, request, REQUEST_MESSAGE_SIZE);
+		bytes = printf("%s\n", request);
 		if (bytes <= 0)
 		{
 			ft_perror("client", E_CLIENT_WRITE, NULL);
@@ -49,8 +54,8 @@ int		main(int argc, char ** __restrict argv)
 			ft_perror("client", E_CLIENT_READ, NULL);
 			continue ;
 		}
-		printf("read data from server (%dB):\n<%s>\n", bytes, response);
-		parse_data(response);
+		printf("read data from server (%zdB):\n<%s>\n", bytes, response);
+		parse_data(response, &shared_led);
 	}
 }
 
@@ -83,7 +88,7 @@ static int		init_socket(char *ip)
 	return sock;
 }
 
-__NOEXC
+__NOEXC __NORET
 static void		*run_led(t_shared_led *shared_led)
 {
 	unsigned int	leds;
@@ -135,23 +140,25 @@ static void		*run_led(t_shared_led *shared_led)
 }
 
 __NOEXC
-static void		send_leds(int sock, int leds)
+static void		send_leds(int sock, unsigned int leds)
 {
-	static char		pattern_on[]  = "LEDx: green";
-	static char		pattern_off[] = "LEDx: grey ";
+	static char		pattern_on[11]  = "LEDx: green";
+	static char		pattern_off[11] = "LEDx: grey ";
+	int				bytes;
 
 	for (int i=0; i < 7; ++i)
 	{
 		if ((leds >> i) & 0x1)
 		{
-			pattern_on[3] = i + 48;
-			write(sock, pattern_on, 11);
+			pattern_on[3] = (char)(i + 48);
+			bytes = write(sock, pattern_on, 11);
 		}
 		else
 		{
-			pattern_off[3] = i + 48;
-			write(sock, pattern_off, 11);
+			pattern_off[3] = (char)(i + 48);
+			bytes = write(sock, pattern_off, 11);
 		}
+		printf("sent %d bytes\n", bytes);
 	}
 }
 
@@ -163,7 +170,7 @@ static void		parse_data(char *response, t_shared_led *shared_led)
 
 	while (isspace(*response))
 		++response;
-	if (memcmp(response, "button", 6))
+	if (memcmp(response, "button", 6) != 0)
 	{
 		ft_perror("client", E_RESPONSE_FORMAT, response);
 		return ;
@@ -171,15 +178,18 @@ static void		parse_data(char *response, t_shared_led *shared_led)
 	response += 6;
 	while (isspace(*response))
 		++response;
-	ptr = str2int(response, &button);
-	if (*ptr != ':' or not isspace(*ptr) or not isbutton(button))
+	ptr = str2int(response, (int *)&button);
+	if ((*ptr != ':' && !isspace(*ptr)) || !isbutton(button))
 	{
 		ft_perror("client", E_BUTTON_VALUE, response);
 		return ;
 	}
-	while (isspace(response))
+	response = ptr;
+	if (*response == ':')
 		++response;
-	if (memcmp(*response), "clicked")
+	while (isspace(*response))
+		++response;
+	if (strcmp(response, "clicked") != 0)
 	{
 		ft_perror("client", E_RESPONSE_FORMAT, response);
 		return ;
@@ -188,13 +198,13 @@ static void		parse_data(char *response, t_shared_led *shared_led)
 	shared_led->new_data = 1;
 }
 
-__NOEXC __WUR
-static int		isbutton(e_button button)
+__NOEXC __WUR __INLINE
+int		isbutton(e_button button)
 {
 	return (unsigned int) button <= 0xb;
 }
 
-__NOEXC
+__NOEXC __WUR
 static int		parse_argv(int argc, char ** __restrict argv)
 {
 	if (argc != 2)
@@ -204,8 +214,9 @@ static int		parse_argv(int argc, char ** __restrict argv)
 		ft_exit(1);
 	}
 	if (!strcmp(argv[1], "-h") or !strcmp(argv[1], "--help"))
-		printf_help_info();
+		print_help_message();
 	if (!strcmp(argv[1], "stdin"))
 		return 1;
-	return init_socket(argv[1]);
+	else
+		return init_socket(argv[1]);
 }

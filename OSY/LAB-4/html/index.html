@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!-- main page.html -->
+<html>
+<head>
+	<meta http-equiv = "content-type" content = "text/html; charset = windows-1251">
+	<title> Main Page </title>
+	<style type="text/css">
+		html {
+			overflow: hidden;
+			background: url(images/backgrounds/BG_1.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}.anime-left {
+			position: absolute;
+			width: 10%;
+			height: 100%;
+			left: -70px;
+			top: -20px;
+			/*background: #fcc;
+			border: solid 1px red;*/
+		}.anime-right {
+			width: 10%;
+			height: 100%;
+			position: absolute;
+			right: 400px;
+			top: -20px;
+			/*background: #fcc;
+			border: solid 1px red;*/
+		}.title {
+			position: absolute; /* text color #490048 */
+			width: 99%;
+			height: 230px;
+			top: 50px;
+			z-index: 4;
+			/*background: #afa;
+			border: solid 1px darkgreen;*/
+		}.left_panel_content {
+			position: absolute;
+			height: 700px;
+			top: 270px;
+			z-index: 4;
+			/*border: solid 1px blue;*/
+		}.button {
+			position: absolute;
+			padding: 10px; /* idend top and bottom of object */
+			width: 400px;
+			height: 70px;
+			left: 435px;
+			z-index: 6;
+			/*border: solid 1px black;*/
+		}img.scale {
+			-moz-transition: all 0.3s ease;
+			-webkit-transition: all 0.3s ease;
+			-o-transition: all 0.3s ease;
+			transition: all 0.3s ease;
+		}img.scale:hover {
+			-moz-transform: scale(1.1); /* effect for Firefox */
+			-webkit-transform: scale(1.1); /* effect for Chrome, Safari, Android and iOS */
+			-o-transform: scale(1.1); /* effect for Opera */
+			-ms-transform: scale(1.1); /* effect for IE */
+			transform: scale(1.1); /* effect for other browsers */
+		}img.rotate {
+			-moz-transition: all 1s ease;
+			-webkit-transition: all 1s ease;
+			-o-transition: all 1s ease;
+			transition: all 1s ease;
+		}img.rotate:hover {
+			-moz-transform: rotate(360deg) scale(1.1);
+			-webkit-transform: rotate(360deg) scale(1.1);  
+			-o-transform: rotate(360deg) scale(1.1); 
+			-ms-transform: rotate(360deg) scale(1.1);
+			transform: rotate(360deg) scale(1.5);
+		}
+		#title_font { top: 60px; }
+		#left_panel { width: 500px; left: 400px; }
+		/*#left_panel_font { position: absolute; width: 190px; height: 50px; left: 435px;}*/
+		#left_panel_font { top: 300px; }
+		#button_1 { top: 400px; } #button_2 { top: 500px; } #button_3 { top: 600px; } #button_4 { top: 700px; }
+
+		.right_panel_content {
+			position: absolute;
+			z-index: 6;
+		}.social {
+			position: absolute;
+			width: 65px;
+			height: 65px;
+			top: 780px;
+			z-index: 6;
+			/* border: solid 1px black; */
+		}
+		#right_panel { width: 500px; left: 1000px; }
+		#right_panel_font { top: 300px; left: 1050px; width: 400px; }
+		#right_panel_text { top: 370px; left: 1050px; width: 400px; height: 500px; }/* border: solid 1px black; } */
+		#vk { left: 1060px; } #insta { left: 1140px; } #fb { left: 1220px; } #google { left: 1300px; } #tw { left: 1380px; }
+	</style>
+</head>
+<body>
+
+    <div class="anime-left", id="anime_left"> <img src="images/anime/anime_1.png"> </div>
+    <div class="anime-right", id="anime_right", align="right"> <img src="images/anime/anime_2.png"> </div>
+
+	<div class="title", id="title_bg", align="center">
+    	<img src="images/menu/title_bg.png", alt="">
+    </div>
+    <div class="left_panel_content", id="left_panel", align="left">
+		<img src="images/menu/menu_main.png">
+	</div>
+	<div class="left_panel_content", id="right_panel", align="right">
+		<img src="images/menu/menu_main.png">
+	</div>
+
+    <div class="title", id="title_font", align="center">
+    	<a href="main page.html"><img class="scale", src="images/fonts/font_title.png", alt=""></a>
+    </div>
+    <div class="button" id="left_panel_font", align="center"><img src="images/fonts/left_panel_font.png"></div>
+    <div class="button", id="button_1"><a href="pages/page_1.html"><img class="scale", src="images/buttons/button_about.png", alt=""></a></div>
+    <div class="button", id="button_2"><a href="pages/page_2.html"><img class="scale", src="images/buttons/button_creativity.png", alt=""></a></div>
+    <div class="button", id="button_3"><a href="pages/page_3.html"><img class="scale", src="images/buttons/button_history.png", alt=""></a></div>
+    <div class="button", id="button_4"><a href="pages/page_4.html"><img class="scale", src="images/buttons/button_memes.png", alt=""></a></div>
+
+    <div class="right_panel_content", id="right_panel_font", align="center">
+    	<img src="images/fonts/right_panel_font.png">
+    </div>
+	<div class="right_panel_content", id="right_panel_text", align="center">
+		<font face="Comic Sans MS"><p style="font-size: 22px; color: #490048">Данный сайт про одного из самых популярных стримеров на платформе
+			Twitch ©. Сайт полностью сделан и пренадлежит Семичастнову Константину Владиславовичу. О всех возникающих вопросах и ошибках
+			просьба писать на адрес "Semichastnov-7b@yandex.ru". Так же, подписывайтесь в социальных сетях:</p></font>
+	</div>
+	<div class="social", id="vk", align="center"><a href="/pages/social.html"><img class="rotate", src="images/buttons/button_vk.png"></div>
+	<div class="social", id="insta", align="center"><a href="/pages/social.html"><img class="rotate", src="images/buttons/button_insta.png"></div>
+	<div class="social", id="fb", align="center"><a href="/pages/social.html"><img class="rotate", src="images/buttons/button_facebook.png"></div>
+	<div class="social", id="google", align="center"><a href="/pages/social.html"><img class="rotate", src="images/buttons/button_google.png"></div>
+	<div class="social", id="tw", align="center"><a href="/pages/social.html"><img class="rotate", src="images/buttons/button_twitter.png"></div>
+
+</body>
+</html>	
