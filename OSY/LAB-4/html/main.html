@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<!-- main page.html -->
+<html>
+<head>
+	<meta http-equiv = "content-type" content = "text/html; charset = windows-1251">
+	<title> LAB-4 </title>
+	<style type="text/css">
+		html {
+			overflow: hidden;
+			background: url(https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/backgrounds/BG_1.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+	</style>
+	<style type="text/css">
+		.anime-left
+		{
+			position: absolute;
+			height: 100%;
+			width: 30%;
+			bottom: 0px;
+			left: -2%;
+			/*border: solid 1px red;*/
+			/*background: #afa;*/
+		}
+		.anime-left img
+		{
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			width: 102%;
+		}
+		.anime-right {
+			position: absolute;
+			height: 100%;
+			width: 30%;
+			bottom: 0px;
+			right: -2%;
+			/*border: solid 1px red;*/
+			/*background: #afa;*/
+		}
+		.anime-right img
+		{
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			width: 115%;
+		}
+		.title {
+			position: absolute; /* text color #490048 */
+			width: 99%;
+			height: 230px;
+			top: 50px;
+			z-index: 4;
+			/*background: #afa;
+			border: solid 1px darkgreen;*/
+		}
+		.left_panel {
+			position: absolute;
+			height: 700px;
+			width: 400;
+			top: 270px;
+			left: 400px;
+			z-index: 4;
+			border: solid 1px red;
+			/*border: solid 1px blue;*/
+		}
+		.left_panel img
+		{
+			position: absolute;
+		}
+		.left_panel_buttons
+		{
+			/*position: relative;*/
+			top: 100;
+		}
+		.button {
+			position: absolute;
+			padding: 10px; /* idend top and bottom of object */
+			width: 400px;
+			height: 70px;
+			left: 435px;
+			z-index: 6;
+			/*border: solid 1px black;*/
+		}
+		img.scale {
+			-moz-transition: all 0.3s ease;
+			-webkit-transition: all 0.3s ease;
+			-o-transition: all 0.3s ease;
+			transition: all 0.3s ease;
+		}
+		img.scale:hover {
+			-moz-transform: scale(1.1); /* effect for Firefox */
+			-webkit-transform: scale(1.1); /* effect for Chrome, Safari, Android and iOS */
+			-o-transform: scale(1.1); /* effect for Opera */
+			-ms-transform: scale(1.1); /* effect for IE */
+			transform: scale(1.1); /* effect for other browsers */
+		}
+		img.rotate {
+			-moz-transition: all 1s ease;
+			-webkit-transition: all 1s ease;
+			-o-transition: all 1s ease;
+			transition: all 1s ease;
+		}
+		img.rotate:hover {
+			-moz-transform: rotate(360deg) scale(1.1);
+			-webkit-transform: rotate(360deg) scale(1.1);  
+			-o-transform: rotate(360deg) scale(1.1); 
+			-ms-transform: rotate(360deg) scale(1.1);
+			transform: rotate(360deg) scale(1.5);
+		}
+		#title_font { top: 60px; }
+		#left_panel { width: 500px; left: 400px; }
+		/*#left_panel_font { position: absolute; width: 190px; height: 50px; left: 435px;}*/
+		#left_panel_font { top: 300px; }
+		#button_1 { top: 400px; } #button_2 { top: 500px; } #button_3 { top: 600px; } #button_4 { top: 700px; }
+
+		.right_panel_content {
+			position: absolute;
+			height: 700px;
+			top: 270px;
+			z-index: 6;
+		}.social {
+			position: absolute;
+			width: 65px;
+			height: 65px;
+			top: 780px;
+			z-index: 6;
+			/* border: solid 1px black; */
+		}
+		#right_panel { width: 500px; left: 1000px; }
+		#right_panel_font { top: 300px; left: 1050px; width: 400px; }
+		#right_panel_text { top: 370px; left: 1050px; width: 400px; height: 500px; }/* border: solid 1px black; } */
+		#vk { left: 1060px; } #insta { left: 1140px; } #fb { left: 1220px; } #google { left: 1300px; } #tw { left: 1380px; }
+	</style>
+</head>
+<body>
+	<div class="anime-left", id="anime_left">
+		<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/anime/anime_1.png">
+	</div>
+	<div class="anime-right", id="anime_right", align="right">
+		<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/anime/anime_2.png">
+	</div>
+
+	<div class="title", id="title_bg", align="center">
+		<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/menu/title_bg.png", alt="">
+	</div>
+	<div class="left_panel", align="left">
+		<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/menu/menu_main.png">
+		<div class="left_panel_buttons", align="center">
+			<table>
+				<tbody>
+					<tr>
+						<th>
+							<img class="scale", src="images/buttons/button_1.png", alt="">
+							<img class="scale", src="images/buttons/button_2.png", alt="">
+							<img class="scale", src="images/buttons/button_3.png", alt="">
+							<img class="scale", src="images/buttons/button_4.png", alt="">
+						</th>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="right_panel_content", id="right_panel", align="right">
+		<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/menu/menu_main.png">
+	</div>
+
+	<div class="title", id="title_font", align="center">
+		<a href="main page.html">
+			<img class="scale", src="images/fonts/title.png", alt="">
+		</a>
+	</div>
+	<div class="button" id="left_panel_font", align="center">
+		<img src="images/fonts/controls.png">
+	</div>
+	<div class="button", id="button_1">
+		<a href="pages/page_1.html">
+		</a>
+	</div>
+	<div class="button", id="button_2">
+		<a href="pages/page_2.html">
+			<img class="scale", src="images/buttons/button_2.png", alt="">
+		</a>
+	</div>
+	<div class="button", id="button_3">
+		<a href="pages/page_3.html">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_history.png", alt="">
+		</a>
+	</div>
+	<div class="button", id="button_4">
+		<a href="pages/page_4.html">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_memes.png", alt="">
+		</a>
+	</div>
+
+	<div class="right_panel_content", id="right_panel_font", align="center">
+		<img src="images/fonts/log.png">
+	</div>
+	<div class="right_panel_content", id="right_panel_text", align="center">
+		<font face="Comic Sans MS">
+			<p style="font-size: 22px; color: #490048">
+			here will be log
+			</p>
+		</font>
+	</div>
+	<div class="social", id="vk", align="center">
+		<a href="/pages/social.html">
+			<img class="rotate", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_vk.png">
+		</a>
+	</div>
+	<div class="social", id="insta", align="center">
+		<a href="/pages/social.html">
+			<img class="rotate", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_insta.png">
+		</a>
+	</div>
+	<div class="social", id="fb", align="center">
+		<a href="/pages/social.html">
+			<img class="rotate", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_facebook.png">
+		</a>
+	</div>
+	<div class="social", id="google", align="center">
+		<a href="/pages/social.html">
+			<img class="rotate", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_google.png">
+		</a>
+	</div>
+	<div class="social", id="tw", align="center">
+		<a href="/pages/social.html">
+			<img class="rotate", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_twitter.png">
+		</a>
+	</div>
+
+</body>
+</html>	
