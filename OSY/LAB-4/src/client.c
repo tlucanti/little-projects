@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/29 22:35:59 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/07 19:18:47 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/08 15:19:42 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,15 +162,15 @@ static void		send_leds(int sock, unsigned int leds)
 	}
 }
 
-__NOEXC
-static void		parse_data(char *response, t_shared_led *shared_led)
+__NOEXC __WUR
+static int		parse_data(char *response)
 {
 	e_button	button;
 	char		*ptr;
 
 	while (isspace(*response))
 		++response;
-	if (memcmp(response, "button", 6) != 0)
+	if (memcmp(response, "BUTTON", 6) != 0)
 	{
 		ft_perror("client", E_RESPONSE_FORMAT, response);
 		return ;
@@ -194,8 +194,7 @@ static void		parse_data(char *response, t_shared_led *shared_led)
 		ft_perror("client", E_RESPONSE_FORMAT, response);
 		return ;
 	}
-	shared_led->button = button;
-	shared_led->new_data = 1;
+	return button;
 }
 
 __NOEXC __WUR __INLINE

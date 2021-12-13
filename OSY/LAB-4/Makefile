@@ -6,7 +6,7 @@
 #    By: kostya <kostya@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/09/08 23:21:10 by kostya            #+#    #+#              #
-#    Updated: 2021/12/07 17:04:14 by kostya           ###   ########.fr        #
+#    Updated: 2021/12/12 22:11:24 by kostya           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,8 @@
 NAME_SERVER	=	server
 NAME_CLIENT	=	client
 CC			=	clang
-CFLAGS		=	-Wall -Wextra -Werror
+CFLAGS		=	-Wall -Wextra
+# -Werror
 COPTIONS	=	-O2
 # ------------------------------- linker options -------------------------------
 LIBRARY		=	-lpthread

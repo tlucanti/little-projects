@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:40:07 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/02 23:08:19 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/12 15:17:25 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ void	ft_info(const char *__restrict parent, int errorcode, const char *__restric
 void	ft_exit(int status) __NORET __NOEXC;
 void	print_help_message(void) __NORET __NOEXC;
 
+extern	pthread_mutex_t		print_mutex;
 
 // errrors
 typedef enum	s_error

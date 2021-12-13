@@ -6,12 +6,12 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:34:33 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/02 23:10:05 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/12 15:21:26 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "error.h"
-#include "color.h"
+#include "../inc/error.h"
+#include "../inc/color.h"
 
 static const char	*ft_strerror(int errorcode) __NOEXC __WUR;
 
@@ -31,6 +31,7 @@ void	ft_message(unsigned int type, const char *__restrict parent,
 		type_chr = INFO"[INFO]";
 	else
 		type_chr = "[INTERNAL_TOKEN_ERROR]";
+	pthread_mutex_lock(&print_mutex);
 	printf("%s%s ", type_chr, RESET);
 	if (parent)
 		printf("%s%s:%s ", TERM_WHITE, parent, RESET);
@@ -39,6 +40,7 @@ void	ft_message(unsigned int type, const char *__restrict parent,
 		printf(": %s%s%s\n", WARNING, message, RESET);
 	else
 		printf("\n");
+	pthread_mutex_unlock(&print_mutex);
 }
 
 __NOEXC __WUR
