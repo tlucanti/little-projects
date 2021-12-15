@@ -16,13 +16,13 @@
 __NOEXC __WUR __MALLOC
 void	*xmalloc(size_t size)
 /*
-** function allocates memory or terminates program if allocation faled
+** function allocates memory or terminates program if allocation failed
 */
 {
 	register void	*ptr;
 
 	ptr = malloc(size);
-	if (!ptr)
+	if (ptr == NULL)
 	{
 		ft_perror("malloc", errno, NULL);
 		ft_exit(1);

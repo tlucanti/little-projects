@@ -1,0 +1,80 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>webserver</title>
+		<style>
+			label { display: block; min-width: 50px; text-align: center; }
+			div { display: flex; }
+			textarea { width: 90%; min-height: 200px; }
+		</style>
+	</head>
+	<body>
+	<h1>Веб-сервер лабораторного стенда</h1>
+	<br>
+	<h2>Температура Raspberry Pi</h2>
+	<div id="temp">? °C</div>
+	<h2>Светодиоды</h2>
+	<div>
+		<label id="LED0">LED0</label>
+		<label id="LED1">LED1</label>
+		<label id="LED2">LED2</label>
+		<label id="LED3">LED3</label>
+	</div>
+	<h2>Кнопки</h2>
+	<input type="button" value="0" onclick="data_request('POST', 'writedata', 'BUTTON0: clicked');">
+	<input type="button" value="1" onclick="data_request('POST', 'writedata', 'BUTTON1: clicked');">
+	<input type="button" value="2" onclick="data_request('POST', 'writedata', 'BUTTON2: clicked');">
+	<h2>Сообщения</h2>
+	<textarea id="log"></textarea>
+	</body>
+</html>
+
+<script>
+
+function data_view(key, value) {
+	switch (key) 
+	{
+		case "LED0":
+		case "LED1":
+		case "LED2":
+		case "LED3":
+				document.getElementById(key).style.backgroundColor = value;
+			break;
+		case "temp":
+				document.getElementById("temp").innerHTML = value + " °C";
+			break;
+	}
+	var d = new Date();
+	var time = String(d.getHours()).padStart(2, '0') + ":";
+	time += String(d.getMinutes()).padStart(2, '0') + ":";
+	time += String(d.getSeconds()).padStart(2, '0');
+	document.getElementById("log").value = time + ": " + value + "\n" +
+	document.getElementById("log").value;
+}
+
+function data_request(type, header, data) {
+	const xhr = new XMLHttpRequest();
+	xhr.open(type, header);
+	xhr.onreadystatechange = function() {
+	if (xhr.readyState !== 4 || xhr.status !== 200) return;
+	var response = xhr.responseText;
+	var msgs = response.split("\n");
+	for (var i = 0; i < msgs.length-1; i++) {
+		var msg = msgs[i].split(": ");
+		data_view(msg[0], msg[1]);
+	}
+	window.setTimeout(data_request, 500, 'GET', 'readdata', '');
+	};
+	xhr.send(data + "\r\n\r\n");
+}
+
+data_request('GET', 'readdata', '');
+
+// function send_request(data) {
+// 	const xhr = new XMLHttpRequest();	
+// 	xhr.open("GET", "readdata", true);
+// 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+// 	xhr.send(data+ "\r\n\r\n");
+// }
+
+</script>

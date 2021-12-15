@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/30 19:47:25 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/07 19:18:46 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/15 16:56:22 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <string.h>
 # include <ctype.h>
 # include <errno.h>
+# include <signal.h>
 
 typedef enum	s_button
 {
@@ -31,13 +32,23 @@ typedef enum	s_button
 	var_1	= 0x4,
 	var_2	= 0x5,
 
-	diode1	= 0x6,
-	diode2	= 0x7,
-	diode3	= 0x8,
-	diode4	= 0x9,
-	diode5	= 0xa,
-	diode6	= 0xb
+	led_count = 0x6,
+
+	led1	= 0x6,
+	led2	= 0x7,
+	led3	= 0x8,
+	led4	= 0x9,
+	led5	= 0xa,
+	led6	= 0xb
 }				e_button;
+
+typedef struct	s_shared_led
+{
+	sig_atomic_t	new_data;
+	e_button		button;
+	unsigned int	leds;
+	pthread_mutex_t	led_mutex;
+}					t_shared_led;
 
 char	*str2int(char *str, int *number);
 
@@ -47,8 +58,7 @@ char	*str2int(char *str, int *number);
 # define __NORET	__attribute__((noreturn))
 # define __INLINE	__attribute__((always_inline))
 
-# define REQUEST_MESSAGE_SIZE	1100
-# define RESPONSE_MESSAGE_SIZE	256
+# define REQUEST_MESSAGE_SIZE	1024
 
 # define or		||
 # define and	&&

@@ -1,3 +1,4 @@
+
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -19,11 +20,16 @@
 		<label id="LED1">LED1</label>
 		<label id="LED2">LED2</label>
 		<label id="LED3">LED3</label>
+		<label id="LED4">LED4</label>
+		<label id="LED5">LED5</label>
 	</div>
 	<h2>Кнопки</h2>
-	<input type="button" value="0" onclick="data_request('POST', 'writedata', 'BUTTON0: clicked');">
-	<input type="button" value="1" onclick="data_request('POST', 'writedata', 'BUTTON1: clicked');">
-	<input type="button" value="2" onclick="data_request('POST', 'writedata', 'BUTTON2: clicked');">
+	<input type="button" value="up" onclick="send_data('BUTTON0: clicked');">
+	<input type="button" value="down" onclick="send_data('BUTTON1: clicked');">
+	<input type="button" value="left" onclick="send_data('BUTTON2: clicked');">
+	<input type="button" value="right" onclick="send_data('BUTTON3: clicked');">
+	<input type="button" value="var-1" onclick="send_data('BUTTON4: clicked');">
+	<input type="button" value="var-2" onclick="send_data('BUTTON5: clicked');">
 	<h2>Сообщения</h2>
 	<textarea id="log"></textarea>
 	</body>
@@ -31,50 +37,71 @@
 
 <script>
 
-function data_view(key, value) {
+function data_view(key, value)
+{
+	let col_array = ['grey', 'green'];
+
 	switch (key) 
 	{
+		case "LEDCHAIN":
+			document.getElementById('LED0').style.backgroundColor = col_array[value[0]];
+			document.getElementById('LED1').style.backgroundColor = col_array[value[1]];
+			document.getElementById('LED2').style.backgroundColor = col_array[value[2]];
+			document.getElementById('LED3').style.backgroundColor = col_array[value[3]];
+			document.getElementById('LED4').style.backgroundColor = col_array[value[4]];
+			document.getElementById('LED5').style.backgroundColor = col_array[value[5]];
+			break ;
+
 		case "LED0":
 		case "LED1":
 		case "LED2":
 		case "LED3":
-				document.getElementById(key).style.backgroundColor = value;
-			break;
+			document.getElementById(key).style.backgroundColor = value;
+			break ;
 		case "temp":
-				document.getElementById("temp").innerHTML = value + " °C";
-			break;
+			document.getElementById("temp").innerHTML = value + " °C";
+			break ;
 	}
 	var d = new Date();
 	var time = String(d.getHours()).padStart(2, '0') + ":";
 	time += String(d.getMinutes()).padStart(2, '0') + ":";
 	time += String(d.getSeconds()).padStart(2, '0');
-	document.getElementById("log").value = time + ": " + value + "\n" +
+	document.getElementById("log").value = time + ": " + key + ': ' + value + "\n" +
 	document.getElementById("log").value;
 }
 
-function data_request(type, header, data) {
+function data_request() {
 	const xhr = new XMLHttpRequest();
-	xhr.open(type, header);
-	xhr.onreadystatechange = function() {
-	if (xhr.readyState !== 4 || xhr.status !== 200) return;
-	var response = xhr.responseText;
-	var msgs = response.split("\n");
-	for (var i = 0; i < msgs.length-1; i++) {
-		var msg = msgs[i].split(": ");
-		data_view(msg[0], msg[1]);
-	}
-	window.setTimeout(data_request, 500, 'GET', 'readdata', '');
+	xhr.open('GET', 'readdata');
+	xhr.onreadystatechange = function()
+	{
+		if (xhr.readyState !== 4 || xhr.status !== 200)
+			return;
+		var response = xhr.responseText;
+		var msgs = response.split("\n");
+		console.log('message %d', msgs.length);
+		for (var i = 0; i < msgs.length; ++i)
+		{
+			console.log('parsing %s', msgs[i]);
+			var msg = msgs[i].split(": ");
+			data_view(msg[0], msg[1]);
+		}
+		window.setTimeout(data_request, 0);
 	};
-	xhr.send(data + "\r\n\r\n");
+	console.log('sending message keep-alive');
+	xhr.send();
+	console.log('keep-alive succsess');
 }
 
-data_request('GET', 'readdata', '');
+data_request();
 
-// function send_request(data) {
-// 	const xhr = new XMLHttpRequest();	
-// 	xhr.open("GET", "readdata", true);
-// 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-// 	xhr.send(data+ "\r\n\r\n");
-// }
+function send_data (data) {
+	const xhr = new XMLHttpRequest();	
+	xhr.open("POST", "writedata");
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	console.log('sending %s message', data);
+	xhr.send(data+ "\r\n\r\n");
+	console.log('%s succsess', data);
+}
 
 </script>

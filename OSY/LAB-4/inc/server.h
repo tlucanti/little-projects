@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/30 19:49:55 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/12 23:03:00 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/15 15:26:46 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ typedef struct	s_server
 	int			socket;
 	int			client;
 }				t_server;
+
 
 // typedef struct	s_button_checker
 // {
