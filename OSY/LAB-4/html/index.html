@@ -217,6 +217,8 @@
 			height: 700px;
 			top: 270px;
 			z-index: 6;
+			overflow: hidden;
+			/*border: solid 1px black; */
 		}
 		.social
 		{
@@ -262,16 +264,16 @@
 			<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/fonts/controls.png">
 		</div>
 		<div class="button", id="button_0">
-			<img class="scale", src="images/buttons/button_1.png", alt="", onclick="send_data('BUTTON0: clicked');">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_1.png", alt="", onclick="send_data('BUTTON0: clicked');">
 		</div>
 		<div class="button", id="button_1", onclick="send_data('BUTTON1: clicked');">
-			<img class="scale", src="images/buttons/button_2.png", alt="">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_2.png", alt="">
 		</div>
 		<div class="button", id="button_2", onclick="send_data('BUTTON2: clicked');">
-			<img class="scale", src="images/buttons/button_3.png", alt="">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_3.png", alt="">
 		</div>
 		<div class="button", id="button_3", onclick="send_data('BUTTON3: clicked');">
-			<img class="scale", src="images/buttons/button_4.png", alt="">
+			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_4.png", alt="">
 		</div>
 		<div class="button", id="var_1", onclick="send_data('BUTTON4: clicked');">
 			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/var_1.png", alt="">
@@ -280,7 +282,7 @@
 			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/var_2.png", alt="">
 		</div>
 		<div class="leds_text">
-			<img src="images/buttons/leds.png">
+			<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/leds.png">
 		</div>
 		<div class="leds">
 			<div class="led0", id="led0">
@@ -309,7 +311,7 @@
 		<div class="right_panel_font">
 			<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/fonts/log.png">
 		</div>
-		<div class="right_panel_content", id="right_panel_text", align="center", face="Comic Sans MS", style="font-size: 22px; color: #490048">
+		<div class="right_panel_content", id="right_panel_text", align="center", style="font-size: 22px; color: #490048">
 			<label id="log">here will be log</label>
 			<!-- <font face="Comic Sans MS"> -->
 				<!-- <textarea style="font-size: 22px; color: #490048"> -->
@@ -340,7 +342,7 @@
 
 function data_view(key, value)
 {
-	let col_array = ['rgba(0,0,0,0)', 'green'];
+	let col_array = ['rgba(0,0,0,0)', 'purple'];
 	let disp_array = ['none', ''];
 
 	switch (key) 
@@ -372,8 +374,8 @@ function data_view(key, value)
 	var time = String(d.getHours()).padStart(2, '0') + ":";
 	time += String(d.getMinutes()).padStart(2, '0') + ":";
 	time += String(d.getSeconds()).padStart(2, '0');
-	document.getElementById("log").value = time + ": " + key + ': ' + value + "\n" +
-	document.getElementById("log").value;
+	document.getElementById("log").innerHTML = time + ": " + key + ': ' + value + "\n" +
+	document.getElementById("log").innerHTML;
 }
 
 function data_request() {
@@ -384,11 +386,11 @@ function data_request() {
 		if (xhr.readyState !== 4 || xhr.status !== 200)
 			return;
 		var response = xhr.responseText;
-		console.log('got %s', response);
+		// console.log('got %s', response);
 		var msgs = response.split("\n");
 		for (var i = 0; i < msgs.length; ++i)
 		{
-			console.log('parsing %s', msgs[i]);
+			// console.log('parsing %s', msgs[i]);
 			var msg = msgs[i].split(": ");
 			data_view(msg[0], msg[1]);
 		}
@@ -403,7 +405,7 @@ function send_data (data) {
 	const xhr = new XMLHttpRequest();	
 	xhr.open("POST", "writedata");
 	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	console.log('sending %s', data);
+	// console.log('sending %s', data);
 	xhr.send(data+ "\r\n\r\n");
 }
 

@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/30 19:47:25 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/15 16:56:22 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/15 18:20:44 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 # include <sys/socket.h>
 # include <arpa/inet.h>
+# include <sys/stat.h>
+# include <fcntl.h>
 # include <stdio.h>
 # include <unistd.h>
 # include <pthread.h>
@@ -59,6 +61,11 @@ char	*str2int(char *str, int *number);
 # define __INLINE	__attribute__((always_inline))
 
 # define REQUEST_MESSAGE_SIZE	1024
+# define RESPONSE_MESSAGE_SIZE	200
+
+# ifndef INDEX_HTML
+#  define INDEX_HTML		"html/index.html"
+# endif
 
 # define or		||
 # define and	&&

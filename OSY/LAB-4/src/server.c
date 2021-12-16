@@ -6,12 +6,11 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/29 22:45:00 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/15 17:51:53 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/16 14:06:04 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/lab4.h"
-#include "../inc/server.h"
 #include "../inc/memory.h"
 #include "../inc/error.h"
 
@@ -24,10 +23,11 @@ static int		parse_data(char *response) __NOEXC __WUR;
 static size_t	create_http(char *dest, char *data) __NOEXC;
 static void		*run_led(t_shared_led *shared_led) __NOEXC __NORET;
 static void		get_led_data(unsigned char *dest, const t_shared_led *shared_led) __NOEXC;
+static int		min2(int a, int b) __NOEXC __WUR __INLINE;
 
 pthread_mutex_t print_mutex;
 
-__NOEXC __NORET
+__NOEXC
 int main()
 {
 	int		sock;
@@ -43,6 +43,7 @@ static void		*backend(int sock)
 {
 	pthread_t		thread;
 	char			request[REQUEST_MESSAGE_SIZE];
+	char			response[RESPONSE_MESSAGE_SIZE];
 	t_shared_led	shared_led;
 	ssize_t			bytes;
 	int				client = -1;
@@ -77,87 +78,53 @@ static void		*backend(int sock)
 			{
 				size_t		fsize;
 				char		*index;
-				char		*response;
+				char		*html;
 
 				index = read_file(INDEX_HTML, &fsize);
 				if (index == NULL)
 					break ;
-				response = xmalloc(fsize + 100);
-				fsize = create_http(response, index);
-				printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-					"write data to client %lu(B) \n%s\n"
-					"++++++++++++++++++++++++++++++++++++++++++++++++++++++\n",
-					fsize, response);
-				if (send(client, response, fsize, 0) < 0)
+				html = xmalloc(fsize + 100);
+				fsize = create_http(html, index);
+				if (send(client, html, fsize, 0) < 0)
 					ft_perror("server", errno, "cannot send data to client");
-				else
-					printf("OK\n");
 				free(index);
-				free(response);
+				free(html);
 			}
-			else if (strncmp(request, "POST /writedata HTTP/1.1", 22) == 0)
+			else if (memcmp(request, "POST /writedata HTTP/1.1", 22) == 0)
 			{
-				pthread_mutex_lock(&print_mutex);
-				printf("------------------------------------------------------\n"
-					"read data from client (%zuB)\n%s\n"
-					"------------------------------------------------------\n",
-					bytes, request);
-				pthread_mutex_unlock(&print_mutex);
+				char	*needle;
+				int		button_num;
 
+				needle = strstr(request, "BUTTON");
+				if (needle == NULL)
+					continue ;
+				button_num = parse_data(needle);
 
-				for (ssize_t i=0; i < bytes; ++i)
-				{
-					if (memcmp(request + i, "BUTTON", 6) == 0)
-					{
-						int		button_num = parse_data(request + i);
-
-						pthread_mutex_lock(&print_mutex);
-						printf("got BUTTON %d\n", button_num);
-						pthread_mutex_unlock(&print_mutex);
-
-						pthread_mutex_lock(&shared_led.led_mutex);
-						shared_led.button = button_num;
-						shared_led.new_data = 1;
-						pthread_mutex_unlock(&shared_led.led_mutex);
-						break ;
-					}
-				}
+				pthread_mutex_lock(&shared_led.led_mutex);
+				shared_led.button = button_num;
+				shared_led.new_data = 1;
+				pthread_mutex_unlock(&shared_led.led_mutex);
 			}
-			else if (strncmp(request, "GET /readdata HTTP/1.1", 22) == 0)
+			else if (memcmp(request, "GET /readdata HTTP/1.1", 22) == 0)
 			{
 				unsigned char	led_response[20] = "LEDCHAIN: ";
-				char	response[200];
+				char			response[200];
 
 				get_led_data(led_response + 10, &shared_led);
 				create_http(response, (char *)led_response);
 
-				// printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
-					// "write data to client %lu(B) \n%s\n"
-					// "++++++++++++++++++++++++++++++++++++++++++++++++++++++\n",
-					// strlen(response), response);
-
-				pthread_mutex_lock(&print_mutex);
-				printf("sending %s\n", led_response);
-				pthread_mutex_unlock(&print_mutex);
-
-				if (write(client, response, strlen(response)) < 0)
-				// if (send(client, response, size, 0) < 0)
+				if (send(client, response, strlen(response), 0) < 0)
 					ft_perror("server", errno, "cannot send data to client");
 			}
 			else
 			{
-				char	response[200];
 				size_t	size = create_http(response, "");
 
-				printf("unknown-request\n");
-				if (write(client, response, size) < 0)
-				// if (send(client, response, size, 0) < 0)
+				request[min2(strlen(request), 22)] = 0;
+				ft_warning("server", W_UNKNOWN_REQUEST, request);
+				if (send(client, response, size, 0) < 0)
 					ft_perror("server", errno, "cannot send data to client");
 			}
-			// str2int(request, &pid);
-			// int button = 0;
-			// (void)_;
-			// sprintf(response, "button%d: clicked", button);
 		}
 	}
 }
@@ -172,14 +139,10 @@ static void		*run_led(t_shared_led *shared_led)
 
 
 	leds = 14;
-	variant = 0;
+	variant = 1;
 	period = 1000000;
 	while (1)
 	{
-		// pthread_mutex_lock(&print_mutex);
-		// printf("led %d var %d period %d\n", leds, variant, period);
-		// pthread_mutex_unlock(&print_mutex);
-
 		if (shared_led->new_data)
 		{
 			pthread_mutex_lock(&shared_led->led_mutex);
@@ -215,7 +178,6 @@ static void		*run_led(t_shared_led *shared_led)
 			else if (variant == 2)
 				leds = (leds + 1) & 0b111111;
 		}
-
 		shared_led->leds = leds;
 		usleep((int)period);
 	}
@@ -271,6 +233,7 @@ static char		*read_file(char *fname, size_t *size)
 	char		*ret;
 	int			fd;
 
+	printf("%s\n", fname);
 	fd = open(fname, O_RDONLY);
 	if (fd == -1 || stat(fname, &st))
 	{
@@ -316,12 +279,6 @@ static int		parse_data(char *response)
 	return button;
 }
 
-// __NOEXC __WUR __INLINE
-// static int		isbutton(e_button button)
-// {
-// 	return (unsigned int) button <= 0xb;
-// }
-
 __NOEXC
 static size_t	create_http(char *dest, char *data)
 {
@@ -332,8 +289,15 @@ static size_t	create_http(char *dest, char *data)
 	return sprintf(dest,
 		"HTTP/1.1 200 OK\r\n"
 		"Status: 200 OK\r\n"
-		// "Content-Type: \"text/plain\"\r\n"
 		"Content-Length: %zu\r\n\r\n"
 		"%s",
 		size, data);
+}
+
+__NOEXC __WUR __INLINE
+static int		min2(int a, int b)
+{
+	if (a <= b)
+		return a;
+	return b;
 }

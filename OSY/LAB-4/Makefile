@@ -5,89 +5,67 @@
 #                                                     +:+ +:+         +:+      #
 #    By: kostya <kostya@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2021/09/08 23:21:10 by kostya            #+#    #+#              #
-#    Updated: 2021/12/15 16:19:02 by kostya           ###   ########.fr        #
+#    Created: 2021/12/15 18:16:13 by kostya            #+#    #+#              #
+#    Updated: 2021/12/15 19:27:45 by kostya           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # ------------------------------ compiler options ------------------------------
-NAME_SERVER	=	server
-NAME_CLIENT	=	client
+NAME		=	server
 CC			=	clang
-CFLAGS		=	-Wall -Wextra
-# -Werror
+CFLAGS		=	-Wall -Wextra -Werror
 COPTIONS	=	-O2
 # ------------------------------- linker options -------------------------------
-LIBRARY		=	-lpthread
+LIBRARY		=	-L. -lpthread
 OBJS_DIR	=	obj
 INCLUDE_DIR	=	inc
-SCRS_DIR	=	src
+SRCS_DIR	=	src
 # ------------------------------- project sorces -------------------------------
-SRCS_SERVER	=	\
-				server	\
-				memory	\
-				error	\
+SRCS		=	\
+				error		\
+				memory		\
+				server		\
 				utils
 # ------------------------------------------------------------------------------
-SRCS_CLIENT	=	\
-				client	\
-				error	\
-				utils
-# ------------------------------------------------------------------------------
-HDRS_SERVER	=	\
-				server	\
-				lab4	\
-				memory	\
-				color	\
-				error
-# ------------------------------------------------------------------------------
-HDRS_CLIENT	=	\
-				client	\
-				lab4	\
-				color	\
-				error
+HDRS		=	\
+				color		\
+				error		\
+				lab4		\
+				memory
 
 # ======================= UNCHANGEABLE PART OF MAKEFILE ========================
 # ------------------------------------------------------------------------------
 RM			=	rm -f
-OBJS_SERVER	=	$(addprefix ${OBJS_DIR}/,${SRCS_SERVER:=.o})
-OBJS_CLIENT	=	$(addprefix ${OBJS_DIR}/,${SRCS_CLIENT:=.o})
-DEPS_CLIENT	=	$(addprefix ${INCLUDE_DIR}/,${HDRS_CLIENT:=.h})
-DEPS_SERVER	=	$(addprefix ${INCLUDE_DIR}/,${HDRS_SERVER:=.h})
+OBJS		=	$(addprefix ${OBJS_DIR}/,${SRCS:=.o})
+DEPS		=	$(addprefix ${INCLUDE_DIR}/,${HDRS:=.h})
 INCLUDE		=	-I ${INCLUDE_DIR}
 
 # ------------------------------------------------------------------------------
 all:			${OBJS_DIR}
-	@$(MAKE)	$(NAME_SERVER) -j
-	@$(MAKE)	$(NAME_CLIENT) -j
+	@$(MAKE)	$(NAME) -j
 
 # ------------------------------------------------------------------------------
-${OBJS_DIR}/%.o: ${SCRS_DIR}/%.c Makefile
+${OBJS_DIR}/%.o: ${SRCS_DIR}/%.c ${DEPS} Makefile
 	${CC}		${CFLAGS} ${COPTIONS} -c -o $@ $< ${INCLUDE}
 
 # ------------------------------------------------------------------------------
-$(NAME_SERVER):	${OBJS_SERVER} ${DEPS_SERVER}
-	${CC}		-o ${NAME_SERVER} ${CFLAGS} ${COPTIONS} ${OBJS_SERVER} ${LIBRARY}
-
-$(NAME_CLIENT):	${OBJS_CLIENT} ${DEPS_CLIENT}
-	${CC}		-o ${NAME_CLIENT} ${CFLAGS} ${COPTIONS} ${OBJS_CLIENT} ${LIBRARY}
+$(NAME):		${OBJS} ${DEPS}
+	${CC}		-o ${NAME} ${CFLAGS} ${COPTIONS} ${OBJS} ${LIBRARY}
 
 # ------------------------------------------------------------------------------
 clean:
-	${RM}		${OBJS_SERVER}
-	${RM}		${OBJS_CLIENT}
+	${RM}		${OBJS}
 
 # ------------------------------------------------------------------------------
 fclean:			clean
-	${RM}		${NAME_SERVER}
-	${RM}		${NAME_CLIENT}
+	${RM}		${NAME}
+
+# ------------------------------------------------------------------------------
+re:				fclean all
 
 # ------------------------------------------------------------------------------
 ${OBJS_DIR}:
 	mkdir		-p ${OBJS_DIR}
-
-# ------------------------------------------------------------------------------
-re:				fclean all
 
 # ------------------------------------------------------------------------------
 .PHONY:			all clean fclean re

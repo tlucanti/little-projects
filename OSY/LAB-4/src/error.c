@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:34:33 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/15 17:00:43 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/15 18:07:55 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,9 @@ static const char	*ft_strerror(e_error errorcode)
 		return ("invalid button value");
 	else if (errorcode == E_CLIENT_BADARG)
 		return ("invalid argument format");
+
+	else if (errorcode == W_UNKNOWN_REQUEST)
+		return ("unknown request format");
 
 	else if (errorcode == I_CLIENT_INFO)
 		return ("Try " TERM_WHITE "'./client " TERM_YELLOW "--help'" RESET

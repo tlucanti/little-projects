@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/09 20:40:07 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/12 15:17:25 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/15 18:08:51 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,10 @@ typedef enum	s_error
 	E_BUTTON_VALUE		= -4,
 	E_CLIENT_BADARG		= -5,
 
-	I_CLIENT_INFO		= -6,
-	I_SERVER_INFO		= -7
+	W_UNKNOWN_REQUEST	= -6,
+
+	I_CLIENT_INFO		= -7,
+	I_SERVER_INFO		= -8
 }				e_error;
 
 // oks
