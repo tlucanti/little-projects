@@ -6,12 +6,14 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/30 19:47:25 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/15 18:20:44 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/16 15:34:10 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LAB4_H
 # define LAB4_H
+
+# define _GNU_SOURCE
 
 # include <sys/socket.h>
 # include <arpa/inet.h>
@@ -48,6 +50,7 @@ typedef struct	s_shared_led
 {
 	sig_atomic_t	new_data;
 	e_button		button;
+	sig_atomic_t	power;
 	unsigned int	leds;
 	pthread_mutex_t	led_mutex;
 }					t_shared_led;

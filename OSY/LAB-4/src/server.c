@@ -6,7 +6,7 @@
 /*   By: kostya <kostya@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/29 22:45:00 by kostya            #+#    #+#             */
-/*   Updated: 2021/12/16 14:06:04 by kostya           ###   ########.fr       */
+/*   Updated: 2021/12/16 15:59:13 by kostya           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,13 @@ extern ssize_t	read(int fd, void *buf, size_t count);
 static int		init_socket() __NOEXC __WUR;
 static void		*backend(int sock) __NOEXC __NORET;
 static char		*read_file(char *fname, size_t *size) __NOEXC __WUR;
-static int		parse_data(char *response) __NOEXC __WUR;
+static int		parse_data(char *response, int verbose) __NOEXC __WUR;
 static size_t	create_http(char *dest, char *data) __NOEXC;
 static void		*run_led(t_shared_led *shared_led) __NOEXC __NORET;
 static void		get_led_data(unsigned char *dest, const t_shared_led *shared_led) __NOEXC;
 static int		min2(int a, int b) __NOEXC __WUR __INLINE;
+static void		*stdin_read(t_shared_led *shared_led) __NOEXC __NORET;
+static int		parse_led(char *response, int *power) __NOEXC __WUR;
 
 pthread_mutex_t print_mutex;
 
@@ -42,6 +44,7 @@ __NOEXC __NORET
 static void		*backend(int sock)
 {
 	pthread_t		thread;
+	pthread_t		stdin_thread;
 	char			request[REQUEST_MESSAGE_SIZE];
 	char			response[RESPONSE_MESSAGE_SIZE];
 	t_shared_led	shared_led;
@@ -50,6 +53,7 @@ static void		*backend(int sock)
 
 	shared_led.new_data = 0;
 	pthread_mutex_init(&shared_led.led_mutex, 0);
+	pthread_create(&stdin_thread, NULL, (void *(*)(void *))(void *)stdin_read, (void *)&shared_led);
 	pthread_create(&thread, NULL, (void *(*)(void *))(void *)run_led, (void *)&shared_led);
 	
 	while (1)
@@ -74,7 +78,7 @@ static void		*backend(int sock)
 				ft_perror("server", errno, "cannot read data from client");
 				break ;
 			}
-			if (memcmp(request, "GET / HTTP/1.1", 14) == 0)
+			if (strncasecmp(request, "GET / HTTP/1.1", 14) == 0)
 			{
 				size_t		fsize;
 				char		*index;
@@ -90,22 +94,22 @@ static void		*backend(int sock)
 				free(index);
 				free(html);
 			}
-			else if (memcmp(request, "POST /writedata HTTP/1.1", 22) == 0)
+			else if (strncasecmp(request, "POST /writedata HTTP/1.1", 22) == 0)
 			{
 				char	*needle;
 				int		button_num;
 
-				needle = strstr(request, "BUTTON");
+				needle = strcasestr(request, "BUTTON");
 				if (needle == NULL)
 					continue ;
-				button_num = parse_data(needle);
+				button_num = parse_data(needle, 1);
 
 				pthread_mutex_lock(&shared_led.led_mutex);
 				shared_led.button = button_num;
 				shared_led.new_data = 1;
 				pthread_mutex_unlock(&shared_led.led_mutex);
 			}
-			else if (memcmp(request, "GET /readdata HTTP/1.1", 22) == 0)
+			else if (strncasecmp(request, "GET /readdata HTTP/1.1", 22) == 0)
 			{
 				unsigned char	led_response[20] = "LEDCHAIN: ";
 				char			response[200];
@@ -145,24 +149,32 @@ static void		*run_led(t_shared_led *shared_led)
 	{
 		if (shared_led->new_data)
 		{
+			if (shared_led->new_data == 1)
+			{
+
+				if (shared_led->button == up)
+					period /= 2;
+				else if (shared_led->button == down)
+					period *= 2;
+				else if (shared_led->button == left)
+					direction = left;
+				else if (shared_led->button == right)
+					direction = right;
+				else if (shared_led->button == var_1)
+					variant = 1;
+				else if (shared_led->button == var_2)
+					variant = 2;
+			}
+			else if (shared_led->new_data == 2)
+			{
+				if (shared_led->power)
+					leds = (leds | (0x1 << (shared_led->button))) & 0b111111;
+				else
+					leds = (leds & ~(0x1 << (shared_led->button))) & 0b111111;
+			}
 			pthread_mutex_lock(&shared_led->led_mutex);
 			shared_led->new_data = 0;
 			pthread_mutex_unlock(&shared_led->led_mutex);
-
-			if (shared_led->button == up)
-				period /= 2;
-			else if (shared_led->button == down)
-				period *= 2;
-			else if (shared_led->button == left)
-				direction = left;
-			else if (shared_led->button == right)
-				direction = right;
-			else if (shared_led->button == var_1)
-				variant = 1;
-			else if (shared_led->button == var_2)
-				variant = 2;
-			else
-				leds = leds ^ (0x1 << (shared_led->button - 6));
 		}
 		if (direction == left)
 		{
@@ -183,8 +195,44 @@ static void		*run_led(t_shared_led *shared_led)
 	}
 }
 
+__NOEXC __NORET
+static void		*stdin_read(t_shared_led *shared_led)
+{
+	char	buff[200];
+	int		n;
+	int		power;
+
+	while (1)
+	{
+		fgets(buff, 200, stdin);
+		buff[strlen(buff) - 1] = 0;
+		n = parse_data(buff, 0);
+		if (n != -1)
+		{
+			pthread_mutex_lock(&shared_led->led_mutex);
+			shared_led->button = n;
+			shared_led->new_data = 1;
+			pthread_mutex_unlock(&shared_led->led_mutex);
+			ft_ok("server", K_BUTTON_CHANGE, buff);
+			continue ;
+		}
+		n = parse_led(buff, &power);
+		if (n != -1)
+		{
+			pthread_mutex_lock(&shared_led->led_mutex);
+			shared_led->button = n;
+			shared_led->power = power;
+			shared_led->new_data = 2;
+			pthread_mutex_unlock(&shared_led->led_mutex);
+			ft_ok("server", K_LED_CHANGE, buff);
+			continue ;
+		}
+		ft_perror("server", E_RESPONSE_FORMAT, buff);
+	}
+}
+
 __NOEXC
-static		void get_led_data(unsigned char *dest, const t_shared_led *shared_led)
+static void		get_led_data(unsigned char *dest, const t_shared_led *shared_led)
 {
 	unsigned int				leds;
 
@@ -233,7 +281,6 @@ static char		*read_file(char *fname, size_t *size)
 	char		*ret;
 	int			fd;
 
-	printf("%s\n", fname);
 	fd = open(fname, O_RDONLY);
 	if (fd == -1 || stat(fname, &st))
 	{
@@ -248,16 +295,17 @@ static char		*read_file(char *fname, size_t *size)
 }
 
 __NOEXC __WUR
-static int		parse_data(char *response)
+static int		parse_data(char *response, int verbose)
 {
 	e_button	button;
 	char		*ptr;
 
 	while (isspace(*response))
 		++response;
-	if (memcmp(response, "BUTTON", 6) != 0)
+	if (strncasecmp(response, "BUTTON", 6) != 0)
 	{
-		ft_perror("server", E_RESPONSE_FORMAT, response);
+		if (verbose)
+			ft_perror("server", E_RESPONSE_FORMAT, response);
 		return -1;
 	}
 	response += 6;
@@ -271,12 +319,43 @@ static int		parse_data(char *response)
 		++response;
 	while (isspace(*response))
 		++response;
-	if (memcmp(response, "clicked", 6) != 0)
+	if (strncasecmp(response, "clicked", 6) != 0)
 	{
-		ft_perror("server", E_RESPONSE_FORMAT, response);
+		if (verbose)
+			ft_perror("server", E_RESPONSE_FORMAT, response);
 		return -1;
 	}
 	return button;
+}
+
+__NOEXC __WUR
+static int		parse_led(char *response, int *power)
+{
+	int		led;
+	char	*ptr;
+
+	while (isspace(*response))
+		++response;
+	if (strncasecmp(response, "LED", 3) != 0)
+		return -1;
+	response += 3;
+	while (isspace(*response))
+		++response;
+	ptr = str2int(response, (int *)&led);
+	response = ptr;
+	while (isspace(*response))
+		++response;
+	if (*response == ':')
+		++response;
+	while (isspace(*response))
+		++response;
+	if (strncasecmp(response, "on", 2) == 0)
+		*power = 1;
+	else if (strncasecmp(response, "off", 3) == 0)
+		*power = 0;
+	else
+		return -1;
+	return led;
 }
 
 __NOEXC
