@@ -2,7 +2,7 @@
 <!-- main page.html -->
 <html>
 <head>
-	<meta http-equiv = "content-type" content = "text/html; charset = windows-1251">
+	<meta http-equiv = "content-type" content = "text/html; charset = utf-8">
 	<title> LAB-4 </title>
 	<style type="text/css">
 		html
@@ -83,6 +83,67 @@
 			position: relative;
 			top: 400px;
 		}
+		.leds_text
+		{
+			position: absolute;
+			top: 340px;
+			left: 160px;
+		}
+		.leds
+		{
+			position: relative;
+			top: 450px;
+			left: 20px;
+			/*border: solid 1px black; */
+		}
+		.led0
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 30px;
+			border: solid 1px black; 
+		}
+		.led1
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 100px;
+			border: solid 1px black; 
+		}
+		.led2
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 170px;
+			border: solid 1px black; 
+		}
+		.led3
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 240px;
+			border: solid 1px black; 
+		}
+		.led4
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 310px;
+			border: solid 1px black; 
+		}
+		.led5
+		{
+			width: 40px;
+			height: 40px;
+			position: absolute;
+			left: 380px;
+			border: solid 1px black; 
+		}
 		.right_panel
 		{
 			position: absolute;
@@ -143,20 +204,22 @@
 			transform: rotate(360deg) scale(1.5);
 		}
 		#title_font { top: 10px; left: 10px; }
-		#button_1 { left: 20px; top: 120px; }
-		#button_2 { left: 130px; top: 120px; }
-		#button_3 { left: 240px; top: 120px; }
-		#button_4 { left: 350px; top: 120px; }
+		#button_0 { left: 20px; top: 120px; }
+		#button_1 { left: 130px; top: 120px; }
+		#button_2 { left: 240px; top: 120px; }
+		#button_3 { left: 350px; top: 120px; }
 		#var_1 { left: 120px; top: 220px; }
 		#var_2 { left: 260px; top: 220px; }
 
-		.right_panel_content {
+		.right_panel_content
+		{
 			position: absolute;
 			height: 700px;
 			top: 270px;
 			z-index: 6;
 		}
-		.social {
+		.social
+		{
 			position: absolute;
 			width: 65px;
 			height: 65px;
@@ -164,8 +227,17 @@
 			z-index: 6;
 			/* border: solid 1px black; */
 		}
-		#right_panel_text { top: 370px; left: 1050px; width: 400px; height: 500px; }/* border: solid 1px black; } */
-		#vk { left: 20px; } #git { left: 130px; } #insta { left: 240px; } #google { left: 350px; } #tw { left: 460px; }
+		#right_panel_text
+		{
+			top: 130px;
+			left: 50px;
+			width: 400px;
+			height: 450px;
+			/*border: solid 1px black;*/
+		} 
+		#vk { left: 80px; }
+		#git { left: 200px; }
+		#insta { left: 320px; }
 	</style>
 </head>
 <body>
@@ -189,23 +261,46 @@
 		<div class="left_panel_font">
 			<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/fonts/controls.png">
 		</div>
+		<div class="button", id="button_0">
+			<img class="scale", src="images/buttons/button_1.png", alt="", onclick="send_data('BUTTON0: clicked');">
+		</div>
 		<div class="button", id="button_1", onclick="send_data('BUTTON1: clicked');">
-			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_1.png", alt="">
+			<img class="scale", src="images/buttons/button_2.png", alt="">
 		</div>
 		<div class="button", id="button_2", onclick="send_data('BUTTON2: clicked');">
-			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_2.png", alt="">
+			<img class="scale", src="images/buttons/button_3.png", alt="">
 		</div>
 		<div class="button", id="button_3", onclick="send_data('BUTTON3: clicked');">
-			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_3.png", alt="">
+			<img class="scale", src="images/buttons/button_4.png", alt="">
 		</div>
-		<div class="button", id="button_4", onclick="send_data('BUTTON4: clicked');">
-			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/button_4.png", alt="">
-		</div>
-		<div class="button", id="var_1", onclick="send_data('BUTTON5: clicked');">
+		<div class="button", id="var_1", onclick="send_data('BUTTON4: clicked');">
 			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/var_1.png", alt="">
 		</div>
-		<div class="button", id="var_2", onclick="send_data('BUTTON6: clicked');">
+		<div class="button", id="var_2", onclick="send_data('BUTTON5: clicked');">
 			<img class="scale", src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/buttons/var_2.png", alt="">
+		</div>
+		<div class="leds_text">
+			<img src="images/buttons/leds.png">
+		</div>
+		<div class="leds">
+			<div class="led0", id="led0">
+				<!-- <label id="LED0", style="font-size: 22px">░░</label> -->
+			</div>
+			<div class="led1", id="led1">
+				<!-- <label id="LED1", style="font-size: 22px; color: #490048">░░</label> -->
+			</div>
+			<div class="led2", id="led2">
+				<!-- <label id="LED2", style="font-size: 22px; color: #490048">░░</label> -->
+			</div>
+			<div class="led3", id="led3">
+				<!-- <label id="LED3", style="font-size: 22px; color: #490048">░░</label> -->
+			</div>
+			<div class="led4", id="led4">
+				<!-- <label id="LED4", style="font-size: 22px; color: #490048">░░</label> -->
+			</div>
+			<div class="led5", id="led5">
+				<!-- <label id="LED5", style="font-size: 22px; color: #490048">░░</label> -->
+			</div>
 		</div>
 
 	</div>
@@ -214,12 +309,13 @@
 		<div class="right_panel_font">
 			<img src="https://raw.githubusercontent.com/antikostya/little-projects/main/OSY/LAB-4/html/images/fonts/log.png">
 		</div>
-		<div class="right_panel_content", id="right_panel_text", align="center">
-			<font face="Comic Sans MS">
-				<textarea style="font-size: 22px; color: #490048">
-				here will be log
-				</textarea>
-			</font>
+		<div class="right_panel_content", id="right_panel_text", align="center", face="Comic Sans MS", style="font-size: 22px; color: #490048">
+			<label id="log">here will be log</label>
+			<!-- <font face="Comic Sans MS"> -->
+				<!-- <textarea style="font-size: 22px; color: #490048"> -->
+				<!-- here will be log -->
+				<!-- </textarea> -->
+			<!-- </font> -->
 		</div>
 		<div class="social", id="vk", align="center">
 			<a href="https://vk.com/idantikostya">
@@ -239,66 +335,76 @@
 	</div>
 </body>
 </html>	
-<script> 
-  
-    function data_view(key, value) { 
-         
-        switch (key) { 
-             
-            case "LED0": 
-            case "LED1": 
-            case "LED2": 
-            case "LED3": 
-                document.getElementById(key).style.backgroundColor = value; 
-            break; 
-  
-            case "temp": 
-                document.getElementById("temp").innerHTML = value + " �C"; 
-            break; 
-             
-            case "log": 
-                var d = new Date(); 
-                var time = String(d.getHours()).padStart(2, '0') + ":"; 
-                time += String(d.getMinutes()).padStart(2, '0') + ":";  
-                time += String(d.getSeconds()).padStart(2, '0'); 
-                document.getElementById("log").value  =  time  +  ":  "  +  value  +  "\n"  + 
-document.getElementById("log").value; 
-            break; 
-             
-        } 
-    } 
-     
-    function data_request() { 
-         
-        const xhr = new XMLHttpRequest(); 
-        xhr.open('GET', "readdata"); 
-  
-        xhr.onreadystatechange = function() { 
-             
-            if (xhr.readyState !== 4 || xhr.status !== 200) return; 
-  
-            var response    = xhr.responseText; 
-            var msgs        = response.split("\n"); 
-            for (var i = 0; i < msgs.length-1; i++) {  
-                var msg = msgs[i].split(": "); 
-                data_view(msg[0], msg[1]); 
-            } 
-  
-            window.setTimeout(data_request, 500); 
-  
-        }; 
-         
-        xhr.send(); 
-         
-    } 
-     
-    data_request(); 
-     
-    function send_data (data) { 
-        const xhr = new XMLHttpRequest(); 
-        xhr.open("POST", "writedata", true); 
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); 
-        xhr.send(data+ "\r\n\r\n"); 
-    } 
-     
+
+<script>
+
+function data_view(key, value)
+{
+	let col_array = ['rgba(0,0,0,0)', 'green'];
+	let disp_array = ['none', ''];
+
+	switch (key) 
+	{
+		case "LEDCHAIN":
+			// document.getElementById('led0').style.display = disp_array[value[0]];
+			// document.getElementById('LED1').style.display = disp_array[value[1]];
+			// document.getElementById('LED2').style.display = disp_array[value[2]];
+			// document.getElementById('LED3').style.display = disp_array[value[3]];
+			// document.getElementById('LED4').style.display = disp_array[value[4]];
+			// document.getElementById('LED5').style.display = disp_array[value[5]];
+
+			document.getElementById('led0').style.backgroundColor = col_array[value[0]];
+			document.getElementById('led1').style.backgroundColor = col_array[value[1]];
+			document.getElementById('led2').style.backgroundColor = col_array[value[2]];
+			document.getElementById('led3').style.backgroundColor = col_array[value[3]];
+			document.getElementById('led4').style.backgroundColor = col_array[value[4]];
+			document.getElementById('led5').style.backgroundColor = col_array[value[5]];
+			break ;
+
+		case "LED0":
+		case "LED1":
+		case "LED2":
+		case "LED3":
+			document.getElementById(key).style.backgroundColor = value;
+			break ;
+	}
+	var d = new Date();
+	var time = String(d.getHours()).padStart(2, '0') + ":";
+	time += String(d.getMinutes()).padStart(2, '0') + ":";
+	time += String(d.getSeconds()).padStart(2, '0');
+	document.getElementById("log").value = time + ": " + key + ': ' + value + "\n" +
+	document.getElementById("log").value;
+}
+
+function data_request() {
+	const xhr = new XMLHttpRequest();
+	xhr.open('GET', 'readdata');
+	xhr.onreadystatechange = function()
+	{
+		if (xhr.readyState !== 4 || xhr.status !== 200)
+			return;
+		var response = xhr.responseText;
+		console.log('got %s', response);
+		var msgs = response.split("\n");
+		for (var i = 0; i < msgs.length; ++i)
+		{
+			console.log('parsing %s', msgs[i]);
+			var msg = msgs[i].split(": ");
+			data_view(msg[0], msg[1]);
+		}
+		window.setTimeout(data_request, 0);
+	};
+	xhr.send();
+}
+
+data_request();
+
+function send_data (data) {
+	const xhr = new XMLHttpRequest();	
+	xhr.open("POST", "writedata");
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	console.log('sending %s', data);
+	xhr.send(data+ "\r\n\r\n");
+}
+
 </script>
