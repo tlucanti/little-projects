@@ -2,9 +2,9 @@
 # ------------------------------------------------------------------------------
 POLY_SIZE   = 15        # polynom size: x^15
 POLYNOM     = 0b010011  # binary polynom: x5-x4-x3-x2-x1-x0
-N           = 1100      # message cnt
-I           = 20        # message data
-e           = 0o20      # octal error
+N           = 1600      # message cnt
+I           = 1000        # message data
+e           = 0o1000      # octal error
 T           = 1         # error count
 # ------------------------------------------------------------------------------
 
@@ -188,7 +188,7 @@ if not ok:
 e_str = true_bin(e, POLY_SIZE)
 e_true = (int(e_str + e_str, 2) >> i) % pow(2, POLY_SIZE)
 E_true = E_err ^ e_true
-I_true = int(true_bin(E_true, POLY_SIZE)[:-8][::-1], 2)
+I_true = int(true_bin(E_true, POLY_SIZE)[::-1], 2)
 print()
 print('e <- {:<2} = {}(2)'.format(i, true_bin(e, POLY_SIZE)))
 print(f'e       = {true_bin(e_true, POLY_SIZE)}(2) = {oct(e_true)[2:]}(8)')
