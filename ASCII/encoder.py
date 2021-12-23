@@ -9,6 +9,9 @@ import numpy as np
 import math
 import sys
 import shutil
+import signal
+
+SIGINT = 0
 
 def convolution(array, shape):
 	Y, X = array.shape
@@ -33,10 +36,13 @@ def convolution(array, shape):
 
 
 def image2ascii(image):
-	histogram = ' \'\";%$I@'
+	histogram = ' `\'\";%$I@Q'
 	
 	image = image - image.min()
-	ascii = np.floor(image * (len(histogram) / image.max())).astype(np.uint8)
+	if image.max() == 0:
+		ascii = np.ones(image.shape, dtype=np.uint8) * ord(histogram[0])
+		return ascii
+	ascii = np.floor(image * ((len(histogram) - 1) / image.max())).astype(np.uint8)
 
 	for i in range(len(histogram)):
 		ascii[np.where(ascii == i)] = ord(histogram[i])
@@ -53,26 +59,50 @@ def frame_routine(image, shape):
 	return r_conv
 
 
+def sigint_handler(sig, gname):
+	global SIGINT
+
+	SIGINT = 1
+
+
 def main():
 	fname = sys.argv[1]
 	s = shutil.get_terminal_size()
 	shape = [s.lines, s.columns]
 	vidcap = cv2.VideoCapture(fname)
-	FPS = 5
+	success, image = vidcap.read()
+	FPS = 1
+	signal.signal(signal.SIGINT, sigint_handler)
 
-	i = 0
-	while 1:
-		success, image = vidcap.read()
-		i += 1
-		if FPS != i:
-			continue
-		i = 0
+
+	with open('compiled.txt', 'w') as outf:
+
 		if not success:
-			break
-		conv = frame_routine(image, shape)
-		ascii = image2ascii(conv)
-		for row in ascii:
-			print(''.join(map(chr, row)))
+			print(f'Cannot open `{fname}` file')
+			return 1
+
+		print('Converting video, press `ctrl+c` to stop')
+
+		frame = 0
+		while 1:
+			
+			if SIGINT:
+				print(f'{frame} frames done, stopped')
+				return 0
+			frame += 1
+			block = ''
+			if frame % FPS == 0:
+				conv = frame_routine(image, shape)
+				ascii = image2ascii(conv)
+				for row in ascii:
+					block += ''.join(map(chr, row)) + '\n'
+				block += '\n'
+				outf.write(block)
+
+			print(f'frame {frame} done', end='\r')
+			success, image = vidcap.read()
+			if not success:
+				break
 
 
 def check():
@@ -95,5 +125,5 @@ main()
 
 
 def ps(s):
-	for i in range(10):
-		print(s * 10)
+	for i in range(30):
+		print(s * 30)
