@@ -1,0 +1,6 @@
+.fuse_hidden*
+server
+client
+obj
+.idea
+cmake-build-debug

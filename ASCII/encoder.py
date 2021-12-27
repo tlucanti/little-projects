@@ -13,6 +13,22 @@ import signal
 
 SIGINT = 0
 
+class Color():
+	if platform.system() == 'Windows':
+		import ctypes
+		kernel32 = ctypes.windll.kernel32
+		kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
+	BLACK  = "\033[1;90m"
+	RED    = "\033[1;91m"
+	GREEN  = "\033[1;92m"
+	YELLOW = "\033[1;93m"
+	BLUE   = "\033[1;94m"
+	PURPLE = "\033[1;95m"
+	CYAN   = "\033[1;96m"
+	WHITE  = "\033[1;97m"
+	RESET  = "\033[0m"
+
+
 def convolution(array, shape):
 	Y, X = array.shape
 	kernel_shape_x = np.linspace(0, X, shape[1] + 1)
@@ -36,13 +52,14 @@ def convolution(array, shape):
 
 
 def image2ascii(image):
-	histogram = ' `\'\";%$I@Q'
-	
+	# histogram = ' `\'\";%$I@Q'
+	histogram = ' ░▒▓█'
+
 	image = image - image.min()
 	if image.max() == 0:
-		ascii = np.ones(image.shape, dtype=np.uint8) * ord(histogram[0])
+		ascii = np.ones(image.shape, dtype=np.uint16) * ord(histogram[0])
 		return ascii
-	ascii = np.floor(image * ((len(histogram) - 1) / image.max())).astype(np.uint8)
+	ascii = np.floor(image * ((len(histogram) - 1) / image.max())).astype(np.uint16)
 
 	for i in range(len(histogram)):
 		ascii[np.where(ascii == i)] = ord(histogram[i])
@@ -75,7 +92,7 @@ def main():
 	signal.signal(signal.SIGINT, sigint_handler)
 
 
-	with open('compiled.txt', 'w') as outf:
+	with open('test.txt', 'w') as outf:
 
 		if not success:
 			print(f'Cannot open `{fname}` file')

@@ -1,7 +1,7 @@
 /**
  *	Author:		antikostya
  *	Created:	2021-12-23 23:04:18
- *	Modified:	2021-12-23 23:58:47
+ *	Modified:	2021-12-24 00:29:52
  **/
 
 #include <iostream>
@@ -11,9 +11,13 @@
 
 using namespace::std;
 
-int main()
+int main(int argc, char **argv)
 {
-	ifstream	file("compiled.txt");
+	char *fname = argv[1];
+
+	if (argc == 1)
+		fname = (char *)"compiled.txt";
+	ifstream	file(fname);
 	string		line;
 	string		block;
 
@@ -27,10 +31,10 @@ int main()
 		getline(file, line, '\n');
 		if (line.empty())
 		{
-			cout << block;
+			write(1, block.c_str(), block.size());
 			block.clear();
-			cout << "\033c";
-			usleep(10000); // 100 FPS
+			// cout << "\033c";
+			usleep(20000); // 80 FPS
 			continue ;
 		}
 		block += line + "\n";
