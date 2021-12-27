@@ -12,3 +12,6 @@
 [CRITERIA]: https://docs.google.com/document/d/1-Hh1zYQS-9o6K-huLXR4I-e0-KHxw6HX
 [SCHEME]: https://app.diagrams.net/#LIDZ.drawio
 [PRESENTATION]: https://docs.google.com/presentation/d/1q6jzqRhmNRM_Sn_1NK-vtoKfukIsi-1OtOrPmNOQnuM
+
+converter https://www.chipdip.ru/product/am1s-1203sz AM1S-1203SZ
+lock https://www.chipdip.ru/product0/8008355204 Lock-296MA
