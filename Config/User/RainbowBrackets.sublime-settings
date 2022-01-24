@@ -1,0 +1,96 @@
+{
+    "debug": false,
+
+    "default_config": {
+        "bracket_pairs": {
+            "(": ")",
+            "[": "]",
+            "{": "}"
+        },
+
+        "coloring": false,
+
+        "enabled": true,
+
+        "ignored_scopes": [
+            "comment",
+            "string",
+            "constant"
+        ],
+
+        "rainbow_colors": [
+            "#66D9EF",   /* level5 ocean  */
+            "#334eff",   /* level6 blue   */
+            "#C48DFF",   /* level7 purple */
+            "#FF0000",   /* level1 red    */
+            "#FF6A00",   /* level2 orange */
+            "#FFD833",   /* level3 yellow */
+            "#00FF00",   /* level4 green  */
+        ],
+
+        "mismatch_color": "#FF0000"
+    },
+
+    "syntax_specific": {
+        "Bash": {
+            "coloring": false,
+
+            "ignored_scopes": "keyword"
+        },
+
+        "JSON": {
+            "bracket_pairs": {
+                "{": "}",
+                "[": "]",
+                "(": ")",
+            },
+
+            "extensions": [
+                ".json",
+                ".sublime-settings",
+                ".sublime-menu",
+                ".sublime-build",
+                ".sublime-keymap",
+                ".sublime-commands",
+                ".sublime-theme",
+                ".sublime-color-scheme",
+                ".c",
+                ".cpp",
+                ".h",
+                ".hpp",
+                ".py"
+            ],
+
+            "ignored_scopes": [
+                "comment", "string", "constant"
+            ]
+        },
+
+        "Regular Expression": {
+            "extensions": [
+                ".sublime-syntax"
+            ],
+
+            "ignored_scopes": [
+                "meta.set.regexp",
+                "constant"
+            ]
+        },
+
+        "Scheme": {
+            "bracket_pairs": {
+                "(": ")",
+                "[": "]",
+            },
+
+            "extensions": [
+                ".scm",
+                ".ss"
+            ],
+
+            "ignored_scopes": [
+                "comment", "string", "constant"
+            ]
+        }
+    }
+}

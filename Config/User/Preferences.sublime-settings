@@ -1,0 +1,44 @@
+{
+	"always_show_minimap_viewport": true,
+	"caret_extra_width": 3,
+	"caret_extra_bottom": 5,
+	"caret_extra_top": 5,
+	"caret_style": "phase",
+	"font_size": 12,
+	"highlight_line": true,
+	"highlight_modified_tabs": true,
+	"rulers":
+	[
+		80,
+		120
+	],
+	"save_on_focus_lost": true,
+	"show_tab_close_buttons": false,
+	"word_wrap": false,
+	// "word_wrap": true,
+	"ignored_packages":
+	[
+		"SublimeLinter-contrib-42-norminette",
+		"Vintage",
+	],
+	"color_scheme": "Packages/Materialize/schemes/Material Behave.tmTheme",
+	"theme": "Material Behave.sublime-theme",
+	"draw_minimap_border": true,
+	"match_brackets_angle": true,
+	"ensure_newline_at_eof_on_save": true,
+	"tab_completion": false,
+	"auto_complete": true,
+	// "auto_hide_menu": true,
+	// "auto_hide_tabs": true,
+	// "auto_hide_status_bar": true,
+	"reveal_tabs_with_timeout": true,
+	"reveal_menu": false,
+	"hide_pointer_while_typing": false,
+	"auto_find_in_selection": true,
+	"drag_text": false,
+	"bold_folder_labels": true,
+	"hide_tab_scrolling_buttons": true,
+	"hide_new_tab_button": true,
+	"auto_complete_delay": 100,
+	/*"highlight_line": true,*/
+}

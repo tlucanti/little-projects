@@ -1,0 +1,113 @@
+[
+	// move cursor to one char forward/backward
+	{ "keys": ["alt+;"], "command": "move", "args": {"by": "characters", "forward": true} },
+	{ "keys": ["alt+k"], "command": "move", "args": {"by": "characters", "forward": false} },
+	// move cursor to one char forward/backward and select
+	{ "keys": ["shift+alt+;"], "command": "move", "args": {"by": "characters", "forward": true, "extend": true} },
+	{ "keys": ["shift+alt+k"], "command": "move", "args": {"by": "characters", "forward": false, "extend": true} },
+	// move cursor to one word forward/backward
+	{ "keys": ["alt+d"], "command": "move", "args": {"by": "words", "forward": true} },
+	{ "keys": ["alt+a"], "command": "move", "args": {"by": "words", "forward": false} },
+	// move cursor to one word forward/backward and select
+	{ "keys": ["shift+alt+d"], "command": "move", "args": {"by": "words", "forward": true, "extend": true} },
+	{ "keys": ["shift+alt+a"], "command": "move", "args": {"by": "words", "forward": false, "extend": true} },
+	// move cursor to one line up/down
+	{ "keys": ["alt+o"], "command": "move", "args": {"by": "lines", "forward": false} },
+	{ "keys": ["alt+l"], "command": "move", "args": {"by": "lines", "forward": true} },
+	// move cursor to one line up/down and select
+	{ "keys": ["shift+alt+o"], "command": "move", "args": {"by": "lines", "forward": false, "extend": true} },
+	{ "keys": ["shift+alt+l"], "command": "move", "args": {"by": "lines", "forward": true, "extend": true} },
+	// move curser to next/previous paragraph
+	{ "keys": ["alt+["], "command": "move", "args": {"by": "stops", "empty_line": true, "forward": false} },
+	{ "keys": ["alt+]"], "command": "move", "args": {"by": "stops", "empty_line": true, "forward": true} },
+	// move curser to next/previous paragraph and select
+	{ "keys": ["alt+shift+["], "command": "move", "args": {"by": "stops", "empty_line": true, "forward": false, "extend": true} },
+	{ "keys": ["alt+shift+]"], "command": "move", "args": {"by": "stops", "empty_line": true, "forward": true, "extend": true} },
+	// move cursor to the begin/end of line
+	{ "keys": ["ctrl+right"], "command": "move_to", "args": {"to": "eol", "extend": false} },
+	{ "keys": ["ctrl+left"], "command": "move_to", "args": {"to": "bol", "extend": false} },
+	{ "keys": ["ctrl+;"], "command": "move_to", "args": {"to": "eol", "extend": false} },
+	{ "keys": ["ctrl+k"], "command": "move_to", "args": {"to": "bol", "extend": false} },
+	// move cursor to the begin/end of line and select
+	{ "keys": ["ctrl+shift+right"], "command": "move_to", "args": {"to": "eol", "extend": true} },
+	{ "keys": ["ctrl+shift+left"], "command": "move_to", "args": {"to": "bol", "extend": true} },
+	{ "keys": ["ctrl+shift+;"], "command": "move_to", "args": {"to": "eol", "extend": true} },
+	{ "keys": ["ctrl+shift+k"], "command": "move_to", "args": {"to": "bol", "extend": true} },
+	// delete residue or begining of line starting of cursor
+	{ "keys": ["shift+alt+delete"], "command": "run_macro_file", "args": {"file": "res://Packages/User/delete_residue_forward.sublime-macro"} },
+	{ "keys": ["shift+alt+backspace"], "command": "run_macro_file", "args": {"file": "res://Packages/User/delete_residue_backward.sublime-macro"} },
+
+	// [ctrl + r] find functions and macros in project
+	{ "keys": ["ctrl+r"], "command": "goto_symbol_in_project" },
+	// [ctrl + shift + r] find file
+	{ "keys": ["ctrl+shift+r"], "command": "show_overlay", "args": {"overlay": "goto", "text": ""} },
+
+	// [ctrl + d] delete current line
+	{ "keys": ["ctrl+d"], "command": "run_macro_file", "args": {"file": "res://Packages/Default/Delete Line.sublime-macro"} },
+
+	// create or delete additional cursor
+	{ "keys": ["ctrl+up"], "command": "column_select", "args": {"by": "lines", "forward": false} },
+	{ "keys": ["ctrl+down"], "command": "column_select", "args": {"by": "lines", "forward": true} },
+	{ "keys": ["ctrl+o"], "command": "column_select", "args": {"by": "lines", "forward": false} },
+	{ "keys": ["ctrl+l"], "command": "column_select", "args": {"by": "lines", "forward": true} },
+
+	// { "keys": ["ctrl+alt+pageup"], "command": "column_select", "args": {"by": "pages", "forward": false}},
+	// { "keys": ["ctrl+alt+pagedown"], "command": "column_select", "args": {"by": "pages", "forward": true}},
+	// { "keys": ["ctrl+alt+home"], "command": "column_select", "args": {"by": "all", "forward": false}},
+	// { "keys": ["ctrl+alt+end"], "command": "column_select", "args": {"by": "all", "forward": true}},
+
+	// [ctrl + /] comment current line and move cursor to next line
+	{
+		"keys": ["ctrl+/"],
+		"command": "run_macro_file",
+		"args": {"file": "res://Packages/User/comment_line.sublime-macro"},
+		"context": [
+			{ "key": "selection_empty", "operator": "equal", "operand": "true", "match_all": true },
+		]
+	},
+
+	// [lol]
+	{
+		"keys": ["ctrl+p"],
+		"command": "run_macro_file",
+		"args": {"file": "res://Packages/User/caps.sublime-macro"},
+
+	},
+
+	// disables [ctrl + q] command
+	{ "keys": ["ctrl+q"], "command": "" },
+
+	// [alt + right] move line (or selected lines) by one indent to right
+	{ "keys": ["alt+right"], "command": "indent" },
+
+	// [alt + left] move line (or selected lines) by one indent to left
+	{ "keys": ["alt+left"], "command": "unindent" },
+
+	// [alt + up] move line (or selected lines) by one line up
+	{ "keys": ["alt+up"], "command": "swap_line_up" },
+
+	// [alt + up] move line (or selected lines) by one line down
+	{ "keys": ["alt+down"], "command": "swap_line_down" },
+
+	// [tab] - disable auto completion by pressing tab
+	{ "keys": ["tab"], "command": "insert", "args": {"characters": "\t"}, "context": 
+		[{ "key": "auto_complete_visible" }]
+	},
+
+	{
+		"keys": ["shift+enter"],
+		"command": "run_macro_file",
+		"args": {"file": "res://Packages/User/shift-enter.sublime-macro"},
+	},
+	// { "keys": ["ctrl+g"], "command": "goto_line",},
+	{ "keys": ["ctrl+g"], "command": "show_overlay", "args": {"overlay": "goto", "text": ":"} },
+	{ "keys": ["ctrl+alt+n"], "command": "norm_toggle"},
+	// { "keys": ["shift+alt+l"], "command":
+		// [
+			// { "command": "move_to", "args": {"extend": false, "to": "bol"}, },
+			// { "command": "move_to", "args": {"extend": false, "to": "bol"}, },
+			// { "command": "move", "args": {"by": "lines", "extend": true, "forward": true}, }
+		// ]
+	// }
+
+]

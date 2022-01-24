@@ -1,0 +1,25 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"42 Headers",
+		"CMakeEditor",
+		"Color Scheme - Chromodynamics",
+		"Column Select",
+		"FileHeader",
+		"Material Theme",
+		"Materialize",
+		"Night Owl",
+		"Package Control",
+		"rainbow_csv",
+		"RainbowBrackets",
+		"RISC-V Assembly Syntax",
+		"SublimeLinter",
+		"SublimeLinter-contrib-42-norminette",
+		"Verilog",
+		"WakaTime",
+	],
+}
