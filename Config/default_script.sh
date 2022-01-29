@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # to install - run this command
 # chmod 777 default_script.sh && ./default_script.sh
 
@@ -25,14 +25,14 @@ $apt install make
 $apt install gpg
 $apt install python3
 $apt install gdb
+$apt install curl
 git clone https://github.com/longld/peda.git ~/peda
 echo "source ~/peda/peda.py" >> ~/.gdbinit
 
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.zsh-syntax-highlighting
-wget https://raw.githubusercontent.com/tlucanti/little-projects/master/Config/.vimrc -O ~/.vimrc
-wget https://raw.githubusercontent.com/tlucanti/little-projects/master/Config/.zshrc -O ~/.zshrc
-
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+cp .vimrc ~/.vimrc
+cp .zshrc ~/.zshrc
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	sudo apt-get install python-pip
@@ -40,6 +40,3 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	sudo apt-get update
 	sudo apt-get dist-upgrade
 fi
-
-ssh-keygen
-gpg --full-generate-key

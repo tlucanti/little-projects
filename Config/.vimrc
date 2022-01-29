@@ -94,3 +94,6 @@ set laststatus=2
 " Use 256 colours (Use this setting only if your terminal supports 256 colours)
 set t_Co=256
 
+" Hotkey for :NERDTree and :NerdTree
+nnoremap <C-n> :NERDTree<CR>
+nnoremap <C-b> :NERDTreeToggle<CR>
