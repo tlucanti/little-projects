@@ -99,3 +99,16 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# To define styles for nested brackets up to level 4
+ZSH_HIGHLIGHT_STYLES[bracket-level-1]='fg=blue,bold'
+ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=red,bold'
+ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=yellow,bold'
+ZSH_HIGHLIGHT_STYLES[bracket-level-4]='fg=magenta,bold'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=green,bold'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=yellow,bold'
+ZSH_HIGHLIGHT_STYLES[path]='bold'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='bold'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='bold'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=yellow,bold'
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=green,bold'
