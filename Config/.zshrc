@@ -112,3 +112,5 @@ ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='bold'
 ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='bold'
 ZSH_HIGHLIGHT_STYLES[redirection]='fg=yellow,bold'
 ZSH_HIGHLIGHT_STYLES[arg0]='fg=green,bold'
+
+alias norminette="/home/"$USER"/.local/bin/norminette"

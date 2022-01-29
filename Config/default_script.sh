@@ -39,4 +39,5 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	sudo apt-get install python3-pip
 	sudo apt-get update
 	sudo apt-get dist-upgrade
+	python3 -m pip install --upgrade norminette
 fi
