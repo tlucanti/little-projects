@@ -13,7 +13,11 @@
 #ifndef MEMORY_H
 # define MEMORY_H
 
-# include <malloc.h>
+# ifdef __linux__
+#  include <malloc.h>
+# else
+#  include <stdlib.h>
+# endif
 # include <errno.h>
 
 # ifndef __MALLOC
