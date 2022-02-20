@@ -6,7 +6,7 @@
 /*   By: tlucanti <tlucanti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/19 17:09:44 by tlucanti          #+#    #+#             */
-/*   Updated: 2022/02/19 20:18:11 by tlucanti         ###   ########.fr       */
+/*   Updated: 2022/02/20 18:06:26 by tlucanti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,26 @@
 
 # include <string>
 # include <climits>
+# include "defs.h"
 
 # define _NAMESPACE_START	namespace tlucanti {
 # define _NAMESPACE_END		} /* tlucanti */
 
-# if __cplusplus <= 199711L
-#  define __WUR __attribute__((warn_unused_result))
-#  define noexcept
-# else
-#  define __WUR [[nodiscard]]
-# endif /* C++20 */
+# ifndef ULONG_LONG_MAX
+#  define ULONG_LONG_MAX ((unsigned long long)(-1))
+# endif
+# ifndef LONG_LONG_MAX
+#  define LONG_LONG_MAX (ULONG_LONG_MAX / 2)
+# endif
+# ifndef LONG_LONG_MIN
+#  define LONG_LONG_MIN (LONG_LONG_MAX + 1)
+# endif
+
+# define __INT_STR(__x) #__x
+# define __INT_STR_INTERNAL(__x) __INT_STR(__x)
+# define __MIN_LL_STR __INT_STR_INTERNAL(LONG_LONG_MIN)
 
 _NAMESPACE_START
-
-	template<class T, class U>
-	struct is_same : std::false_type {};
-
-	template<class T>
-	struct is_same<T, T> : std::true_type {};
 
 	class bad_lexical_cast : public std::bad_cast
 	{
@@ -98,24 +100,24 @@ _NAMESPACE_START
 		underflow		= 0b1001,
 	};
 
-	__WUR static inline
+	__WUR inline
 	long long int
 	s2ll(const char *str, lexical_cast_errors *error_ptr, int base)
+	/*
+		string to integer converter
+	*/
 	{
 		long long int	ret_val	= 0;
 		unsigned int	sign	= 0;
 
-		assert(base >= 1 and base <= 32);
+		assert(base >= 2 and base <= 32);
 		if (error_ptr)
 			*error_ptr = ok;
 		while (isspace(*str))
 			++str;
 		while (*str == '+' or *str == '-')
-		{
-			if (*str == '-')
+			if (*str++ == '-')
 				sign ^= 1;
-			++str;
-		}
 		while (isalnum(*str))
 		{
 			long long int i;
@@ -125,7 +127,7 @@ _NAMESPACE_START
 				i = *str - 87; // 'a' = 87 + 0xA = 97
 			else
 				i = *str - 55; // 'A' = 55 + 0xA = 65
-			if (i > base)
+			if (i >= base)
 			{
 				if (error_ptr)
 					*error_ptr = bad_base_symbol;
@@ -141,20 +143,23 @@ _NAMESPACE_START
 			++str;
 		}
 		if (*str == 0)
-			return ret_val * (sign << 1) - 1;
+			return ret_val * (((1 - sign) << 1) - 1);
 		else if (error_ptr)
 			*error_ptr = bad_symbol;
 		return 0;
 	}
 
-	__WUR
+	__WUR inline
 	unsigned long long int
 	s2ull(const char *str, lexical_cast_errors *error_ptr, int base)
+	/*
+		string to unsigned integer converter
+	*/
 	{
 		unsigned long long int ret_val = 0;
 		unsigned long long int old_value;
 
-		assert(base >= 1 and base <= 32);
+		assert(base >= 2 and base <= 32);
 		if (error_ptr)
 			*error_ptr = ok;
 		while (isspace(*str))
@@ -176,15 +181,15 @@ _NAMESPACE_START
 				i = *str - 87; // 'a' = 87 + 0xA = 97
 			else
 				i = *str - 55; // 'A' = 55 + 0xA = 65
-			if (i > base)
+			if (i >= base)
 			{
 				if (error_ptr)
 					*error_ptr = bad_base_symbol;
 				return 0;
 			}
 			old_value = ret_val;
-			ret_val = ret_val * base;
-			if (ret_val / base != old_value)
+			ret_val = ret_val * base + i;
+			if ((ret_val - i) / base != old_value)
 			{
 				if (error_ptr)
 					*error_ptr = overflow;
@@ -200,12 +205,15 @@ _NAMESPACE_START
 	}
 
 
-	template <typename target_T, int base>
+	template <typename target_T, int base=10, typename source_T>
 	__WUR inline
 	target_T
-	lexical_cast(const std::string &source, bool no_overflow=false)
+	lexical_cast(const source_T &_source, bool no_overflow=false)
+	/*
+		convert from string to integer
+	*/
 	{
-		static_assert(base >= 1 and base <= 32, "base should be in range [1:32]");
+		static_assert(base >= 2 and base <= 32, "base should be in range [2:32]");
 		static_assert(
 				// signed integer
 				tlucanti::is_same<target_T, char>::value or
@@ -223,6 +231,7 @@ _NAMESPACE_START
 
 		lexical_cast_errors error = ok;
 		target_T ret;
+		std::string source = _source;
 		if (tlucanti::is_same<target_T, char>::value or
 			tlucanti::is_same<target_T, short int>::value or
 			tlucanti::is_same<target_T, int>::value or
@@ -243,6 +252,8 @@ _NAMESPACE_START
 				error = underflow;
 				ret = std::numeric_limits<target_T>::min();
 			}
+			else
+				ret = static_cast<target_T>(ret_val);
 		}
 		else
 			/*
@@ -255,8 +266,12 @@ _NAMESPACE_START
 				error = overflow;
 				ret = std::numeric_limits<target_T>::max();
 			}
+			else
+				ret = static_cast<target_T>(ret_val);
 		}
-		if (error == bad_symbol)
+		if (error == ok)
+			return ret;
+		else if (error == bad_symbol)
 			throw lexical_bad_symbol();
 		else if (error == bad_base_symbol)
 			throw lexical_bad_base_symbol();
@@ -264,11 +279,105 @@ _NAMESPACE_START
 			throw lexical_overflow();
 		else if (error == underflow and not no_overflow)
 			throw lexical_underflow();
-		if (error == neg_unsigned)
+		else if (error == neg_unsigned)
 			throw lexical_unsigned_negative();
-		else // ok
-			return static_cast<target_T>(ret);
+		throw bad_lexical_cast("[bad_cast_error]: unknown error");
+	}
+
+	inline
+	char *
+	ull2s(unsigned long long int val, char *dest, int base, int upper)
+	{
+		assert(base >= 2 and base <= 32);
+		static const char *_lower = "0123456789abcdefghijklmnopqrstuvwxyz";
+		static const char *_upper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		const char *alpha = _lower;
+
+		if (val == 0)
+		{
+			*dest = '0';
+			dest[1] = 0;
+			return dest;
+		}
+		char buf[65];
+		int i = 64;
+		buf[i] = 0;
+		if (upper)
+			alpha = _upper;
+		while (val)
+		{
+			buf[--i] = alpha[val % base];
+			val /= base;
+		}
+		return (char *)memmove(dest, buf + i, 65 - i);
+	}
+
+	inline
+	char *
+	ll2s(long long int val, char *dest, int base, int upper)
+	{
+		assert(base >= 2 and base <= 32);
+
+		if (val == LONG_LONG_MIN)
+			return strcpy(dest, __MIN_LL_STR);
+		if (val < 0)
+		{
+			*dest = '-';
+			ull2s(-val, dest + 1, base, upper);
+			return dest;
+		}
+		return ull2s(val, dest, base, upper);
+	}
+
+	template <typename target_T, int base=10, bool upper=true, typename source_T>
+	__WUR inline
+	target_T
+	numeric_cast(const source_T &source, bool no_overflow=false)
+	/*
+		convert from string to integer
+	*/
+	{
+		static_assert(base >= 2 and base <= 32, "base should be in range [2:32]");
+		static_assert(
+				// signed integer
+				tlucanti::is_same<source_T, char>::value or
+				tlucanti::is_same<source_T, short int>::value or
+				tlucanti::is_same<source_T, int>::value or
+				tlucanti::is_same<source_T, long int>::value or
+				tlucanti::is_same<source_T, long long int>::value or
+				// unsigned integer
+				tlucanti::is_same<source_T, unsigned char>::value or
+				tlucanti::is_same<source_T, unsigned short int>::value or
+				tlucanti::is_same<source_T, unsigned int>::value or
+				tlucanti::is_same<source_T, unsigned long int>::value or
+				tlucanti::is_same<source_T, unsigned long long int>::value
+				, "type not supported");
+
+		char *buf[66];
+		std::string ret;
+		if (tlucanti::is_same<source_T, char>::value or
+			tlucanti::is_same<source_T, short int>::value or
+			tlucanti::is_same<source_T, int>::value or
+			tlucanti::is_same<source_T, long int>::value or
+			tlucanti::is_same<source_T, long long int>::value)
+		/*
+			signed integer cast
+		*/
+		{
+			long long s = source;
+			ll2s(s, reinterpret_cast<char *>(buf), base, upper);
+		}
+		else
+		/*
+			unsigned integer cast
+		*/
+		{
+			unsigned long long s = source;
+			ull2s(s, reinterpret_cast<char *>(buf), base, upper);
+		}
+		return reinterpret_cast<char *>(buf);
 	}
 
 _NAMESPACE_END
 #endif /* LEXICAL_CAST_HPP */
+
