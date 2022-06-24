@@ -2,6 +2,7 @@
 
 from aiohttp import web
 from json.decoder import JSONDecodeError
+from datetime import datetime
 
 routes = web.RouteTableDef()
 database = dict()
@@ -29,6 +30,7 @@ def not_found():
 
 
 def node_found(node):
+    debug_print(f'SENDING: {node}')
     return web.json_response(node, status=200)
 
 
@@ -60,6 +62,15 @@ def json_validation(data, expected):
                 raise ValidationError(f'unknown type by value `{dkey}` ({type(expected[ekey])})')
 
 
+def node_serialize(data):
+    data_cpy = dict(data)
+    child_list = [node_serialize(database[x]) for x in data_cpy['children']]
+    if len(child_list) == 0 and data['type'] == 'OFFER':
+        child_list = None
+    data_cpy['children'] = child_list
+    return data_cpy
+
+
 nonetype = type(None)
 import_expected_json = {
     "items": list,
@@ -89,7 +100,7 @@ class ImportHandler(web.View):
     async def post(self) -> web.Response:
         try:
             content = await self.request.json()
-            debug_print('got content:', content)
+            debug_print('IMPORT: got content:', content)
             json_validation(content, import_expected_json)
             for item in content['items']:
                 if 'type' not in item:
@@ -100,13 +111,14 @@ class ImportHandler(web.View):
                     json_validation(item, offer_expected_json)
                 else:
                     raise ValidationError(f'unknown type `{item[type]}`')
-                children = dict()
+                children = set()
                 if item['id'] in database:
                     children = database[item['id']]['children']
                 database[item['id']] = item
                 database[item['id']]['children'] = children
-                if 'parentId' in item and item['parentId'] is not None:
-                    database[item['parentId']]['children'][item['id']] = item
+                if item['parentId'] is not None:
+                    database[item['parentId']]['children'].add(item['id'])
+            debug_print(f'  DATABASE: {database}')
             return ok_response()
         except (JSONDecodeError, ValidationError) as exc:
             debug_print('bad request:', exc)
@@ -126,6 +138,7 @@ class DeleteHandler(web.View):
                 del item[it]
 
         del_id = self.request.match_info.get('id')
+        debug_print(f'DELETE: {del_id}')
         if del_id is None:
             return bad_request()
         if del_id not in database:
@@ -143,11 +156,13 @@ class NodesHandler(web.View):
     """
     async def get(self) -> web.Response:
         node_id = self.request.match_info.get('id')
+        print(f'GET: {node_id}')
         if node_id is None:
             return bad_request()
         if node_id not in database:
             return not_found()
-        return node_found(database[node_id])
+        return node_found(node_serialize(database[node_id]))
+
 
 app = web.Application()
 app.add_routes(routes)
