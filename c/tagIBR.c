@@ -6,7 +6,7 @@
 
 #define TWO_GLOBAL_EPOCHS_IBR 1
 
-#define PACKED	__attribute__((packed))
+#define PACKED	__attribute__((__packed__))
 #define INF	(uint64_t)(-1)
 typedef int	bool;
 #define true	1;
@@ -68,6 +68,10 @@ void	tibr_leave(int tid)
 
 // ----------------------------------------------------------------------------
 tibr_block_t	*tibr_allocate(int tid, size_t size)
+/* maybe here we will get pointer with data and set it to tibr_block_t->pointer
+ * instead of allocating it inside this function (because otherwise we will
+ * need to call tibr_write right after tibr_allocate just to set this pointer
+ */
 {
 	tibr_block_t	*block;
 	void		*ptr;
@@ -123,10 +127,14 @@ void	_tibr_clear(int tid)
 // ----------------------------------------------------------------------------
 void	recalim(int tid, tibr_block_t *block)
 {
-	wait_list[tid][ wait_list_counter[tid] ] = block;
+	wait_list[tid][ ++wait_list_counter[tid] ] = block;
 	block->life_time.reclaim_epoch = g_epoch;
 	if (++reclaim_counter[tid] % TIBR_CLEAR_FREQ == 0)
 		_tibr_clear(tid);
+	/* here if we will leave after TIBR_CLEAR_FREQ - 1 reclaims -
+	 * _tibr_clear() will never called for current thread, so we will get
+	 * memory leak and floating epochs witch will never freed
+	 */
 }
 
 #if TWO_GLOBAL_EPOCHS_IBR == 1
@@ -138,13 +146,13 @@ tibr_block_t	*read(int tid, tibr_tagged_pointer_t *ptr)
 	do
 	{
 		reservations[tid].upper = max(
-			reservations[tid].upper, ptr->last_access);
+			reservations[tid].upper, g_epoch);
 		/* maybe we can here dereference freed memory if any other
 		 * thread in this position will reclaim this block  and
 		 * instantly clear
 		 */
 		ret = ptr->block;
-	} while (reservations[tid].upper >= ptr->last_access);
+	} while (reservations[tid].upper != g_epoch);
 	return ret;
 }
 
@@ -158,12 +166,8 @@ tibr_block_t	*read(int tid, tibr_tagged_pointer_t *ptr)
 	{
 		reservations[tid].upper = max(
 			reservations[tid].upper, ptr->last_access);
-		/* maybe we can here dereference freed memory if any other
-		 * thread in this position will reclaim this block  and
-		 * instantly clear
-		 */
 		ret = ptr->block;
-	} while (reservations[tid].upper >= ptr->last_access);
+	} while (reservations[tid].upper < ptr->last_access);
 	return ret;
 }
 #endif /* two global epochs */
