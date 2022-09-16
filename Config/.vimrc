@@ -71,10 +71,11 @@ call plug#begin('~/.vim/bundle')
 " Начать искать плагины в этой директории
 " Тут будут описаны наши плагины
 
-Plug 'ErichDonGubler/vim-sublime-monokai'
-Plug 'altercation/vim-colors-solarized'
-Plug 'octol/vim-cpp-enhanced-highlight'
-Plug 'preservim/nerdtree'
+    Plug 'ErichDonGubler/vim-sublime-monokai'
+    Plug 'altercation/vim-colors-solarized'
+    Plug 'octol/vim-cpp-enhanced-highlight'
+    Plug 'preservim/nerdtree'
+    Plug 'frazrepo/vim-rainbow'	
 call plug#end()
 " Перестать это делать
 
