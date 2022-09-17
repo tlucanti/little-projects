@@ -58,6 +58,16 @@ set clipboard=unnamedplus
 map <C-c> y
 " дополнительный шорткат на копирование на CTRL+C
 
+set rtp+=$HOME/.local/lib/python2.7/site-packages/powerline/bindings/vim/
+
+" Always show statusline
+set laststatus=2
+
+" Use 256 colours (Use this setting only if your terminal supports 256 colours)
+" set t_Co=256
+
+set colorcolumn=81
+
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 
   " Если vim-plug не стоит
@@ -72,26 +82,26 @@ call plug#begin('~/.vim/bundle')
 " Тут будут описаны наши плагины
 
     Plug 'ErichDonGubler/vim-sublime-monokai'
-    Plug 'altercation/vim-colors-solarized'
     Plug 'octol/vim-cpp-enhanced-highlight'
     Plug 'preservim/nerdtree'
-    Plug 'frazrepo/vim-rainbow'	
+    Plug 'frazrepo/vim-rainbow'
+	" Plug 'Yggdroot/indentLine'
+	" Plug 'lukas-reineke/virt-column.nvim'
 call plug#end()
 " Перестать это делать
 
+" vim rainbow settings
+au FileType c,cpp,py,sh,vimrc,zshrc call rainbow#load()
+let g:rainbow_active = 1
+let g:rainbow_ctermfgs = ['lightblue', 'red', 'lightgreen', 'yellow', 'magenta']
+
+" IndentLinw settings
+let g:indentLine_enabled = 1
+let g:indentLine_char_list = ['│', '╎', '┆', '┊']
+" let g:indentLine_color_term = 'lightgrey'
+
+" colorscheme settings
 colorscheme sublimemonokai
-" syntax enable
-" set background=dark
-" colorscheme solarized
-
-:hi Normal guibg=NONE ctermbg=NONE
-" disabling colorscheme bg color (to transparent)
-
-set rtp+=$HOME/.local/lib/python2.7/site-packages/powerline/bindings/vim/
-
-" Always show statusline
-set laststatus=2
-
-" Use 256 colours (Use this setting only if your terminal supports 256 colours)
-set t_Co=256
+hi Normal guibg=NONE ctermbg=NONE
+"disabling colorscheme bg color (to transparent)
 
