@@ -69,36 +69,42 @@ set laststatus=2
 set colorcolumn=81
 
 if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 
-  " Если vim-plug не стоит
-  " Создать директорию
-  " И скачать его оттуда
-  " А после прогнать команду PlugInstall
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 
+    " Если vim-plug не стоит
+    " Создать директорию
+    " И скачать его оттуда
+    " А после прогнать команду PlugInstall
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
 call plug#begin('~/.vim/bundle')
-" Начать искать плагины в этой директории
-" Тут будут описаны наши плагины
+    " Начать искать плагины в этой директории
+    " Тут будут описаны наши плагины
 
     Plug 'ErichDonGubler/vim-sublime-monokai'
-    Plug 'octol/vim-cpp-enhanced-highlight'
-    Plug 'preservim/nerdtree'
+    " Plug 'octol/vim-cpp-enhanced-highlight'
+    " Plug 'preservim/nerdtree'
     Plug 'frazrepo/vim-rainbow'
-	" Plug 'Yggdroot/indentLine'
-	" Plug 'lukas-reineke/virt-column.nvim'
+    Plug 'Yggdroot/indentLine'
+    " Plug 'lukas-reineke/virt-column.nvim'
+    Plug 'raimondi/delimitmate'
 call plug#end()
 " Перестать это делать
 
 " vim rainbow settings
-au FileType c,cpp,py,sh,vimrc,zshrc call rainbow#load()
 let g:rainbow_active = 1
+au FileType c,cpp,py,sh,vimrc,zshrc call rainbow#load()
 let g:rainbow_ctermfgs = ['lightblue', 'red', 'lightgreen', 'yellow', 'magenta']
 
 " IndentLinw settings
 let g:indentLine_enabled = 1
 let g:indentLine_char_list = ['│', '╎', '┆', '┊']
 " let g:indentLine_color_term = 'lightgrey'
+
+" delimitmate settings
+let g:delimitMate_jump_expansion = 1
+let g:delimitMate_expand_cr = 2
+let g:delimitMate_balance_matchpairs = 1
 
 " colorscheme settings
 colorscheme sublimemonokai
