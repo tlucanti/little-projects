@@ -66,6 +66,9 @@ set laststatus=2
 " Use 256 colours (Use this setting only if your terminal supports 256 colours)
 " set t_Co=256
 
+autocmd BufWritePre * :%s/\s\+$//e
+" remove trailing spaces for all files when saving
+
 set colorcolumn=81
 
 if empty(glob('~/.vim/autoload/plug.vim'))
@@ -88,6 +91,7 @@ call plug#begin('~/.vim/bundle')
     Plug 'Yggdroot/indentLine'
     " Plug 'lukas-reineke/virt-column.nvim'
     Plug 'raimondi/delimitmate'
+	Plug 'vim-python/python-syntax'
 call plug#end()
 " Перестать это делать
 
@@ -105,6 +109,10 @@ let g:indentLine_char_list = ['│', '╎', '┆', '┊']
 let g:delimitMate_jump_expansion = 1
 let g:delimitMate_expand_cr = 2
 let g:delimitMate_balance_matchpairs = 1
+
+" python-highlight settings
+let g:python_highlight_all = 1
+let g:python_highlight_space_errors = 0
 
 " colorscheme settings
 colorscheme sublimemonokai
