@@ -72,7 +72,7 @@ autocmd BufWritePre * :%s/\s\+$//e
 set colorcolumn=81
 
 if empty(glob('~/.vim/autoload/plug.vim'))
-    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim 
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     " Если vim-plug не стоит
     " Создать директорию
     " И скачать его оттуда
@@ -85,13 +85,15 @@ call plug#begin('~/.vim/bundle')
     " Тут будут описаны наши плагины
 
     Plug 'ErichDonGubler/vim-sublime-monokai'
-    " Plug 'octol/vim-cpp-enhanced-highlight'
+    Plug 'octol/vim-cpp-enhanced-highlight'
     " Plug 'preservim/nerdtree'
     Plug 'frazrepo/vim-rainbow'
     Plug 'Yggdroot/indentLine'
     " Plug 'lukas-reineke/virt-column.nvim'
     Plug 'raimondi/delimitmate'
-	Plug 'vim-python/python-syntax'
+        Plug 'vim-python/python-syntax'
+        Plug 'joshdick/onedark.vim'
+        Plug 'haishanh/night-owl.vim'
 call plug#end()
 " Перестать это делать
 
@@ -114,8 +116,20 @@ let g:delimitMate_balance_matchpairs = 1
 let g:python_highlight_all = 1
 let g:python_highlight_space_errors = 0
 
+" c++ hightlight settings
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_posix_standard = 1
+let g:cpp_experimental_template_highlight = 1
+let g:cpp_concepts_highlight = 1
+
 " colorscheme settings
-colorscheme sublimemonokai
+set termguicolors
+colorscheme night-owl
 hi Normal guibg=NONE ctermbg=NONE
 "disabling colorscheme bg color (to transparent)
-
+set cursorline
+set cursorcolumn
+hi CursorLine guibg=#203050
+hi CursorColumn guibg=#102030
