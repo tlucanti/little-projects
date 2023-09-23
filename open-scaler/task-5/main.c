@@ -8,7 +8,7 @@
 
 int main()
 {
-	const char *path = "/dev/random";
+	const char *path = "/dev/sdb";
 	int dev;
 	int ret;
 	unsigned char c;
@@ -23,7 +23,7 @@ int main()
 		return 1;
 	}
 
-	for (unsigned long long i = 0; i < 10000000; ++i) {
+	for (unsigned long long i = 0; ; ++i) {
 		ret = read(dev, &c, 1);
 
 		if (i % 100000 == 0) {
@@ -45,6 +45,10 @@ int main()
 		if (cnt[i] > cnt[ans]) {
 			ans = i;
 		}
+	}
+
+	for (int i = 0; i < 256; ++i) {
+		printf("char: %d, frequency: %llu\n", i, cnt[i]);
 	}
 	printf("highest frequency char %d (%llu times)\n", ans, cnt[ans]);
 }
