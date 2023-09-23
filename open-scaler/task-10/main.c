@@ -10,17 +10,22 @@ int main()
 {
 	uint16_t net;
 	int16_t host;
-	int res;
-	int pos = 0;
-	int neg = 0;
+	long long res;
+	long long pos = 0;
+	long long neg = 0;
+	int i = 0;
 
 	if (sizeof(uint16_t) != 2) {
 		printf("short it not 2 bytes long\n");
 	}
 
 	while (true) {
-		res = read(1, &net, sizeof(uint16_t));
+		++i;
+		res = read(0, &net, sizeof(uint16_t));
 
+		if (i % 100000 == 0) {
+			printf("read %d numbers\n", i);
+		}
 		if (res == 0) {
 			printf("eof\n");
 		} else if (res == -1) {
@@ -41,7 +46,7 @@ int main()
 		}
 	}
 
-	printf("positive: %d\n", pos);
-	printf("negative: %d\n", neg);
-	printf("difference: %d\n", abs(pos - neg));
+	printf("positive: %lld\n", pos);
+	printf("negative: %lld\n", neg);
+	printf("difference: %lld\n", pos - neg);
 }
