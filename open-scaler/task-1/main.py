@@ -43,11 +43,25 @@ def parse(s):
     return res
 
 
+def solve(nums):
+    ans = 0
+    n = []
+
+    for i in range(1, len(nums) - 1):
+        dist = abs(nums[i + 1] - nums[i - 1])
+        if dist > ans:
+            ans = dist
+            n = [nums[i - 1], nums[i + 1]]
+
+    return ans, n
+
+
 def main():
     txt = sys.stdin.read()
 
     numbers = [parse(s) for s in txt.split(',')]
-    print(numbers)
+    # print(numbers)
+    print(solve(numbers))
 
 
 if __name__ == '__main__':
