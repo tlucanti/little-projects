@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <math.h>
 
-double sin_taylor(double x, int n)
+typedef double float_type;
+
+float_type sin_taylor(float_type x, int n)
 {
-	double ans = x;
-	double power = x;
-	double factorial = 1;
+	float_type ans = x;
+	float_type power = x;
+	float_type factorial = 1;
 	int fac = 1;
 	int i = 0;
 
@@ -28,11 +30,11 @@ double sin_taylor(double x, int n)
 	return ans;
 }
 
-double cos_taylor(double x, int n)
+float_type cos_taylor(float_type x, int n)
 {
-	double ans = 1;
-	double power = 1;
-	double factorial = 1;
+	float_type ans = 1;
+	float_type power = 1;
+	float_type factorial = 1;
 	int fac = 0;
 	int i = 0;
 
@@ -54,18 +56,36 @@ double cos_taylor(double x, int n)
 	return ans;
 }
 
-double tan_taylor(double x, int n)
+float_type tan_taylor(float_type x, int n)
 {
 	return sin_taylor(x, n) / cos_taylor(x, n);
 }
 
 int main()
 {
-	double x = 0.5;
+	float_type x = 0.5;
 	int n = 10;
-	double res = tan_taylor(x, n);
+	float_type taylor_res = tan_taylor(x, n);
 
-	printf("tan(%f) with n = %d ternms: %.18f\n", x, n, res);
-	printf("error: %.18f\n", fabs(tan(x) - res));
+	if (sizeof(float_type) == sizeof(float)) {
+		double libc_res = tanf(x);
+
+		printf("taylor tan(%f) with n = %4d terms: %.100f\n", (double)x, n, (double)taylor_res);
+		printf("libc tan(%f):                       %.100f\n", (double)x, (double)libc_res);
+		printf("error: %.100f\n", libc_res - (double)taylor_res);
+	} else if (sizeof(float_type) == sizeof(double)) {
+		double libc_res = tan(x);
+
+		printf("taylor tan(%f) with n = %4d terms: %.100f\n", (double)x, n, (double)taylor_res);
+		printf("libc tan(%f):                       %.100f\n", (double)x, (double)libc_res);
+		printf("error: %.100f\n", libc_res - (double)taylor_res);
+	} else if (sizeof(float_type) == sizeof(long double)) {
+		long double libc_res = tanl(x);
+
+		printf("taylor tan(%Lf) with n = %4d terms: %.100Lf\n", (long double)x, n, (long double)taylor_res);
+		printf("libc tan(%Lf):                       %.100Lf\n", (long double)x, (long double)libc_res);
+		printf("error: %.100Lf\n", libc_res - (long double)taylor_res);
+	}
+
 }
 
