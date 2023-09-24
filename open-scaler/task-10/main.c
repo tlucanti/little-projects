@@ -33,7 +33,7 @@ int main()
 			return 1;
 		}
 
-		host = ntohs(net);
+		host = (int16_t)ntohs(net);
 
 		if (host > 0) {
 			++pos;
