@@ -1,0 +1,243 @@
+===========================================================================================================================================================================================================================
+ Package                                                        Architecture                               Version                                                    Repository                                      Size
+===========================================================================================================================================================================================================================
+Installing:
+ mock                                                           noarch                                     2.2-3.os2203sp2                                            everything                                     184 k
+Installing dependencies:
+ createrepo_c                                                   x86_64                                     0.17.6-3.os2203sp2                                         OS                                             137 k
+ drpm                                                           x86_64                                     0.5.1-1.os2203sp2                                          OS                                              60 k
+ libICE                                                         x86_64                                     1.0.10-5.os2203sp2                                         OS                                              53 k
+ libSM                                                          x86_64                                     1.2.3-5.os2203sp2                                          OS                                              23 k
+ python3-babel                                                  noarch                                     2.9.1-2.os2203sp2                                          OS                                             6.3 M
+ python3-chardet                                                noarch                                     5.0.0-2.os2203sp2                                          OS                                             231 k
+ python3-charset-normalizer                                     noarch                                     2.0.12-1.os2203sp2                                         OS                                              77 k
+ python3-idna                                                   noarch                                     3.2-2.os2203sp2                                            OS                                              87 k
+ python3-jinja2                                                 noarch                                     3.0.3-2.os2203sp2                                          OS                                             252 k
+ python3-markupsafe                                             x86_64                                     2.0.1-3.os2203sp2                                          OS                                              25 k
+ python3-pyroute2                                               noarch                                     0.5.14-1.os2203sp2                                         everything                                     670 k
+ python3-pysocks                                                noarch                                     1.7.1-2.os2203sp2                                          OS                                              34 k
+ python3-pytz                                                   noarch                                     2021.3-2.os2203sp2                                         OS                                              49 k
+ python3-requests                                               noarch                                     2.26.0-8.os2203sp2                                         OS                                             109 k
+ python3-urllib3                                                noarch                                     1.26.12-4.os2203sp2                                        OS                                             205 k
+ startup-notification                                           x86_64                                     0.12-19.os2203sp2                                          OS                                              32 k
+ systemd-container                                              x86_64                                     249-53.os2203sp2                                           OS                                             217 k
+ usermode                                                       x86_64                                     1.114-2.os2203sp2                                          OS                                             229 k
+ xcb-util                                                       x86_64                                     0.4.0-14.os2203sp2                                         OS                                              16 k
+
+Transaction Summary
+===========================================================================================================================================================================================================================
+Install  20 Packages
+
+
+package: mock-2.2-3.os2203sp2.noarch
+  dependency: /bin/bash
+   provider: bash-5.1.8-10.os2203sp2.x86_64
+   provider: bash-5.1.8-10.os2203sp2.x86_64
+  dependency: /usr/bin/bash
+   provider: bash-5.1.8-10.os2203sp2.x86_64
+   provider: bash-5.1.8-10.os2203sp2.x86_64
+  dependency: /usr/bin/python3
+   provider: python3-3.9.9-24.os2203sp2.x86_64
+   provider: python3-3.9.9-24.os2203sp2.x86_64
+  dependency: coreutils
+   provider: coreutils-9.0-10.os2203sp2.x86_64
+   provider: coreutils-9.0-10.os2203sp2.x86_64
+  dependency: createrepo_c
+   provider: createrepo_c-0.17.6-3.os2203sp2.x86_64
+   provider: createrepo_c-0.17.6-3.os2203sp2.x86_64
+  dependency: dnf
+   provider: dnf-4.14.0-14.os2203sp2.noarch
+   provider: dnf-4.14.0-14.os2203sp2.noarch
+  dependency: dnf-plugins-core
+   provider: dnf-plugins-core-4.3.1-3.os2203sp2.noarch
+   provider: dnf-plugins-core-4.3.1-3.os2203sp2.noarch
+  dependency: pigz
+   provider: pigz-2.6-2.os2203sp2.x86_64
+   provider: pigz-2.6-2.os2203sp2.x86_64
+  dependency: procps-ng
+   provider: procps-ng-4.0.2-6.os2203sp2.x86_64
+   provider: procps-ng-4.0.2-6.os2203sp2.x86_64
+  dependency: python(abi) = 3.9
+   provider: python3-3.9.9-24.os2203sp2.x86_64
+   provider: python3-3.9.9-24.os2203sp2.x86_64
+  dependency: python3-distro
+   provider: python3-distro-1.6.0-2.os2203sp2.noarch
+   provider: python3-distro-1.6.0-2.os2203sp2.noarch
+  dependency: python3-jinja2
+   provider: python3-jinja2-3.0.3-2.os2203sp2.noarch
+   provider: python3-jinja2-3.0.3-2.os2203sp2.noarch
+  dependency: python3-pyroute2
+   provider: python3-pyroute2-0.5.14-1.os2203sp2.noarch
+  dependency: python3-requests
+   provider: python3-requests-2.26.0-8.os2203sp2.noarch
+   provider: python3-requests-2.26.0-8.os2203sp2.noarch
+  dependency: python3-rpm
+   provider: python3-rpm-4.17.0-26.os2203sp2.x86_64
+   provider: python3-rpm-4.17.0-26.os2203sp2.x86_64
+  dependency: python3-six >= 1.4.0
+   provider: python3-six-1.16.0-2.os2203sp2.noarch
+   provider: python3-six-1.16.0-2.os2203sp2.noarch
+  dependency: systemd
+   provider: systemd-249-53.os2203sp2.x86_64
+   provider: systemd-249-53.os2203sp2.x86_64
+  dependency: systemd-container
+   provider: systemd-container-249-53.os2203sp2.x86_64
+   provider: systemd-container-249-53.os2203sp2.x86_64
+  dependency: tar
+   provider: tar-2:1.34-4.os2203sp2.x86_64
+   provider: tar-2:1.34-4.os2203sp2.x86_64
+  dependency: usermode
+   provider: usermode-1.114-2.os2203sp2.x86_64
+   provider: usermode-1.114-2.os2203sp2.x86_64
+  dependency: util-linux
+   provider: util-linux-2.37.2-20.os2203sp2.x86_64
+   provider: util-linux-2.37.2-20.os2203sp2.x86_64
+
+
+
+/bin/bash
+/usr/bin/bash
+/usr/bin/python3
+config(mock) = 2.2-3.os2203sp2
+coreutils
+createrepo_c
+dnf
+dnf-plugins-core
+pigz
+procps-ng
+python(abi) = 3.9
+python3-distro
+python3-jinja2
+python3-pyroute2
+python3-requests
+python3-rpm
+python3-six >= 1.4.0
+rpmlib(CompressedFileNames) <= 3.0.4-1
+rpmlib(FileDigests) <= 4.6.0-1
+rpmlib(PartialHardlinkSets) <= 4.0.4-1
+rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+rpmlib(PayloadIsXz) <= 5.2-1
+systemd
+systemd-container
+tar
+usermode
+util-linux
+
+
+Installed:
+  ModemManager-glib-1.14.8-2.os2203sp2.x86_64                             NetworkManager-wifi-1:1.32.12-19.os2203sp2.x86_64                            accountsservice-0.6.55-2.os2203sp2.x86_64
+  accountsservice-libs-0.6.55-2.os2203sp2.x86_64                          adobe-mappings-cmap-20190730-3.os2203sp2.noarch                              adobe-mappings-cmap-lang-20190730-3.os2203sp2.noarch
+  adobe-mappings-pdf-20190401-2.os2203sp2.noarch                          alsa-lib-1.2.5.1-3.os2203sp2.x86_64                                          at-spi2-atk-devel-2.38.0-2.os2203sp2.x86_64
+  at-spi2-core-devel-2.42.0-2.os2203sp2.x86_64                            atk-devel-2.38.0-1.os2203sp2.x86_64                                          autogen-5.18.16-3.os2203sp2.x86_64
+  avahi-glib-0.8-15.os2203sp2.x86_64                                      bluez-5.54-17.os2203sp2.x86_64                                               bluez-libs-5.54-17.os2203sp2.x86_64
+  bolt-0.9.1-1.os2203sp2.x86_64                                           bzip2-devel-1.0.8-6.os2203sp2.x86_64                                         c-ares-devel-1.18.1-7.os2203sp2.x86_64
+  cairo-devel-1.17.4-4.os2203sp2.x86_64                                   cairo-gobject-devel-1.17.4-4.os2203sp2.x86_64                                cdparanoia-libs-10.2-31.os2203sp2.x86_64
+  check-0.15.2-2.os2203sp2.x86_64                                         check-devel-0.15.2-2.os2203sp2.x86_64                                        cheese-libs-2:3.38.0-2.os2203sp2.x86_64
+  chrpath-0.16-13.os2203sp2.x86_64                                        cifs-utils-devel-6.14-4.os2203sp2.x86_64                                     clutter-1.26.4-1.os2203sp2.x86_64
+  clutter-gst3-3.0.27-2.os2203sp2.x86_64                                  clutter-gtk-1.8.4-6.os2203sp2.x86_64                                         cmake-3.22.0-5.os2203sp2.x86_64
+  cmake-data-3.22.0-5.os2203sp2.noarch                                    cmake-filesystem-3.22.0-5.os2203sp2.x86_64                                   cmake-rpm-macros-3.22.0-5.os2203sp2.noarch
+  cogl-1.22.8-2.os2203sp2.x86_64                                          color-filesystem-1-18.os2203sp2.noarch                                       colord-1.4.5-4.os2203sp2.x86_64
+  colord-gtk-0.3.0-1.os2203sp2.x86_64                                     cups-pk-helper-0.2.6-8.os2203sp2.x86_64                                      cyrus-sasl-devel-2.1.28-1.os2203sp2.x86_64
+  dbus-devel-1:1.12.20-9.os2203sp2.x86_64                                 dbus-glib-0.112-2.os2203sp2.x86_64                                           desktop-file-utils-0.26-2.os2203sp2.x86_64
+  diffstat-1.63-1.os2203sp2.x86_64                                        ding-libs-devel-0.6.1-44.os2203sp2.x86_64                                    docbook-dtds-1.0-78.os2203sp2.noarch
+  docbook-style-xsl-1.79.2-9.os2203sp2.noarch                             doxygen-1:1.9.3-2.os2203sp2.x86_64                                           e2fsprogs-devel-1.46.4-21.os2203sp2.x86_64
+  enchant2-2.2.15-2.os2203sp2.x86_64                                      evolution-data-server-3.38.4-3.os2203sp2.x86_64                              fftw-libs-single-3.3.8-11.os2203sp2.x86_64
+  flac-1.3.4-1.os2203sp2.x86_64                                           flatpak-1.10.2-5.os2203sp2.x86_64                                            fontconfig-devel-2.13.94-2.os2203sp2.x86_64
+  freeglut-3.0.0-11.os2203sp2.x86_64                                      freetype-devel-2.12.1-2.os2203sp2.x86_64                                     fribidi-devel-1.0.12-1.os2203sp2.x86_64
+  gd-2.3.3-3.os2203sp2.x86_64                                             gdk-pixbuf2-devel-2.42.6-6.os2203sp2.x86_64                                  gdm-1:42.0-3.os2203sp2.x86_64
+  gdm-devel-1:42.0-3.os2203sp2.x86_64                                     geoclue2-2.5.7-1.os2203sp2.x86_64                                            geocode-glib-3.26.2-4.os2203sp2.x86_64
+  gettext-devel-0.21.1-1.os2203sp2.x86_64                                 ghostscript-9.55.0-2.os2203sp2.x86_64                                        gjs-1.71.1-1.os2203sp2.x86_64
+  glib2-devel-2.72.2-10.os2203sp2.x86_64                                  gnome-autoar-0.2.4-5.os2203sp2.x86_64                                        gnome-bluetooth-1:3.34.5-1.os2203sp2.x86_64
+  gnome-control-center-3.38.6-1.os2203sp2.x86_64                          gnome-control-center-filesystem-3.38.6-1.os2203sp2.noarch                    gnome-desktop3-3.38.6-1.os2203sp2.x86_64
+  gnome-keyring-40.0-1.os2203sp2.x86_64                                   gnome-keyring-pam-40.0-1.os2203sp2.x86_64                                    gnome-online-accounts-3.38.2-3.os2203sp2.x86_64
+  gnome-session-42.0-2.os2203sp2.x86_64                                   gnome-settings-daemon-3.38.2-2.os2203sp2.x86_64                              gnome-shell-3.38.4-4.os2203sp2.x86_64
+  gnutls-utils-3.7.2-8.os2203sp2.x86_64                                   google-droid-sans-fonts-20200215-1.os2203sp2.noarch                          graphene-1.10.6-1.os2203sp2.x86_64
+  graphite2-devel-1.3.14-6.os2203sp2.x86_64                               graphviz-2.48.0-3.os2203sp2.x86_64                                           grub2-pc-1:2.06-30.os2203sp2.x86_64
+  grub2-pc-modules-1:2.06-30.os2203sp2.noarch                             gsm-1.0.18-5.os2203sp2.x86_64                                                gsound-1.0.2-9.os2203sp2.x86_64
+  gssdp-1.4.0.1-1.os2203sp2.x86_64                                        gssproxy-0.9.1-2.os2203sp2.x86_64                                            gstreamer1-1.19.3-2.os2203sp2.x86_64
+  gstreamer1-plugins-bad-free-1.16.2-5.os2203sp2.x86_64                   gstreamer1-plugins-base-1.18.4-3.os2203sp2.x86_64                            gstreamer1-plugins-good-1.16.2-5.os2203sp2.x86_64
+  gtk3-devel-3.24.30-7.os2203sp2.x86_64                                   gtk4-4.7.0-1.os2203sp2.x86_64                                                gupnp-1.4.3-2.os2203sp2.x86_64
+  gupnp-igd-1.2.0-1.os2203sp2.x86_64                                      harfbuzz-devel-2.8.2-4.os2203sp2.x86_64                                      http-parser-2.9.4-2.os2203sp2.x86_64
+  http-parser-devel-2.9.4-2.os2203sp2.x86_64                              hunspell-1.7.0-11.os2203sp2.x86_64                                           hunspell-en-2020.12.07-2.os2203sp2.noarch
+  hyphen-2.8.8-15.os2203sp2.x86_64                                        ibus-1.5.23-2.os2203sp2.x86_64                                               ibus-libs-1.5.23-2.os2203sp2.x86_64
+  iio-sensor-proxy-2.4-5.os2203sp2.x86_64                                 iso-codes-4.7.0-2.os2203sp2.noarch                                           jansson-devel-2.14-3.os2203sp2.x86_64
+  jbig2dec-0.19-4.os2203sp2.x86_64                                        jsoncpp-1.9.5-3.os2203sp2.x86_64                                             keyutils-1.6.3-4.os2203sp2.x86_64
+  keyutils-libs-devel-1.6.3-4.os2203sp2.x86_64                            krb5-1.19.2-8.os2203sp2.x86_64                                               krb5-devel-1.19.2-8.os2203sp2.x86_64
+  lame-3.100-10.os2203sp2.x86_64                                          libX11-devel-1.7.2-6.os2203sp2.x86_64                                        libXau-devel-1.0.10-1.os2203sp2.x86_64
+  libXaw-1.0.14-2.os2203sp2.x86_64                                        libXcomposite-devel-0.4.5-2.os2203sp2.x86_64                                 libXcursor-devel-1.2.1-1.os2203sp2.x86_64
+  libXdamage-devel-1.1.5-3.os2203sp2.x86_64                               libXdmcp-1.1.3-5.os2203sp2.x86_64                                            libXext-devel-1.3.4-6.os2203sp2.x86_64
+  libXfixes-devel-6.0.0-2.os2203sp2.x86_64                                libXfont2-2.0.5-3.os2203sp2.x86_64                                           libXft-devel-2.3.4-2.os2203sp2.x86_64
+  libXi-devel-1.8-2.os2203sp2.x86_64                                      libXinerama-devel-1.1.4-6.os2203sp2.x86_64                                   libXmu-1.1.3-2.os2203sp2.x86_64
+  libXpm-3.5.13-4.os2203sp2.x86_64                                        libXrandr-devel-1.5.2-4.os2203sp2.x86_64                                     libXrender-devel-0.9.10-12.os2203sp2.x86_64
+  libXt-1.2.1-4.os2203sp2.x86_64                                          libXtst-devel-1.2.4-1.os2203sp2.x86_64                                       libXv-1.0.11-12.os2203sp2.x86_64
+  libXxf86vm-1.1.5-2.os2203sp2.x86_64                                     libappstream-glib-0.7.14-4.os2203sp2.x86_64                                  libasyncns-0.8-18.os2203sp2.x86_64
+  libavc1394-0.5.4-12.os2203sp2.x86_64                                    libcanberra-0.30-27.os2203sp2.x86_64                                         libcanberra-gtk3-0.30-27.os2203sp2.x86_64
+  libcmocka-1.1.5-3.os2203sp2.x86_64                                      libcmocka-devel-1.1.5-3.os2203sp2.x86_64                                     libcurl-devel-7.79.1-20.os2203sp2.x86_64
+  libdatrie-devel-0.2.13-2.os2203sp2.x86_64                               libdazzle-3.38.0-1.os2203sp2.x86_64                                          libdazzle-devel-3.38.0-1.os2203sp2.x86_64
+  libdrm-2.4.109-7.os2203sp2.x86_64                                       libdv-1.0.0-30.os2203sp2.x86_64                                              libepoxy-devel-1.5.10-2.os2203sp2.x86_64
+  libevdev-1.13.0-1.os2203sp2.x86_64                                      libffi-devel-3.4.2-8.os2203sp2.x86_64                                        libfontenc-1.1.6-1.os2203sp2.x86_64
+  libgdata-0.18.1-1.os2203sp2.x86_64                                      libglvnd-1:1.3.4-3.os2203sp2.x86_64                                          libglvnd-core-devel-1:1.3.4-3.os2203sp2.x86_64
+  libglvnd-devel-1:1.3.4-3.os2203sp2.x86_64                               libglvnd-egl-1:1.3.4-3.os2203sp2.x86_64                                      libglvnd-gles-1:1.3.4-3.os2203sp2.x86_64
+  libglvnd-glx-1:1.3.4-3.os2203sp2.x86_64                                 libglvnd-opengl-1:1.3.4-3.os2203sp2.x86_64                                   libgnomekbd-3.28.1-1.os2203sp2.x86_64
+  libgtop2-2.40.0-7.os2203sp2.x86_64                                      libgweather-3.36.2-2.os2203sp2.x86_64                                        libhandy-1.6.2-1.os2203sp2.x86_64
+  libical-3.0.11-1.os2203sp2.x86_64                                       libicu-devel-72.1-6.os2203sp2.x86_64                                         libidn-1.38-5.os2203sp2.x86_64
+  libiec61883-1.2.0-23.os2203sp2.x86_64                                   libiec61883-help-1.2.0-23.os2203sp2.x86_64                                   libijs-0.35-10.os2203sp2.x86_64
+  libimagequant-2.15.1-2.os2203sp2.x86_64                                 libinput-1.19.2-2.os2203sp2.x86_64                                           libldac-2.0.2.3-1.os2203sp2.x86_64
+  libldb-devel-2.6.1-2.os2203sp2.x86_64                                   libmozjs-91-0-91.6.0-2.os2203sp2.x86_64                                      libnice-0.1.19-1.os2203sp2.x86_64
+  libnl3-devel-3.7.0-1.os2203sp2.x86_64                                   libnma-1.8.38-2.os2203sp2.x86_64                                             libnotify-0.8.1-1.os2203sp2.x86_64
+  libogg-2:1.3.5-2.os2203sp2.x86_64                                       libpaper-1.1.28-2.os2203sp2.x86_64                                           libpciaccess-0.16-3.os2203sp2.x86_64
+  libpng-devel-2:1.6.38-2.os2203sp2.x86_64                                libraw1394-2.1.2-9.os2203sp2.x86_64                                          libraw1394-help-2.1.2-9.os2203sp2.x86_64
+  librsvg2-2.50.5-3.os2203sp2.x86_64                                      libselinux-devel-3.3-3.os2203sp2.x86_64                                      libsemanage-devel-3.3-5.os2203sp2.x86_64
+  libsepol-devel-3.3-4.os2203sp2.x86_64                                   libshout-2.2.2-22.os2203sp2.x86_64                                           libsmbclient-devel-4.17.5-6.os2203sp2.x86_64
+  libsndfile-1.0.31-2.os2203sp2.x86_64                                    libstemmer-0-12.os2203sp2.x86_64                                             libsysprof-ui-3.38.1-3.os2203sp2.x86_64
+  libtalloc-devel-2.3.4-1.os2203sp2.x86_64                                libtdb-devel-1.4.7-1.os2203sp2.x86_64                                        libtevent-devel-0.13.0-1.os2203sp2.x86_64
+  libthai-devel-0.1.29-1.os2203sp2.x86_64                                 libtheora-1:1.1.1-25.os2203sp2.x86_64                                        libtiff-devel-4.3.0-27.os2203sp2.x86_64
+  libtool-2.4.7-1.os2203sp2.x86_64                                        libtracker-sparql3-3.0.4-2.os2203sp2.x86_64                                  libudisks2-2.9.4-4.os2203sp2.x86_64
+  libunistring-devel-1.0-3.os2203sp2.x86_64                               libunwind-2:1.6.2-5.os2203sp2.x86_64                                         libv4l-1.14.2-6.os2203sp2.x86_64
+  libverto-devel-0.3.2-3.os2203sp2.x86_64                                 libvisual-1:0.4.0-29.os2203sp2.x86_64                                        libvorbis-1:1.3.7-3.os2203sp2.x86_64
+  libvpx-1.7.0-8.os2203sp2.x86_64                                         libwacom-1.12-2.os2203sp2.x86_64                                             libwacom-data-1.12-2.os2203sp2.noarch
+  libwebp-1.2.1-3.os2203sp2.x86_64                                        libwpe-1.6.0-1.os2203sp2.x86_64                                              libxcb-devel-1.15-1.os2203sp2.x86_64
+  libxcvt-0.1.1-1.os2203sp2.x86_64                                        libxkbcommon-devel-1.3.1-4.os2203sp2.x86_64                                  libxkbcommon-x11-1.3.1-4.os2203sp2.x86_64
+  libxkbfile-1.1.0-5.os2203sp2.x86_64                                     libxklavier-5.4-21.os2203sp2.x86_64                                          libxml2-devel-2.9.14-7.os2203sp2.x86_64
+  libxshmfence-1.3-9.os2203sp2.x86_64                                     libxslt-1.1.37-1.os2203sp2.x86_64                                            low-memory-monitor-2.1-1.os2203sp2.x86_64
+  mcpp-2.7.2-29.os2203sp2.x86_64                                          mesa-demos-8.4.0-1.os2203sp2.x86_64                                          mesa-dri-drivers-21.3.1-3.os2203sp2.x86_64
+  mesa-filesystem-21.3.1-3.os2203sp2.x86_64                               mesa-libEGL-21.3.1-3.os2203sp2.x86_64                                        mesa-libGL-21.3.1-3.os2203sp2.x86_64
+  mesa-libGLU-9.0.2-1.os2203sp2.x86_64                                    mesa-libgbm-21.3.1-3.os2203sp2.x86_64                                        mesa-libglapi-21.3.1-3.os2203sp2.x86_64
+  mobile-broadband-provider-info-20210805-2.os2203sp2.noarch              mozilla-filesystem-1.9-21.os2203sp2.x86_64                                   mozjs91-91.6.0-2.os2203sp2.x86_64
+  mpg123-libs-1.29.3-3.os2203sp2.x86_64                                   mtdev-1.1.6-3.os2203sp2.x86_64                                               mutter-3.38.4-7.os2203sp2.x86_64
+  nfs-utils-2:2.5.4-12.os2203sp2.x86_64                                   nfs-utils-devel-2:2.5.4-12.os2203sp2.x86_64                                  nfs-utils-help-2:2.5.4-12.os2203sp2.x86_64
+  nm-connection-editor-1.24.0-4.os2203sp2.x86_64                          nspr-devel-4.32.0-5.os2203sp2.x86_64                                         nss-devel-3.72.0-9.os2203sp2.x86_64
+  nss-softokn-devel-3.72.0-9.os2203sp2.x86_64                             nss-util-devel-3.72.0-9.os2203sp2.x86_64                                     nss_wrapper-1.1.11-1.os2203sp2.x86_64
+  openScaler-logos-1.0-9.os2203sp2.noarch                                 openjpeg2-2.5.0-2.os2203sp2.x86_64                                           openldap-devel-2.6.0-6.os2203sp2.x86_64
+  openssl-devel-1:1.1.1m-20.os2203sp2.x86_64                              opus-1.3.1-4.os2203sp2.x86_64                                                orc-0.4.32-2.os2203sp2.x86_64
+  ostree-2021.6-2.os2203sp2.x86_64                                        p11-kit-devel-0.24.0-2.os2203sp2.x86_64                                      pam-devel-1.5.2-6.os2203sp2.x86_64
+  pango-devel-1.50.7-1.os2203sp2.x86_64                                   pcre2-devel-10.39-8.os2203sp2.x86_64                                         pipewire-0.3.38-1.os2203sp2.x86_64
+  pipewire-libs-0.3.38-1.os2203sp2.x86_64                                 pixman-devel-0.40.0-3.os2203sp2.x86_64                                       pngquant-2.12.5-3.os2203sp2.x86_64
+  polkit-devel-0.120-9.os2203sp2.x86_64                                   polkit-help-0.120-9.os2203sp2.noarch                                         popt-devel-1.18-3.os2203sp2.x86_64
+  pulseaudio-15.0-10.os2203sp2.x86_64                                     pulseaudio-libs-15.0-10.os2203sp2.x86_64                                     pulseaudio-libs-glib2-15.0-10.os2203sp2.x86_64
+  pulseaudio-module-bluetooth-15.0-10.os2203sp2.x86_64                    python3-devel-3.9.9-24.os2203sp2.x86_64                                      python3-rpm-generators-9-3.os2203sp2.noarch
+  quota-1:4.06-7.os2203sp2.x86_64                                         rest-0.8.1-8.os2203sp2.x86_64                                                rpcbind-1.2.6-6.os2203sp2.x86_64
+  rtkit-0.11-27.os2203sp2.x86_64                                          samba-common-tools-4.17.5-6.os2203sp2.x86_64                                 samba-dc-libs-4.17.5-6.os2203sp2.x86_64
+  samba-devel-4.17.5-6.os2203sp2.x86_64                                   samba-libs-4.17.5-6.os2203sp2.x86_64                                         samba-winbind-4.17.5-6.os2203sp2.x86_64
+  samba-winbind-modules-4.17.5-6.os2203sp2.x86_64                         sbc-1.5-2.os2203sp2.x86_64                                                   sgml-common-0.6.3-52.os2203sp2.noarch
+  softhsm-2.6.1-3.os2203sp2.x86_64                                        sound-theme-freedesktop-0.8-13.os2203sp2.noarch                              speex-1.2.1-1.os2203sp2.x86_64
+  speexdsp-1.2.1-1.os2203sp2.x86_64                                       subunit-1.4.0-2.os2203sp2.x86_64                                             subunit-devel-1.4.0-2.os2203sp2.x86_64
+  switcheroo-control-1.1-8.os2203sp2.x86_64                               sysprof-3.38.1-3.os2203sp2.x86_64                                            sysprof-cli-3.38.1-3.os2203sp2.x86_64
+  sysprof-devel-3.38.1-3.os2203sp2.x86_64                                 systemd-devel-249-53.os2203sp2.x86_64                                        systemd-pam-249-53.os2203sp2.x86_64
+  taglib-1.11.1-12.os2203sp2.x86_64                                       tk-1:8.6.12-1.os2203sp2.x86_64                                               tracker3-3.0.4-2.os2203sp2.x86_64
+  twolame-0.3.13-14.os2203sp2.x86_64                                      uid_wrapper-1.2.4-5.os2203sp2.x86_64                                         upower-0.99.8-5.os2203sp2.x86_64
+  urw-base35-bookman-fonts-20200910-1.os2203sp2.noarch                    urw-base35-c059-fonts-20200910-1.os2203sp2.noarch                            urw-base35-d050000l-fonts-20200910-1.os2203sp2.noarch
+  urw-base35-fonts-20200910-1.os2203sp2.noarch                            urw-base35-fonts-common-20200910-1.os2203sp2.noarch                          urw-base35-gothic-fonts-20200910-1.os2203sp2.noarch
+  urw-base35-nimbus-mono-ps-fonts-20200910-1.os2203sp2.noarch             urw-base35-nimbus-roman-fonts-20200910-1.os2203sp2.noarch                    urw-base35-nimbus-sans-fonts-20200910-1.os2203sp2.noarch
+  urw-base35-p052-fonts-20200910-1.os2203sp2.noarch                       urw-base35-standard-symbols-ps-fonts-20200910-1.os2203sp2.noarch             urw-base35-z003-fonts-20200910-1.os2203sp2.noarch
+  util-linux-devel-2.37.2-20.os2203sp2.x86_64                             vino-3.22.0-12.os2203sp2.x86_64                                              wavpack-5.3.0-2.os2203sp2.x86_64
+  wavpack-help-5.3.0-2.os2203sp2.noarch                                   wayland-devel-1.20.0-6.os2203sp2.x86_64                                      wayland-protocols-devel-1.25-1.os2203sp2.noarch
+  webkit2gtk3-2.36.3-4.os2203sp2.x86_64                                   webkit2gtk3-jsc-2.36.3-4.os2203sp2.x86_64                                    woff2-1.0.2-6.os2203sp2.x86_64
+  wpa_supplicant-1:2.6-30.os2203sp2.x86_64                                wpebackend-fdo-1.6.1-1.os2203sp2.x86_64                                      xapian-core-1.4.9-3.os2203sp2.x86_64
+  xdg-dbus-proxy-0.1.2-1.os2203sp2.x86_64                                 xdg-desktop-portal-1.7.2-2.os2203sp2.x86_64                                  xdg-desktop-portal-gtk-1.8.0-1.os2203sp2.x86_64
+  xorg-x11-drv-libinput-1.2.0-2.os2203sp2.x86_64                          xorg-x11-font-utils-1:7.5-44.os2203sp2.x86_64                                xorg-x11-fonts-7.5-25.os2203sp2.noarch
+  xorg-x11-proto-devel-2021.5-2.os2203sp2.noarch                          xorg-x11-server-1.20.11-20.os2203sp2.x86_64                                  xorg-x11-server-Xwayland-22.1.2-2.os2203sp2.x86_64
+  xorg-x11-server-common-1.20.11-20.os2203sp2.x86_64                      xorg-x11-server-utils-7.7-30.os2203sp2.x86_64                                xorg-x11-xauth-1:1.1.2-1.os2203sp2.x86_64
+  xorg-x11-xinit-1.4.1-2.os2203sp2.x86_64                                 xorg-x11-xkb-utils-7.8-1.os2203sp2.x86_64                                    xz-devel-5.2.5-3.os2203sp2.x86_64
+  zenity-3.41.0-2.os2203sp2.x86_64                                        zlib-devel-1.2.11-22.os2203sp2.x86_64
+
