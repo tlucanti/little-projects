@@ -11,12 +11,12 @@ DNF::DNF(const std::string &input)
 	for (unsigned int i = 0; i < input.size(); ++i) {
 		switch (input.at(i)) {
 		case '1':
-			data.push_back(Impl(i));
+			data.push_back(Impl(i, false));
 			break;
 		case '0':
 			break;
 		case '-':
-			data.push_back(Impl(i));
+			data.push_back(Impl(i, true));
 			break;
 		default:
 			break;
@@ -30,7 +30,7 @@ DNF::~DNF()
 
 void DNF::step()
 {
-	vector<Impl> next;
+	std::vector<Impl> next;
 
 	for (unsigned int i = 0; i < data.size(); ++i) {
 		for (unsigned int j = 0; j < data.size(); ++j) {

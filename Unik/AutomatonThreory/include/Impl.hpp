@@ -4,25 +4,22 @@
 
 #include <iostream>
 
-class Impl
+struct Impl
 {
-private:
 	unsigned int num;
 	unsigned int ind;
 	unsigned int p;
 	bool pw;
 	bool inf;
 
-public:
-	Impl(int n);
+	Impl(unsigned int n, bool inf);
+	Impl(unsigned int n, unsigned int ind, unsigned int p, bool pw, bool inf);
 	~Impl();
-	bool can_patch(const Impl &a, const Impl &b);
-	Impl patch(Impl &a, Impl &b);
-
-friend std::ostream &operator <<(std::ostream &out, const Impl &i);
+	static bool can_patch(const Impl &a, const Impl &b);
+	static Impl patch(Impl &a, Impl &b);
 };
 
-std::ostream &operator <<(std::ostream &out, const Impl &i)
+inline std::ostream &operator <<(std::ostream &out, const Impl &i)
 {
 	out << i.num << std::endl;
 	return out;

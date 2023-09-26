@@ -2,7 +2,7 @@
 all:
 	clang \
 		-fdiagnostics-color=always \
-		-std=c++2a \
+		-std=c++20 \
 		-I include \
 		DNF.cpp Impl.cpp \
 		lab1.cpp

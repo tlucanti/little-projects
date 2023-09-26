@@ -16,7 +16,7 @@ public:
 	DNF(const std::string &input);
 	~DNF();
 
-	void minimize(std::ostream &out);
+	void minimize(std::ostream &out=std::cout);
 };
 
 #endif /* DNF_HPP */

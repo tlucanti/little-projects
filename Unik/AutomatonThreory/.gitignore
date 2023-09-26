@@ -1,2 +1,4 @@
 
 *.gch
+/.cache
+compile_commands.json
