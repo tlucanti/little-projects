@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 	}
 
 	DNF dnf(argv[1]);
+	dnf.dump();
 	dnf.minimize();
 }
 

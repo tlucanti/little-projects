@@ -1,6 +1,6 @@
 
 all:
-	clang \
+	g++ \
 		-fdiagnostics-color=always \
 		-std=c++20 \
 		-I include \

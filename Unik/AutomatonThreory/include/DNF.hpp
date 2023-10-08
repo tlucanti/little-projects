@@ -8,15 +8,18 @@
 class DNF
 {
 private:
+	std::string input;
 	std::vector<Impl> data;
 
-	void step();
+	int step();
 
 public:
 	DNF(const std::string &input);
 	~DNF();
 
 	void minimize(std::ostream &out=std::cout);
+	void dump(void);
+	void table(void);
 };
 
 #endif /* DNF_HPP */
