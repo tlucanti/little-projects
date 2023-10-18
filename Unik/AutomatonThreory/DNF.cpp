@@ -120,7 +120,7 @@ void DNF::table(void)
 {
 	const int w = 3;
 
-	std::cout << "N   ";
+	std::cout << "N   \t|";
 	for (int i = 0; i < input.size(); ++i) {
 		if (input.at(i) == '1') {
 			std::cout << std::setw(w);
@@ -132,20 +132,38 @@ void DNF::table(void)
 	for (int i = 0; i < input.size(); ++i) {
 		if (input.at(i) == '-') {
 			std::cout << std::setw(w);
-			std::cout << i + 1;
+			std::cout << i + 1 << " |";
 		}
 	}
+	std::cout << std::endl;
 
 	for (auto &i : data) {
-		for (int i = 0; i < input.size(); ++i) {
-			if (input.at(i) == '1') {
-				std::cout << setw(w);
-				std::cout << i + 1;
+		std::cout << '(' << i.num << ", " << i.p << ")\t|";
+
+		for (int j = 0; j < input.size(); ++j) {
+			if (input.at(j) == '1') {
+				std::cout << std::setw(w);
+				if (i.was_overlap(j)) {
+					std::cout << '+';
+				} else {
+					std::cout << ' ';
+				}
+				std::cout << " |";
 			}
 		}
 
 		std::cout << '|';
-		for (int i = 0; i < input.size(); ++i) {
-			if (input.at(i) == '-') {
-				std::cout << std:setw(w);
+		for (int j = 0; j < input.size(); ++j) {
+			if (input.at(j) == '-') {
+				std::cout << std::setw(w);
+				if (i.was_overlap(j)) {
+					std::cout << '+';
+				} else {
+					std::cout << ' ';
+				}
+				std::cout << " |";
+			}
+		}
+		std::cout << std::endl;
+	}
 }

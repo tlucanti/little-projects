@@ -19,6 +19,7 @@ public:
 	~Impl();
 	static bool can_patch(const Impl &a, const Impl &b);
 	static Impl patch(Impl &a, Impl &b);
+	bool was_overlap(unsigned int n);
 };
 
 inline std::ostream &operator <<(std::ostream &out, const Impl &i)

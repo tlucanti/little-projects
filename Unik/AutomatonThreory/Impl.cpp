@@ -35,3 +35,9 @@ Impl Impl::patch(Impl &a, Impl &b) {
 	return { a.num, a.ind, a.p + (b.num - a.num), false, a.inf or b.inf };
 }
 
+bool Impl::was_overlap(unsigned int n)
+{
+	bool res = (n & (~this->p)) == this->num;
+	return res;
+}
+
