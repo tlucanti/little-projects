@@ -12,14 +12,18 @@ private:
 	std::vector<Impl> data;
 
 	int step();
+	std::string minimize_table(void);
+	bool full_coverage(const std::string &bitmask);
 
 public:
 	DNF(const std::string &input);
 	~DNF();
 
-	void minimize(std::ostream &out=std::cout);
+	void minimize(void);
 	void dump(void);
+	void print(void);
 	void table(void);
+	void table(const std::string &bitmask);
 };
 
 #endif /* DNF_HPP */
