@@ -2,6 +2,18 @@
 #include <common.hpp>
 #include <DNF.hpp>
 
+static int log2(unsigned long n)
+{
+	unsigned long i = 1;
+	unsigned long ans = 0;
+
+	while (i < n) {
+		i *= 2;
+		++ans;
+	}
+	return ans;
+}
+
 DNF::DNF(const std::string &input)
 	: input(input)
 {
@@ -253,5 +265,23 @@ void DNF::table(const std::string &bitmask)
 
 void DNF::print(void)
 {
+	int nr_var = log2(input.size());
 
+	for (int i = 0; i < nr_var; ++i) {
+		std::cout << (char)('a' + i);
+	}
+	std::cout << std::endl;
+
+	for (auto &d : data) {
+		for (int v = nr_var - 1; v >= 0; --v) {
+			if (d.p & (1u << v)) {
+				std::cout << "-";
+			} else if (d.num & (1u << v)) {
+				std::cout << "1";
+			} else {
+				std::cout << "0";
+			}
+		}
+		std::cout << std::endl;
+	}
 }
