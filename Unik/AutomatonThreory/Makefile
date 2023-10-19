@@ -5,4 +5,5 @@ all:
 		-std=c++20 \
 		-I include \
 		DNF.cpp Impl.cpp \
-		lab1.cpp
+		lab1.cpp \
+		-o lab1

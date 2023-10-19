@@ -147,8 +147,9 @@ void DNF::minimize(void)
 
 	std::cerr << std::endl;
 	bitmask = minimize_table();
-	std::cerr << "minimized implicant table" << std::endl;
+	std::cerr << "\nminimized implicant table" << std::endl;
 	table(bitmask);
+	std::cerr << std::endl;
 
 	for (int di = 0; di < data.size(); ++di) {
 		if (bitmask.at(di) == 0) {
