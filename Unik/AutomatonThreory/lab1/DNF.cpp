@@ -100,7 +100,7 @@ bool DNF::full_coverage(const std::string &bitmask)
 
 std::string DNF::minimize_table(void)
 {
-	std::string max_removed;
+	std::string max_removed(data.size(), 0);
 
 	for (int i = 1; i < data.size(); ++i) {
 		std::string removed(i, 1);
