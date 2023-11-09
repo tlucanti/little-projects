@@ -11,7 +11,7 @@
 
 #define CONFIG_IMAGE_WIDTH 512
 #define CONFIG_IMAGE_HEIGHT 512
-#define CONFIG_NR_STARS 100
+#define CONFIG_NR_STARS 1000
 #define CONFIG_HUBBLE_CROSS true
 
 __attribute__((__noreturn__, __cold__))
@@ -144,41 +144,49 @@ void intensify_pixel(Image &im, int x, int y, float intensity, float alpha)
 	im.add_pix_safe(x, y, static_cast<unsigned char>(c));
 }
 
-void draw_line(Image &im, unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
+void draw_line(Image &im, int x0, int y0, int x1, int y1)
 {
-	int x, y, dx, dy, d, D;
-	float length, sin, cos, l2, r;
+	int init_x, init_y;
+	int dx, dy;
+	int sx, sy;
+	int err;
+	float length, dist, alpha;
 
-	x = x1;
-	y = y1;
-	dx = x2 - x1;
-	dy = y2 - y1;
-	d = 2 * dy - dx;
+	init_x = x0;
+	init_y = y0;
 
-	D = 0;
-	l2 = dx * dx + dy * dy;
-	length = std::sqrt(l2);
+	dx = std::abs(x1 - x0);
+	dy = -std::abs(y1 - y0);
 
-	sin = dx / length;
-	cos = dy / length;
+	length = std::sqrt(dx * dx + dy * dy);
 
-	while (x < x2) {
-		r = (x - x1) * (x - x1) + (y - y1) * (y - y1);
-		r = uniform_cos(r, l2, 2);
-		r = 1.0f;
+	sx = x0 < x1 ? 1 : -1;
+	sy = y0 < y1 ? 1 : -1;
 
-		//intensify_pixel(im, x, y - 1, D + cos, r);
-		intensify_pixel(im, x, y, D, r);
-		//intensify_pixel(im, x, y + 1, D - cos, r);
+	err = dx + dy;
 
-		x += 1;
-		if (d <= 0) {
-			D += sin;
-			d += 2 * dy;
-		} else {
-			d += sin - cos;
-			d += 2 * (dy - dx);
-			y += 1;
+	while (true) {
+		dist = (init_x - x0) * (init_x - x0) + (init_y - y0) * (init_y - y0);
+		alpha = uniform_cos(std::sqrt(dist), length, 3);
+		im.set_pix_safe(x0, y0, static_cast<unsigned int>(255 * alpha));
+
+		if (x0 == x1 and y0 == y1) {
+			break;
+		}
+
+		if (err * 2 > dy) {
+			if (x0 == x1) {
+				break;
+			}
+			err += dy;
+			x0 += sx;
+		}
+		if (err * 2 <= dx) {
+			if (y0 == y1) {
+				break;
+			}
+			err += dx;
+			y0 += sy;
 		}
 	}
 }
@@ -193,18 +201,7 @@ void hubble_cross(Image &im, unsigned int x, unsigned int y, unsigned int r, flo
 	}
 
 	draw_line(im, x - r / 2, y - r / 2, x + r / 2, y + r / 2);
-	return;
-
-	for (unsigned int i = 0; i < r; ++i) {
-		alpha = uniform_cos(i, r, 3);
-		c = intensity * alpha;
-
-		px = x + i - r / 2;
-		py = y + i - r / 2;
-
-		im.add_pix_safe(x, py, static_cast<unsigned char>(c));
-		im.add_pix_safe(px, y, static_cast<unsigned char>(c));
-	}
+	draw_line(im, x + r / 2, y - r / 2, x - r / 2, y + r / 2);
 }
 
 void create_star(Image &im, unsigned int x, unsigned int y, unsigned int r, float intensity)
@@ -224,7 +221,7 @@ void create_star(Image &im, unsigned int x, unsigned int y, unsigned int r, floa
 			im.add_pix_safe(px, py, static_cast<unsigned char>(c));
 		}
 	}
-	hubble_cross(im, x, y, r * 2, intensity);
+	hubble_cross(im, x, y, r * 3, intensity);
 }
 
 void create_sky(Image &im, int nr_stars)
@@ -236,12 +233,12 @@ void create_sky(Image &im, int nr_stars)
 		star_y = rand_in_range(0, im.get_h() - 1);
 		star_r = rand_in_range(1, std::min(im.get_h(), im.get_w()));
 
-		if (i * 100 / nr_stars < 80) {
+		if (i * 100.f / nr_stars < 98.f) {
+			star_r /= 100;
+		} else if (i * 100.f / nr_stars < 99.f) {
 			star_r /= 30;
-		} else if (i * 100 / nr_stars < 90) {
-			star_r /= 20;
 		} else {
-			star_r /= 10;
+			star_r /= 20;
 		}
 
 		std::cerr << "placing star at " << star_x << ' ' << star_y << '\n';
