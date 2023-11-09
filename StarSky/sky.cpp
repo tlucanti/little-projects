@@ -10,9 +10,9 @@
 #include <cmath>
 #include <ctime>
 
-#define CONFIG_IMAGE_WIDTH 1024
-#define CONFIG_IMAGE_HEIGHT 1024
-#define CONFIG_NR_STARS 2000
+#define CONFIG_IMAGE_WIDTH 512
+#define CONFIG_IMAGE_HEIGHT 512
+#define CONFIG_NR_STARS 1000
 #define CONFIG_HUBBLE_CROSS true
 
 __attribute__((__noreturn__, __cold__))
@@ -27,22 +27,46 @@ static unsigned int rand_in_range(unsigned int start, unsigned int end)
 	return random() % (end - start + 1) + start;
 }
 
-class Image {
+template <class T>
+class Matrix {
+protected:
+	unsigned int w;
+	unsigned int h;
+	std::vector<T> data;
+
+public:
+	Matrix(unsigned int w, unsigned int h)
+		: w(w), h(h)
+	{
+		data.resize(w * h);
+	}
+
+	T &get(unsigned int x, unsigned int y)
+	{
+		if (x >= w or y >= h) {
+			panic("Matrix::get: out of bounds");
+		}
+
+		return data.at(y * w + x);
+	}
+
+	void clear(const T &v)
+	{
+		data.assign(data.size(), v);
+	}
+};
+
+class Image : private Matrix<unsigned int> {
 public:
 	static constexpr unsigned char white = 255u;
 	static constexpr unsigned char black = 0u;
 
 private:
-	unsigned int w;
-	unsigned int h;
-	std::vector<unsigned int> data;
 
 public:
 	Image(unsigned int w, unsigned int h)
-		: w(w), h(h)
-	{
-		data.resize(w * h);
-	}
+		: Matrix(w, h)
+	{ }
 
 	void set_pix(unsigned int px, unsigned int py, unsigned char intensity)
 	{
@@ -50,7 +74,7 @@ public:
 			panic("Image::set_pix: out of bounds");
 		}
 
-		data.at(py * w + px) = intensity;
+		Matrix::get(px, py) = intensity;
 	}
 
 	void set_pix_safe(unsigned int px, unsigned int py, unsigned int intensity)
@@ -59,7 +83,7 @@ public:
 			return;
 		}
 
-		data.at(py * w + px) = intensity;
+		Matrix::get(px, py) = intensity;
 	}
 
 	void add_pix_safe(unsigned int px, unsigned int py, unsigned int intensity)
@@ -68,7 +92,7 @@ public:
 			return;
 		}
 
-		data.at(py * w + px) += intensity;
+		Matrix::get(px, py) += intensity;
 	}
 
 
@@ -78,8 +102,7 @@ public:
 			panic("Image::get_pix: out of bounds");
 		}
 
-		return data.at(py * w + px);
-
+		return Matrix::get(px, py);
 	}
 
 	unsigned int get_w(void)
@@ -94,7 +117,7 @@ public:
 
 	void clear(unsigned char c=Image::black)
 	{
-		data.assign(data.size(), c);
+		Matrix::clear(this->black);
 	}
 
 	void to_pgm(std::ostream &out, const std::string &comment)
@@ -255,6 +278,11 @@ static void create_stars(Image &im, int nr_stars)
 
 		create_star(im, star_x, star_y, star_r, 255.f);
 	}
+}
+
+static void perlin(Image &im, float freq)
+{
+
 }
 
 int main()
