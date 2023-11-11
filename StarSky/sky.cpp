@@ -10,8 +10,8 @@
 #include <cmath>
 #include <ctime>
 
-#define CONFIG_IMAGE_WIDTH 512
-#define CONFIG_IMAGE_HEIGHT 512
+#define CONFIG_IMAGE_WIDTH 100
+#define CONFIG_IMAGE_HEIGHT 100
 #define CONFIG_NR_STARS 1000
 #define CONFIG_HUBBLE_CROSS true
 
@@ -24,7 +24,55 @@ static void panic(const std::string &reason)
 
 static unsigned int rand_in_range(unsigned int start, unsigned int end)
 {
-	return random() % (end - start + 1) + start;
+	return std::rand() % (end - start + 1) + start;
+}
+
+static float rand_in_range(float start, float end)
+{
+	return static_cast<float>(std::rand()) / (RAND_MAX / (end - start + 1)) + start;
+}
+
+struct Point {
+	float x;
+	float y;
+
+	Point(void)
+		: x(0), y(0)
+	{ }
+
+	Point(float x, float y)
+		: x(x), y(y)
+	{ }
+};
+
+std::ostream &operator <<(std::ostream &out, const Point &p)
+{
+	return out << '(' << p.x << ", " << p.y << ')';
+}
+
+static Point random_unit(void)
+{
+	float angle = rand_in_range(0.f, 2 * std::numbers::pi);
+	std::cerr << angle << ' ';
+	return Point(std::cos(angle), std::sin(angle));
+}
+
+static float dot(const Point &a, const Point &b)
+{
+	return a.x * b.x + a.y * b.y;
+}
+
+static float length(const Point &p)
+{
+	return std::sqrt(dot(p, p));
+}
+
+Point normalize(Point p)
+{
+	float x = 1.f / length(p);
+	p.x *= x;
+	p.y *= x;
+	return p;
 }
 
 template <class T>
@@ -53,6 +101,16 @@ public:
 	void clear(const T &v)
 	{
 		data.assign(data.size(), v);
+	}
+
+	unsigned int get_w(void) const
+	{
+		return w;
+	}
+
+	unsigned int get_h(void) const
+	{
+		return h;
 	}
 };
 
@@ -105,19 +163,19 @@ public:
 		return Matrix::get(px, py);
 	}
 
-	unsigned int get_w(void)
+	unsigned int get_w(void) const
 	{
-		return w;
+		return Matrix::get_w();
 	}
 
-	unsigned int get_h(void)
+	unsigned int get_h(void) const
 	{
-		return h;
+		return Matrix::get_h();
 	}
 
 	void clear(unsigned char c=Image::black)
 	{
-		Matrix::clear(this->black);
+		Matrix::clear(c);
 	}
 
 	void to_pgm(std::ostream &out, const std::string &comment)
@@ -280,9 +338,78 @@ static void create_stars(Image &im, int nr_stars)
 	}
 }
 
-static void perlin(Image &im, float freq)
+static void perlin(Image &im, int period)
 {
+	Matrix<Point> mat(period + 1, period + 1);
+	Point d1, d2, d3, d4;
+	float v1, v2, v3, v4;
+	float v12, v34, v;
+	float dx, dy;
+	int px, py;
+	int grid_x, grid_y;
+	unsigned char c;
+	float mn = 0;
 
+	const int delta_x = im.get_h() / period;
+	const int delta_y = im.get_w() / period;
+
+	for (unsigned int y = 0; y <= period; ++y) {
+		for (unsigned int x = 0; x <= period; ++x) {
+			mat.get(x, y) = random_unit();
+			std::cerr << mat.get(x, y) << '\n';
+		}
+	}
+
+	for (int y = 0; y < static_cast<int>(im.get_h()); ++y) {
+		for (int x = 0; x < static_cast<int>(im.get_w()); ++x) {
+			px = x / delta_x;
+			py = y / delta_y;
+
+			grid_x = px * delta_x;
+			grid_y = py * delta_x;
+
+			d1 = Point(x - grid_x, y - grid_y);
+			d2 = Point(x - (grid_x + delta_x), y - grid_y);
+			d3 = Point(x - grid_x, y - (grid_y + delta_y));
+			d4 = Point(x - (grid_x + delta_x), y - (grid_y + delta_y));
+
+			v1 = dot(mat.get(px, py), normalize(d1));
+			v2 = dot(mat.get(px + 1, py), normalize(d2));
+			v3 = dot(mat.get(px, py + 1), normalize(d3));
+			v4 = dot(mat.get(px + 1, py + 1), normalize(d4));
+
+			dx = static_cast<float>(x % delta_x) / delta_x;
+			dy = static_cast<float>(y % delta_y) / delta_y;
+			v12 = std::lerp(v1, v2, dx);
+			v34 = std::lerp(v3, v4, dx);
+			v = std::lerp(v12, v34, dy);
+
+			v = (v + 1) * 255 / 2;
+			c = static_cast<unsigned char>(255 * v);
+			im.set_pix_safe(x, y, c);
+
+			if (y == 4 && x == 49) {
+				std::cerr << x << ' ' << y << ' ' << px << '\n';
+				std::cerr << d2 << ' ' << v2 << '\n';
+			}
+			if (y == 4 && x == 50) {
+				std::cerr << x << ' ' << y << ' ' << px << '\n';
+				std::cerr << d1 << ' ' << v1 << '\n';
+			}
+
+			// std::cerr << '(' << x << ',' << y << ")\n";
+			// std::cerr << px << ' ' << py << '\n';
+			// std::cerr << grid_x << ' ' << grid_y << '\n';
+			// std::cerr << mat.get(px, py) << 'x' << d1 << '\n';
+			// std::cerr << v1 << "\n============\n";
+
+			// std::cerr << '(' << x << ',' << y << ")\n";
+			// std::cestd::cerr << px + 1 << ' ' << py << '\n';
+			// std::cestd::cerr << grid_x + delta_x << ' ' << grid_y << '\n';
+			// std::cestd::cerr << mat.get(px + 1, py) << 'x' << d2 << '\n';
+			// std::cestd::cerr << v2 << "\n============\n";
+		}
+	}
 }
 
 int main()
@@ -290,6 +417,8 @@ int main()
 	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
 
 	std::srand(std::time(nullptr));
-	create_stars(im, CONFIG_NR_STARS);
+	//create_stars(im, CONFIG_NR_STARS);
+	perlin(im, 2);
+
 	im.to_pgm(std::cout);
 }
