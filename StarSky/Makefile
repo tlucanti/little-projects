@@ -6,4 +6,4 @@ all:
 		-O2 \
 		sky.cpp \
 		-o sky
-	./sky > sky.pgm
+
