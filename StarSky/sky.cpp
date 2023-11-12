@@ -87,7 +87,6 @@ std::ostream &operator <<(std::ostream &out, const Point &p)
 static Point random_unit(float from, float to)
 {
 	float angle = rand_in_range(from, to);
-	std::cerr << angle * 180 / 3.14 << std::endl;
 	return Point(std::cos(angle), std::sin(angle));
 }
 
@@ -526,7 +525,6 @@ static void create_milkyway(Image &im, unsigned octaves, float alpha)
 
 	center.x = milkyway.get_w() / 2.f;
 	center.y = milkyway.get_h() / 2.f;
-	std::cerr << "DIRECTION\n";
 	direction = random_unit(pi / 6.f, pi / 4.f);
 
 	for (unsigned y = 0; y < milkyway.get_h(); ++y) {
