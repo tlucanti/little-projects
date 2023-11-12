@@ -15,7 +15,26 @@
 #define CONFIG_NR_STARS 1000
 #define CONFIG_HUBBLE_CROSS true
 
-__attribute__((__noreturn__, __cold__))
+#ifndef __noret
+# define __noret [[noreturn]]
+#endif
+#ifndef __cold
+# define __cold __attribute__((__cold__))
+#endif
+#ifndef __used
+# define __used [[maybe_unused]]
+#endif
+#ifndef likely
+# define lineky(expr) __builtind_expect(!!(expr), true)
+#endif
+#ifndef unlikely
+# define unlikely(expr) __builtin_expect(!!(expr), false)
+#endif
+#ifndef unreachable
+# define unreachable() __builtin_unreachable()
+#endif
+
+__noret __cold
 static void panic(const std::string &reason)
 {
 	std::cout << "[panic]: " << reason << std::endl;
@@ -91,8 +110,9 @@ public:
 
 	T &get(unsigned int x, unsigned int y)
 	{
-		if (x >= w or y >= h) {
+		if (unlikely(x >= w or y >= h)) {
 			panic("Matrix::get: out of bounds");
+			unreachable();
 		}
 
 		return data.at(y * w + x);
@@ -128,8 +148,9 @@ public:
 
 	void set_pix(unsigned int px, unsigned int py, unsigned char intensity)
 	{
-		if (px >= w or py >= h) {
+		if (unlikely(px >= w or py >= h)) {
 			panic("Image::set_pix: out of bounds");
+			unreachable();
 		}
 
 		Matrix::get(px, py) = intensity;
@@ -137,7 +158,7 @@ public:
 
 	void set_pix_safe(unsigned int px, unsigned int py, unsigned int intensity)
 	{
-		if (px >= w or py >= h) {
+		if (unlikely(px >= w or py >= h)) {
 			return;
 		}
 
@@ -146,8 +167,9 @@ public:
 
 	void add_pix(unsigned int px, unsigned int py, unsigned int intensity)
 	{
-		if (px >= w or py >= h) {
+		if (unlikely(px >= w or py >= h)) {
 			panic("Image::set_pix: out of bounds");
+			unreachable();
 		}
 
 		Matrix::get(px, py) += intensity;
@@ -155,7 +177,7 @@ public:
 
 	void add_pix_safe(unsigned int px, unsigned int py, unsigned int intensity)
 	{
-		if (px >= w or py >= h) {
+		if (unlikely(px >= w or py >= h)) {
 			return;
 		}
 
@@ -165,8 +187,9 @@ public:
 
 	unsigned int get_pix(unsigned int px, unsigned int py)
 	{
-		if (px >= w or py >= h) {
+		if (unlikely(px >= w or py >= h)) {
 			panic("Image::get_pix: out of bounds");
+			unreachable();
 		}
 
 		return Matrix::get(px, py);
@@ -324,18 +347,22 @@ static void create_star(Image &im, unsigned int x, unsigned int y,
 	hubble_cross(im, x, y, r * 3, intensity);
 }
 
+__used
 static void create_stars(Image &im, int nr_stars)
 {
 	unsigned int star_x, star_y, star_r;
+	int type;
 
 	for (int i = 0; i < nr_stars; ++i) {
 		star_x = rand_in_range(0, im.get_w() - 1);
 		star_y = rand_in_range(0, im.get_h() - 1);
 		star_r = rand_in_range(1, std::min(im.get_h(), im.get_w()));
 
-		if (i * 100.f / nr_stars < 95.f) {
+		type = i * 100.f / nr_stars;
+
+		if (type < 95.f) {
 			star_r /= 100;
-		} else if (i * 100.f / nr_stars < 98.f) {
+		} else if (type < 98.f) {
 			star_r /= 30;
 		} else {
 			star_r /= 20;
@@ -345,7 +372,7 @@ static void create_stars(Image &im, int nr_stars)
 	}
 }
 
-__attribute__((__used__))
+__used
 static void create_dust(Image &im, float density)
 {
 	float intensity;
@@ -363,13 +390,14 @@ static void create_dust(Image &im, float density)
 				} else {
 					intensity = rand_in_range(1u, 255u);
 				}
+
 				im.add_pix(x, y, intensity);
 			}
 		}
 	}
 }
 
-__attribute__((__used__))
+__used
 static void perlin(Image &im, int period)
 {
 	Matrix<Point> mat(period + 1, period + 1);
@@ -448,9 +476,9 @@ int main()
 	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
 
 	std::srand(std::time(nullptr));
-	create_stars(im, CONFIG_NR_STARS);
-	create_dust(im, 0.1f);
-	//perlin(im, 3);
+	//create_stars(im, CONFIG_NR_STARS);
+	//create_dust(im, 0.1f);
+	perlin(im, 2);
 
 	im.to_pgm(std::cout);
 }
