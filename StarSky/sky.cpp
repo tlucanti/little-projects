@@ -10,8 +10,8 @@
 #include <cmath>
 #include <ctime>
 
-#define CONFIG_IMAGE_WIDTH 100
-#define CONFIG_IMAGE_HEIGHT 100
+#define CONFIG_IMAGE_WIDTH 512
+#define CONFIG_IMAGE_HEIGHT 512
 #define CONFIG_NR_STARS 1000
 #define CONFIG_HUBBLE_CROSS true
 
@@ -144,6 +144,15 @@ public:
 		Matrix::get(px, py) = intensity;
 	}
 
+	void add_pix(unsigned int px, unsigned int py, unsigned int intensity)
+	{
+		if (px >= w or py >= h) {
+			panic("Image::set_pix: out of bounds");
+		}
+
+		Matrix::get(px, py) += intensity;
+	}
+
 	void add_pix_safe(unsigned int px, unsigned int py, unsigned int intensity)
 	{
 		if (px >= w or py >= h) {
@@ -227,7 +236,7 @@ static float uniform_cos(unsigned int x, unsigned int max, float p)
 	return std::pow((c + 1.f) / 2.f, p);
 }
 
-static void draw_line(Image &im, int x0, int y0, int x1, int y1)
+static void draw_line(Image &im, int x0, int y0, int x1, int y1, float intensity)
 {
 	int init_x, init_y;
 	int dx, dy;
@@ -251,7 +260,7 @@ static void draw_line(Image &im, int x0, int y0, int x1, int y1)
 	while (true) {
 		dist = hypot(init_x, init_y, x0, y0);
 		alpha = uniform_cos(dist, length, 4);
-		im.add_pix_safe(x0, y0, static_cast<unsigned int>(255 * alpha));
+		im.add_pix_safe(x0, y0, static_cast<unsigned int>(255.f * intensity * alpha));
 
 		if (x0 == x1 and y0 == y1) {
 			break;
@@ -277,8 +286,6 @@ static void draw_line(Image &im, int x0, int y0, int x1, int y1)
 static void hubble_cross(Image &im, unsigned int x, unsigned int y,
 			 unsigned int r, float intensity)
 {
-	float c, alpha;
-	unsigned int px, py;
 	unsigned int x0, y0, x1, y1;
 
 	if (not CONFIG_HUBBLE_CROSS) {
@@ -291,8 +298,8 @@ static void hubble_cross(Image &im, unsigned int x, unsigned int y,
 	y1 = y + r / 2;
 
 	if (hypot(x0, y0, x1, y1) > 0.03f * std::max(im.get_w(), im.get_h())) {
-		draw_line(im, x - r / 2, y - r / 2, x + r / 2, y + r / 2);
-		draw_line(im, x + r / 2, y - r / 2, x - r / 2, y + r / 2);
+		draw_line(im, x - r / 2, y - r / 2, x + r / 2, y + r / 2, intensity);
+		draw_line(im, x + r / 2, y - r / 2, x - r / 2, y + r / 2, intensity);
 	}
 }
 
@@ -306,7 +313,7 @@ static void create_star(Image &im, unsigned int x, unsigned int y,
 		for (unsigned int w = 0; w < r; ++w) {
 			cx = uniform_cos(w, r, 3);
 			cy = uniform_cos(h, r, 3);
-			c = cx * cy * intensity;
+			c = cx * cy * 255. * intensity;
 
 			px = x + w - r / 2;
 			py = y + h - r / 2;
@@ -334,10 +341,35 @@ static void create_stars(Image &im, int nr_stars)
 			star_r /= 20;
 		}
 
-		create_star(im, star_x, star_y, star_r, 255.f);
+		create_star(im, star_x, star_y, star_r, 1.f);
 	}
 }
 
+__attribute__((__used__))
+static void create_dust(Image &im, float density)
+{
+	float intensity;
+	int type;
+
+	for (unsigned y = 0; y < im.get_h(); ++y) {
+		for (unsigned x = 0; x < im.get_w(); ++x) {
+			if (rand_in_range(0.f, 1.f) < density) {
+				type = rand_in_range(0u, 100u);
+
+				if (type < 80) {
+					intensity = rand_in_range(1u, 30u);
+				} else if (type < 95) {
+					intensity = rand_in_range(1u, 100u);
+				} else {
+					intensity = rand_in_range(1u, 255u);
+				}
+				im.add_pix(x, y, intensity);
+			}
+		}
+	}
+}
+
+__attribute__((__used__))
 static void perlin(Image &im, int period)
 {
 	Matrix<Point> mat(period + 1, period + 1);
@@ -348,13 +380,12 @@ static void perlin(Image &im, int period)
 	int px, py;
 	int grid_x, grid_y;
 	unsigned char c;
-	float mn = 0;
 
 	const int delta_x = im.get_h() / period;
 	const int delta_y = im.get_w() / period;
 
-	for (unsigned int y = 0; y <= period; ++y) {
-		for (unsigned int x = 0; x <= period; ++x) {
+	for (unsigned int y = 0; y <= static_cast<unsigned>(period); ++y) {
+		for (unsigned int x = 0; x <= static_cast<unsigned>(period); ++x) {
 			mat.get(x, y) = random_unit();
 			std::cerr << mat.get(x, y) << '\n';
 		}
@@ -362,8 +393,8 @@ static void perlin(Image &im, int period)
 
 	for (int y = 0; y < static_cast<int>(im.get_h()); ++y) {
 		for (int x = 0; x < static_cast<int>(im.get_w()); ++x) {
-			px = x / delta_x;
-			py = y / delta_y;
+			px = x * period / im.get_w();
+			py = y * period / im.get_h();
 
 			grid_x = px * delta_x;
 			grid_y = py * delta_x;
@@ -385,7 +416,7 @@ static void perlin(Image &im, int period)
 			v = std::lerp(v12, v34, dy);
 
 			v = (v + 1) * 255 / 2;
-			c = static_cast<unsigned char>(255 * v);
+			c = static_cast<unsigned char>(v);
 			im.set_pix_safe(x, y, c);
 
 			if (y == 4 && x == 49) {
@@ -417,8 +448,9 @@ int main()
 	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
 
 	std::srand(std::time(nullptr));
-	//create_stars(im, CONFIG_NR_STARS);
-	perlin(im, 2);
+	create_stars(im, CONFIG_NR_STARS);
+	create_dust(im, 0.1f);
+	//perlin(im, 3);
 
 	im.to_pgm(std::cout);
 }
