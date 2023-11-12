@@ -1,7 +1,9 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 #include <numbers>
@@ -9,11 +11,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
-
-#define CONFIG_IMAGE_WIDTH 100
-#define CONFIG_IMAGE_HEIGHT 200
-#define CONFIG_NR_STARS 1
-#define CONFIG_HUBBLE_CROSS true
 
 #ifndef __noret
 # define __noret [[noreturn]]
@@ -34,6 +31,23 @@
 # define unreachable() __builtin_unreachable()
 #endif
 
+static bool g_enable_hubble = true;
+static constexpr char g_help_message[] =
+	"help for StarSky\n"
+	"\n"
+	"usage:\n"
+	"./sky (width) (height) (nr_stars) [options]\n"
+	"\n"
+	"  --help\t\tprint this help message and quit\n"
+	"  --file=<filename>\tsave output image to file, instead prints binary\n"
+	"                   \toutput content to stdout\n"
+	"  --no-dust\t\tidisable dust drawing (small, distant, dim stars)\n"
+	"  --no-hubble\t\tdisable hubble diffraction crosses drawing (white \n"
+	"             \t\tcrossees around stars)\n"
+	"  --no-milkyway\t\tdisable milkyway galaxy trail drawing\n"
+	"\n"
+	"(c) tlucanti\t:\tgithub.com/tlucanti\n";
+
 __noret __cold
 static void panic(const std::string &reason)
 {
@@ -49,7 +63,7 @@ static unsigned int rand_in_range(unsigned int start, unsigned int end)
 
 static float rand_in_range(float start, float end)
 {
-	return static_cast<float>(std::rand()) / (RAND_MAX / (end - start + 1)) + start;
+	return static_cast<float>(std::rand()) / RAND_MAX * (end - start) + start;
 }
 
 struct Point {
@@ -73,6 +87,7 @@ std::ostream &operator <<(std::ostream &out, const Point &p)
 static Point random_unit(float from, float to)
 {
 	float angle = rand_in_range(from, to);
+	std::cerr << angle * 180 / 3.14 << std::endl;
 	return Point(std::cos(angle), std::sin(angle));
 }
 
@@ -342,10 +357,6 @@ static void hubble_cross(Image &im, unsigned int x, unsigned int y,
 {
 	unsigned int x0, y0, x1, y1;
 
-	if (not CONFIG_HUBBLE_CROSS) {
-		return;
-	}
-
 	x0 = x - r / 2;
 	y0 = y - r / 2;
 	x1 = x + r / 2;
@@ -375,7 +386,9 @@ static void create_star(Image &im, unsigned int x, unsigned int y,
 			im.add_pix_safe(px, py, static_cast<unsigned char>(c));
 		}
 	}
-	hubble_cross(im, x, y, r * 3, intensity);
+	if (g_enable_hubble) {
+		hubble_cross(im, x, y, r * 3, intensity);
+	}
 }
 
 __used
@@ -513,7 +526,8 @@ static void create_milkyway(Image &im, unsigned octaves, float alpha)
 
 	center.x = milkyway.get_w() / 2.f;
 	center.y = milkyway.get_h() / 2.f;
-	direction = random_unit(-pi / 6.f, pi / 6.f);
+	std::cerr << "DIRECTION\n";
+	direction = random_unit(pi / 6.f, pi / 4.f);
 
 	for (unsigned y = 0; y < milkyway.get_h(); ++y) {
 		for (unsigned x = 0; x < milkyway.get_w(); ++x) {
@@ -534,14 +548,98 @@ static void create_milkyway(Image &im, unsigned octaves, float alpha)
 	}
 }
 
-int main()
+struct config {
+	unsigned width;
+	unsigned height;
+
+	unsigned nr_stars;
+
+	bool enable_hubble;
+	bool enable_dust;
+	bool enable_milkyway;
+
+	std::ostream *out;
+	bool stdout;
+};
+
+static int to_int(const std::string &s)
 {
-	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
+	std::stringstream ss(s);
+	int i;
+
+	ss >> i;
+	return i;
+}
+
+static void parse_argv(int argc, char **argv, struct config &config)
+{
+	std::string s;
+	int i;
+
+	for (i = 1; i < argc; ++i) {
+		if (std::string(argv[i]) == "--help") {
+			std::cerr << g_help_message << std::endl;
+			exit(0);
+		}
+	}
+
+	if (argc < 4) {
+		std::cerr << "expected arguments, use '--help' for help\n";
+		std::exit(1);
+	}
+
+	config.enable_hubble = true;
+	config.enable_dust = true;
+	config.enable_milkyway = true;
+	config.out = &std::cout;
+	config.stdout = true;
+
+	config.width = to_int(argv[1]);
+	config.height = to_int(argv[2]);
+	config.nr_stars = to_int(argv[3]);
+
+	for (i = 4; i < argc; ++i) {
+		s = argv[i];
+
+		if (s.starts_with("--file=")) {
+			std::string file = s.substr(7);
+			auto out = new std::ofstream(file);
+			config.stdout = false;
+			config.out = out;
+		} else if (s == "--no-hubble") {
+			config.enable_hubble = false;
+			g_enable_hubble = false;
+		} else if (s == "--no-dust") {
+			config.enable_dust = false;
+		} else if (s == "--no-milkyway") {
+			config.enable_milkyway = false;
+		} else {
+			std::cerr << "unknown option '" << s <<
+				"', try '--help' for help" << std::endl;
+			std::exit(1);
+		}
+	}
+}
+
+int main(int argc, char **argv)
+{
+	struct config config;
+
+	parse_argv(argc, argv, config);
+	Image im(config.width, config.height);
 
 	std::srand(std::time(nullptr));
-	create_stars(im, CONFIG_NR_STARS);
-	create_dust(im, 0.1f);
-	create_milkyway(im, 4, 255.f);
+	create_stars(im, config.nr_stars);
+	if (config.enable_dust) {
+		create_dust(im, 0.05f);
+	}
+	if (config.enable_milkyway) {
+		create_milkyway(im, 4, 255.f);
+	}
 
-	im.to_pgm(std::cout);
+	im.to_pgm(*config.out);
+
+	if (not config.stdout) {
+		delete config.out;
+	}
 }
