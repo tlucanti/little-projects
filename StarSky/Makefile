@@ -3,7 +3,7 @@ all:
 	c++ \
 		-fdiagnostics-color=always -std=c++2a \
 		-Wall -Wextra -Werror \
-		-O0 -g3 \
+		-O2 \
 		sky.cpp \
 		-o sky
 	./sky > sky.pgm

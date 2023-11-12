@@ -10,9 +10,9 @@
 #include <cmath>
 #include <ctime>
 
-#define CONFIG_IMAGE_WIDTH 512
-#define CONFIG_IMAGE_HEIGHT 512
-#define CONFIG_NR_STARS 1000
+#define CONFIG_IMAGE_WIDTH 100
+#define CONFIG_IMAGE_HEIGHT 200
+#define CONFIG_NR_STARS 1
 #define CONFIG_HUBBLE_CROSS true
 
 #ifndef __noret
@@ -471,6 +471,11 @@ static void perlin_octave(Matrix<float> &im, unsigned frequency, float amplitude
 		for (unsigned x = 0; x < im.get_w(); ++x) {
 			fx = static_cast<float>(x) * frequency / im.get_w();
 			fy = static_cast<float>(y) * frequency / im.get_h();
+			if (im.get_w() > im.get_h()) {
+				fy /= static_cast<float>(im.get_w() / im.get_h());
+			} else {
+				fx /= static_cast<float>(im.get_h() / im.get_w());
+			}
 
 			c = (perlin_pix(grid, fx, fy) + 1.f) / 2.f * amplitude;
 			im.get(x, y) += c;
