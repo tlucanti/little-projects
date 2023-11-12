@@ -285,6 +285,11 @@ static float norm(float x, float w)
 	return std::exp(-w * x * x);
 }
 
+static float square(float x)
+{
+	return x * x;
+}
+
 static void draw_line(Image &im, int x0, int y0, int x1, int y1, float intensity)
 {
 	int init_x, init_y;
@@ -451,7 +456,7 @@ float perlin_pix(const Matrix<Point> &grid, float x, float y)
 	return std::lerp(v12, v34, y - y0);
 }
 
-static void perlin_octave(Image &im, unsigned frequency, float amplitude)
+static void perlin_octave(Matrix<float> &im, unsigned frequency, float amplitude)
 {
 	Matrix<Point> grid(frequency + 1, frequency + 1);
 	float fx, fy, c;
@@ -468,16 +473,16 @@ static void perlin_octave(Image &im, unsigned frequency, float amplitude)
 			fy = static_cast<float>(y) * frequency / im.get_h();
 
 			c = (perlin_pix(grid, fx, fy) + 1.f) / 2.f * amplitude;
-			im.add_pix(x, y, static_cast<unsigned char>(c));
+			im.get(x, y) += c;
 		}
 	}
 
 }
 
-static void perlin(Image &im, unsigned octaves)
+static void perlin(Matrix<float> &im, unsigned octaves)
 {
 	unsigned frequency = 8;
-	float amplitude = 128;
+	float amplitude = 0.5f;
 	Point direction;
 
 	if (unlikely(octaves > 7)) {
@@ -486,7 +491,7 @@ static void perlin(Image &im, unsigned octaves)
 	}
 
 	while (octaves--) {
-		perlin_octave(im, frequency, amplitude - 1);
+		perlin_octave(im, frequency, amplitude);
 		frequency *= 2.f;
 		amplitude /= 2;
 	}
@@ -494,9 +499,9 @@ static void perlin(Image &im, unsigned octaves)
 
 static void create_milkyway(Image &im, unsigned octaves, float alpha)
 {
-	Image milkyway(im.get_w(), im.get_h());
+	Matrix<float> milkyway(im.get_w(), im.get_h());
 	Point direction, center, delta;
-	float c, du, dh;
+	float c, du, dh, r;
 	const float pi = std::numbers::pi;
 
 	perlin(milkyway, octaves);
@@ -516,9 +521,8 @@ static void create_milkyway(Image &im, unsigned octaves, float alpha)
 			du /= std::max(im.get_w(), im.get_h());
 			dh /= std::max(im.get_w(), im.get_h());
 
-			du = norm(du, 4.f);
-			dh = norm(dh, 32.f);
-			c = alpha * du * dh * milkyway.get_pix(x, y);
+			r = norm(du, 2.f) * norm(dh, 32.f) * alpha;
+			c = r * square(milkyway.get(x, y));
 
 			im.add_pix(x, y, static_cast<unsigned char>(c));
 		}
@@ -532,7 +536,7 @@ int main()
 	std::srand(std::time(nullptr));
 	create_stars(im, CONFIG_NR_STARS);
 	create_dust(im, 0.1f);
-	create_milkyway(im, 4, 0.5f);
+	create_milkyway(im, 4, 255.f);
 
 	im.to_pgm(std::cout);
 }
