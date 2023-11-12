@@ -70,12 +70,17 @@ std::ostream &operator <<(std::ostream &out, const Point &p)
 	return out << '(' << p.x << ", " << p.y << ')';
 }
 
-static Point random_unit(void)
+static Point random_unit(float from, float to)
 {
-	float angle = rand_in_range(0.f, 2 * std::numbers::pi);
-	std::cerr << angle << ' ';
+	float angle = rand_in_range(from, to);
 	return Point(std::cos(angle), std::sin(angle));
 }
+
+static Point random_unit(void)
+{
+	return random_unit(0.f, 2 * std::numbers::pi);
+}
+
 
 static float dot(const Point &a, const Point &b)
 {
@@ -261,6 +266,11 @@ static float hypot(unsigned int x0, unsigned int y0, unsigned int x1,
 	return std::sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
 }
 
+static float catet(float hypot, float catet)
+{
+	return std::sqrt(hypot * hypot - catet * catet);
+}
+
 static float uniform_cos(unsigned int x, unsigned int max, float p)
 {
 	float xv, c;
@@ -268,6 +278,11 @@ static float uniform_cos(unsigned int x, unsigned int max, float p)
 	xv = static_cast<float>(x) / static_cast<float>(max);
 	c = std::cos((2.f * xv - 1) * std::numbers::pi);
 	return std::pow((c + 1.f) / 2.f, p);
+}
+
+static float norm(float x, float w)
+{
+	return std::exp(-w * x * x);
 }
 
 static void draw_line(Image &im, int x0, int y0, int x1, int y1, float intensity)
@@ -416,10 +431,10 @@ float dotGridGradient(const Matrix<Point> &grid, int ix, int iy, float x, float 
 	return dot(g, p);
 }
 
-float perlin(const Matrix<Point> &grid, float x, float y)
+float perlin_pix(const Matrix<Point> &grid, float x, float y)
 {
 	Point p(x, y);
-	int x0 = static_cast<int>(floor(x))
+	int x0 = static_cast<int>(floor(x));
 	int x1 = x0 + 1;
 	int y0 = static_cast<int>(floor(y));
 	int y1 = y0 + 1;
@@ -444,7 +459,6 @@ static void perlin_octave(Image &im, unsigned frequency, float amplitude)
 	for (unsigned int y = 0; y <= frequency; ++y) {
 		for (unsigned int x = 0; x <= frequency; ++x) {
 			grid.get(x, y) = random_unit();
-			std::cerr << grid.get(x, y) << '\n';
 		}
 	}
 
@@ -453,17 +467,18 @@ static void perlin_octave(Image &im, unsigned frequency, float amplitude)
 			fx = static_cast<float>(x) * frequency / im.get_w();
 			fy = static_cast<float>(y) * frequency / im.get_h();
 
-			c = (perlin(grid, fx, fy) + 1.f) / 2.f * amplitude;
+			c = (perlin_pix(grid, fx, fy) + 1.f) / 2.f * amplitude;
 			im.add_pix(x, y, static_cast<unsigned char>(c));
 		}
 	}
 
 }
 
-static void create_milkyway(Image &im, unsigned octaves)
+static void perlin(Image &im, unsigned octaves)
 {
 	unsigned frequency = 8;
 	float amplitude = 128;
+	Point direction;
 
 	if (unlikely(octaves > 7)) {
 		panic("create_milkyway: too many octaves");
@@ -477,14 +492,47 @@ static void create_milkyway(Image &im, unsigned octaves)
 	}
 }
 
+static void create_milkyway(Image &im, unsigned octaves, float alpha)
+{
+	Image milkyway(im.get_w(), im.get_h());
+	Point direction, center, delta;
+	float c, du, dh;
+	const float pi = std::numbers::pi;
+
+	perlin(milkyway, octaves);
+
+	center.x = milkyway.get_w() / 2.f;
+	center.y = milkyway.get_h() / 2.f;
+	direction = random_unit(-pi / 6.f, pi / 6.f);
+
+	for (unsigned y = 0; y < milkyway.get_h(); ++y) {
+		for (unsigned x = 0; x < milkyway.get_w(); ++x) {
+			delta.x = x - center.x;
+			delta.y = y - center.y;
+
+			du = dot(delta, direction);
+			dh = catet(length(delta), du);
+
+			du /= std::max(im.get_w(), im.get_h());
+			dh /= std::max(im.get_w(), im.get_h());
+
+			du = norm(du, 4.f);
+			dh = norm(dh, 32.f);
+			c = alpha * du * dh * milkyway.get_pix(x, y);
+
+			im.add_pix(x, y, static_cast<unsigned char>(c));
+		}
+	}
+}
+
 int main()
 {
 	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
 
 	std::srand(std::time(nullptr));
-	//create_stars(im, CONFIG_NR_STARS);
-	//create_dust(im, 0.1f);
-	create_milkyway(im, 4);
+	create_stars(im, CONFIG_NR_STARS);
+	create_dust(im, 0.1f);
+	create_milkyway(im, 4, 0.5f);
 
 	im.to_pgm(std::cout);
 }
