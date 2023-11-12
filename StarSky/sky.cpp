@@ -79,6 +79,7 @@ struct Point {
 	{ }
 };
 
+__used
 std::ostream &operator <<(std::ostream &out, const Point &p)
 {
 	return out << '(' << p.x << ", " << p.y << ')';
@@ -390,7 +391,6 @@ static void create_star(Image &im, unsigned int x, unsigned int y,
 	}
 }
 
-__used
 static void create_stars(Image &im, int nr_stars)
 {
 	unsigned int star_x, star_y, star_r;
@@ -415,7 +415,6 @@ static void create_stars(Image &im, int nr_stars)
 	}
 }
 
-__used
 static void create_dust(Image &im, float density)
 {
 	float intensity;
@@ -440,7 +439,7 @@ static void create_dust(Image &im, float density)
 	}
 }
 
-float dotGridGradient(const Matrix<Point> &grid, int ix, int iy, float x, float y)
+static float perlin_dot(const Matrix<Point> &grid, int ix, int iy, float x, float y)
 {
 	Point g = grid.get(ix, iy);
 	Point p(x - ix, y - iy);
@@ -448,7 +447,7 @@ float dotGridGradient(const Matrix<Point> &grid, int ix, int iy, float x, float 
 	return dot(g, p);
 }
 
-float perlin_pix(const Matrix<Point> &grid, float x, float y)
+static float perlin_pix(const Matrix<Point> &grid, float x, float y)
 {
 	Point p(x, y);
 	int x0 = static_cast<int>(floor(x));
@@ -457,10 +456,10 @@ float perlin_pix(const Matrix<Point> &grid, float x, float y)
 	int y1 = y0 + 1;
 	float v1, v2, v3, v4, v12, v34;
 
-	v1 = dotGridGradient(grid, x0, y0, x, y);
-	v2 = dotGridGradient(grid, x1, y0, x, y);
-	v3 = dotGridGradient(grid, x0, y1, x, y);
-	v4 = dotGridGradient(grid, x1, y1, x, y);
+	v1 = perlin_dot(grid, x0, y0, x, y);
+	v2 = perlin_dot(grid, x1, y0, x, y);
+	v3 = perlin_dot(grid, x0, y1, x, y);
+	v4 = perlin_dot(grid, x1, y1, x, y);
 
 	v12 = std::lerp(v1, v2, x - x0);
 	v34 = std::lerp(v3, v4, x - x0);
@@ -641,3 +640,4 @@ int main(int argc, char **argv)
 		delete config.out;
 	}
 }
+

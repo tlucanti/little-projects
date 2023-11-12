@@ -7,3 +7,8 @@ all:
 		sky.cpp \
 		-o sky
 
+sky:
+	./sky 2000 2000 1000 --file=sky.pgm
+
+.PHONY: all sky
+
