@@ -37,7 +37,8 @@
 __noret __cold
 static void panic(const std::string &reason)
 {
-	std::cout << "[panic]: " << reason << std::endl;
+	std::cerr << "[panic]: " << reason << std::endl;
+	std::cerr.flush();
 	std::abort();
 }
 
@@ -109,6 +110,16 @@ public:
 	}
 
 	T &get(unsigned int x, unsigned int y)
+	{
+		if (unlikely(x >= w or y >= h)) {
+			panic("Matrix::get: out of bounds");
+			unreachable();
+		}
+
+		return data.at(y * w + x);
+	}
+
+	const T &get(unsigned int x, unsigned int y) const
 	{
 		if (unlikely(x >= w or y >= h)) {
 			panic("Matrix::get: out of bounds");
@@ -398,7 +409,7 @@ static void create_dust(Image &im, float density)
 }
 
 __used
-static void perlin(Image &im, int period)
+static void _perlin(Image &im, int period)
 {
 	Matrix<Point> mat(period + 1, period + 1);
 	Point d1, d2, d3, d4;
@@ -471,6 +482,76 @@ static void perlin(Image &im, int period)
 	}
 }
 
+
+float dotGridGradient(const Matrix<Point> &grid, int ix, int iy, float x, float y)
+{
+	Point g = grid.get(ix, iy);
+	Point p(x - ix, y - iy);
+
+	return dot(g, p);
+}
+
+float perlin(const Matrix<Point> &grid, float x, float y)
+{
+	Point p(x, y);
+	int x0 = static_cast<int>(floor(x))
+	int x1 = x0 + 1;
+	int y0 = static_cast<int>(floor(y));
+	int y1 = y0 + 1;
+	float v1, v2, v3, v4, v12, v34;
+
+	v1 = dotGridGradient(grid, x0, y0, x, y);
+	v2 = dotGridGradient(grid, x1, y0, x, y);
+	v3 = dotGridGradient(grid, x0, y1, x, y);
+	v4 = dotGridGradient(grid, x1, y1, x, y);
+
+	v12 = std::lerp(v1, v2, x - x0);
+	v34 = std::lerp(v3, v4, x - x0);
+
+	return std::lerp(v12, v34, y - y0);
+}
+
+static void perlin_octave(Image &im, unsigned frequency, float amplitude)
+{
+	Matrix<Point> grid(frequency + 1, frequency + 1);
+	float fx, fy, c;
+
+	for (unsigned int y = 0; y <= frequency; ++y) {
+		for (unsigned int x = 0; x <= frequency; ++x) {
+			grid.get(x, y) = random_unit();
+			std::cerr << grid.get(x, y) << '\n';
+		}
+	}
+
+	for (unsigned y = 0; y < im.get_h(); ++y) {
+		for (unsigned x = 0; x < im.get_w(); ++x) {
+			fx = static_cast<float>(x) * frequency / im.get_w();
+			fy = static_cast<float>(y) * frequency / im.get_h();
+
+			c = (perlin(grid, fx, fy) + 1.f) / 2.f * amplitude;
+			im.add_pix(x, y, static_cast<unsigned char>(c));
+		}
+	}
+
+}
+
+static void create_milkyway(Image &im, unsigned octaves)
+{
+	unsigned frequency = 8;
+	float amplitude = 128;
+
+	if (unlikely(octaves > 7)) {
+		panic("create_milkyway: too many octaves");
+		unreachable();
+	}
+
+	while (octaves--) {
+		perlin_octave(im, frequency, amplitude - 1);
+		frequency *= 2.f;
+		amplitude /= 2;
+	}
+}
+
 int main()
 {
 	Image im(CONFIG_IMAGE_WIDTH, CONFIG_IMAGE_HEIGHT);
@@ -478,7 +559,7 @@ int main()
 	std::srand(std::time(nullptr));
 	//create_stars(im, CONFIG_NR_STARS);
 	//create_dust(im, 0.1f);
-	perlin(im, 2);
+	create_milkyway(im, 4);
 
 	im.to_pgm(std::cout);
 }
