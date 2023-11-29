@@ -7,10 +7,15 @@
 #include <vector>
 
 class Table {
-	std::vector<std::vector<TableItem>> table;
+public:
+	Table(const std::vector<std::vector<int>> &transition);
 
-	Table(const std::vector<std::vector<int> > &transition,
-	      const std::vector<std::vector<int> > &exit);
+	void dump(void);
+
+private:
+	std::vector<std::vector<TableItem>> table;
+	size_t rows;
+	size_t cols;
 };
 
 #endif /* TABLE_HPP */
