@@ -2,3 +2,5 @@
 /lab1
 /lab2
 /build
+compile_commands.json
+/.cache

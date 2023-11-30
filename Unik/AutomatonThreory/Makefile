@@ -19,7 +19,7 @@ LAB2_OBJ =	build/Impl.o		\
 		build/lab2.o
 
 CXX_FLAGS =	-fdiagnostics-color=always	\
-		-O2				\
+		-O0 -g3				\
 		-std=c++20			\
 		-I include
 
