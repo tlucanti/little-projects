@@ -1,22 +1,51 @@
 
-lab1:
-	g++ \
-		-fdiagnostics-color=always \
-		-std=c++20 \
-		-I include \
-		src/DNF.cpp src/Impl.cpp \
-		lab1.cpp \
-		-o lab1
+all: lab2
 
-lab2:
-	c++ \
-		-Wall -Wextra -Werror \
-		-fdiagnostics-color=always -std=c++2a \
-		-I include \
-		-O0 -g3 \
-		-o lab2 \
-		src/Table.cpp src/TableItem.cpp \
-		lab2.cpp
+SRC =	src/DNF.cpp		\
+	src/Impl.cpp		\
+	src/TableItem.cpp	\
+	src/Table.cpp		\
+	lab1.cpp		\
+	lab2.cpp
 
+LAB1_OBJ =	build/Impl.o	\
+		build/DNF.o	\
+		build/lab1.o
 
-.PHONY: lab1 lab2
+LAB2_OBJ =	build/Impl.o		\
+		build/DNF.o		\
+		build/TableItem.o	\
+		build/Table.o		\
+		build/lab2.o
+
+CXX_FLAGS =	-fdiagnostics-color=always	\
+		-O2				\
+		-std=c++20			\
+		-I include
+
+CC = 	c++
+LD =	c++
+
+all: lab2
+
+build/%.o: src/%.cpp build Makefile
+	$(CC) $(CXX_FLAGS) -c $< -o $@
+
+build/%.o: %.cpp build Makefile
+	$(CC) $(CXX_FLAGS) -c $< -o $@
+
+build:
+	mkdir -p build
+
+lab1: $(LAB1_OBJ)
+	$(LD) $(LDFLAGS) $(LAB1_OBJ) -o lab1
+
+lab2: $(LAB2_OBJ)
+	$(LD) $(LDFLAGS) $(LAB2_OBJ) -o lab2
+
+run-lab1: lab1
+	./lab1 1111101-11-01000
+
+run-lab2: lab2
+	./lab2 transition.txt
+
