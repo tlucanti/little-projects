@@ -9,7 +9,7 @@ struct bitfield {
 		: val(val), maxw(maxw)
 	{}
 
-	unsigned operator [](unsigned i)
+	unsigned operator [](unsigned i) const
 	{
 		if (i > maxw) {
 			panic("out of range");

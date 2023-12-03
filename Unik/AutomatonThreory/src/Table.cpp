@@ -1,7 +1,10 @@
 
 #include <Table.hpp>
 
-Table::Table(const std::vector<std::vector<int>> &transition)
+Table::Table()
+{}
+
+Table::Table(const std::vector<std::vector<unsigned>> &transition)
 {
 	unsigned val, maxw, v;
 
@@ -30,7 +33,7 @@ Table::Table(const std::vector<std::vector<int>> &transition)
 	}
 }
 
-void Table::dump(void)
+void Table::dump(void) const
 {
 	for (size_t r = 0; r < rows; ++r) {
 		for (size_t c = 0; c < cols; ++c) {
@@ -39,5 +42,15 @@ void Table::dump(void)
 		std::cout << '\n';
 	}
 	std::cout << '\n';
+}
+
+size_t Table::get_rows(void) const
+{
+	return this->rows;
+}
+
+size_t Table::get_cols(void) const
+{
+	return this->cols;
 }
 

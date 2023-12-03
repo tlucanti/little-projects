@@ -7,11 +7,15 @@
 #include <iomanip>
 #include <cstdlib>
 
+#define panic(msg) __panic(msg, __FILE__, __LINE__)
+
 __attribute__((__cold__, __noreturn__))
-static inline void panic(const std::string &s)
+static inline void __panic(const std::string &s, const std::string &file, size_t line)
 {
+	std::cout << std::endl;
+	std::cerr << file << ':' << line << "\n";
 	std::cerr << "PANIC: " << s << std::endl;
-	std::exit(1);
+	std::abort();
 }
 
 static inline unsigned int powerof2(unsigned int x)

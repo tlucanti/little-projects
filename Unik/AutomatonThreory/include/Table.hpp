@@ -3,14 +3,16 @@
 #define TABLE_HPP
 
 #include <TableItem.hpp>
-
 #include <vector>
 
 class Table {
 public:
-	Table(const std::vector<std::vector<int>> &transition);
+	Table(const std::vector<std::vector<unsigned>> &transition);
+	Table();
 
-	void dump(void);
+	void dump(void) const;
+	size_t get_rows(void) const;
+	size_t get_cols(void) const;
 
 private:
 	std::vector<std::vector<TableItem>> table;

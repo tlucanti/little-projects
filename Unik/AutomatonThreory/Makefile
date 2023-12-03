@@ -1,13 +1,4 @@
 
-all: lab2
-
-SRC =	src/DNF.cpp		\
-	src/Impl.cpp		\
-	src/TableItem.cpp	\
-	src/Table.cpp		\
-	lab1.cpp		\
-	lab2.cpp
-
 LAB1_OBJ =	build/Impl.o	\
 		build/DNF.o	\
 		build/lab1.o
@@ -16,6 +7,7 @@ LAB2_OBJ =	build/Impl.o		\
 		build/DNF.o		\
 		build/TableItem.o	\
 		build/Table.o		\
+		build/Automat.o		\
 		build/lab2.o
 
 CXX_FLAGS =	-fdiagnostics-color=always	\
@@ -26,7 +18,7 @@ CXX_FLAGS =	-fdiagnostics-color=always	\
 CC = 	c++
 LD =	c++
 
-all: lab2
+all: run-lab2
 
 build/%.o: src/%.cpp build Makefile
 	$(CC) $(CXX_FLAGS) -c $< -o $@
@@ -47,5 +39,7 @@ run-lab1: lab1
 	./lab1 1111101-11-01000
 
 run-lab2: lab2
-	./lab2 transition.txt
+	./lab2 transition.txt output.txt
+
+.PHONY: lab1 lab2 run-lab1 run-lab2
 

@@ -1,19 +1,20 @@
 
-#ifndef TABLE_HPP
-#define TABLE_HPP
+#ifndef AUTOMAT_HPP
+#define AUTOMAT_HPP
 
 #include <Table.hpp>
-#include <Impl.hpp>
 
 class Automat {
 public:
-	Automat(const Table &transition, const std::vector<Impl> &states);
-	Automat(const Table &transition, const Table &states);
+	Automat(const Table &transition, const std::vector<unsigned> &output);
+	Automat(const Table &transition, const Table &output);
 
 private:
+	void init_automat(const Table &trnsition, const Table &output);
+
 	Table transition;
-	Table states;
+	Table output;
 };
 
-#endif /* TABLE_HPP */
+#endif /* AUTOMAT_HPP */
 

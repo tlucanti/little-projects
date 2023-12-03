@@ -1,7 +1,6 @@
 
-#include <Table.hpp>
-#include <Impl.hpp>
 #include <common.hpp>
+#include <Automat.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -9,7 +8,7 @@
 #include <vector>
 #include <sstream>
 
-static void parse_table(std::istream &in, std::vector<std::vector<int>> &transition)
+static void parse_table(std::istream &in, std::vector<std::vector<unsigned>> &transition)
 {
 	int rows = 0;
 	std::string line;
@@ -26,14 +25,13 @@ static void parse_table(std::istream &in, std::vector<std::vector<int>> &transit
 
 		while (ss) {
 			std::string edge;
-			int state;
+			unsigned state;
 			ss >> edge;
 
 			if (edge.empty()) {
 				break;
 			}
 
-			std::cout << edge << ' ';
 			if (edge == "-") {
 				state = 0;
 			} else {
@@ -42,7 +40,6 @@ static void parse_table(std::istream &in, std::vector<std::vector<int>> &transit
 
 			transition.back().push_back(state);
 		}
-		std::cout << std::endl;
 	}
 
 	size_t cols = transition.front().size();
@@ -53,15 +50,27 @@ static void parse_table(std::istream &in, std::vector<std::vector<int>> &transit
 	}
 }
 
-static void parse_states(std::ifstream &in, std::vector<Impl> &states)
+static void parse_output(std::ifstream &in, std::vector<unsigned> &output)
 {
+	std::string line;
+	std::getline(in, line);
 
+	std::stringstream ss(line);
+	while (ss) {
+		std::string sout;
+		ss >> sout;
+
+		if (sout.empty()) {
+			break;
+		}
+		output.push_back(std::stoi(sout, nullptr, 2));
+	}
 }
 
 int main(int argc, char **argv)
 {
-	std::vector<std::vector<int>> trans;
-	std::vector<Impl> states;
+	std::vector<std::vector<unsigned>> trans;
+	std::vector<unsigned> states;
 
 	if (argc != 3) {
 		panic("argv err");
@@ -78,10 +87,10 @@ int main(int argc, char **argv)
 	}
 
 	parse_table(tr, trans);
-	parse_states(st, states);
+	parse_output(st, states);
 
 	Table table(trans);
-	std::cout << '\n';
-	table.dump();
+
+	Automat at(trans, states);
 }
 
