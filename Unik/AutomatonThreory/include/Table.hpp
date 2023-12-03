@@ -13,6 +13,8 @@ public:
 	void dump(void) const;
 	size_t get_rows(void) const;
 	size_t get_cols(void) const;
+	int get_w(void) const;
+	const TableItem &at(size_t r, size_t c) const;
 
 private:
 	std::vector<std::vector<TableItem>> table;

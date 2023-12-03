@@ -92,5 +92,10 @@ int main(int argc, char **argv)
 	Table table(trans);
 
 	Automat at(trans, states);
+
+	at.encode();
+	at.minimize();
+	at.dump();
+	at.print();
 }
 

@@ -12,14 +12,14 @@ private:
 	std::vector<Impl> data;
 
 	int step();
-	std::string minimize_table(void);
+	std::string minimize_table(long maxiter);
 	bool full_coverage(const std::string &bitmask);
 
 public:
 	DNF(const std::string &input);
 	~DNF();
 
-	void minimize(void);
+	void minimize(long maxiter=100000);
 	void dump(void);
 	void print(void);
 	void table(void);

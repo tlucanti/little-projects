@@ -12,7 +12,7 @@ LAB2_OBJ =	build/Impl.o		\
 
 CXX_FLAGS =	-fdiagnostics-color=always	\
 		-Wall -Wextra -Werror		\
-		-O0 -g3				\
+		-O3 -g0				\
 		-std=c++20			\
 		-I include
 

@@ -6,7 +6,7 @@ Table::Table()
 
 Table::Table(const std::vector<std::vector<int>> &transition)
 {
-	unsigned val, maxw, v;
+	int val, maxw, v;
 
 	rows = transition.size();
 	cols = transition.front().size();
@@ -17,6 +17,9 @@ Table::Table(const std::vector<std::vector<int>> &transition)
 
 		for (size_t c = 0; c < cols; ++c) {
 			v = transition.at(r).at(c);
+			if (v < 0) {
+				continue;
+			}
 			maxw = std::max(maxw, v);
 		}
 	}
@@ -52,5 +55,15 @@ size_t Table::get_rows(void) const
 size_t Table::get_cols(void) const
 {
 	return this->cols;
+}
+
+int Table::get_w(void) const
+{
+	return table.at(0).at(0).get_w();
+}
+
+const TableItem &Table::at(size_t r, size_t c) const
+{
+	return table.at(r).at(c);
 }
 

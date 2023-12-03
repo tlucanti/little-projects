@@ -29,7 +29,8 @@ void Automat::init_automat(const Table &trans, const Table &out)
 	transition = trans;
 	output = out;
 
-	if (transition.get_rows() != output.get_rows() || transition.get_cols() != output.get_cols()) {
+	if (transition.get_rows() != output.get_rows() ||
+	    transition.get_cols() != output.get_cols()) {
 		panic("transition and output shape mismatch");
 	}
 
@@ -37,5 +38,93 @@ void Automat::init_automat(const Table &trans, const Table &out)
 	transition.dump();
 	std::cout << "Output\n";
 	output.dump();
+}
+
+void Automat::encode(void)
+{
+	std::vector<std::string> Dstr;
+	std::vector<std::string> ystr;
+
+	std::cerr << "Encoding D:\n";
+	encode_table(transition, Dstr);
+	std::cerr << "\nEncoding y:\n";
+	encode_table(output, ystr);
+
+	for (const auto &s : Dstr) {
+		D.emplace_back(s);
+	}
+
+	for (const auto &s : ystr) {
+		y.emplace_back(s);
+	}
+}
+
+void Automat::minimize(void)
+{
+	for (auto &d : D) {
+		d.minimize();
+	}
+	for (auto &d : y) {
+		d.minimize();
+	}
+}
+
+void Automat::dump(void)
+{
+	transition.dump();
+	output.dump();
+}
+
+void Automat::print(void)
+{
+	for (size_t i = 0; i < D.size(); ++i) {
+		std::cout << 'D' << i << '\n';
+		D.at(i).print();
+	}
+
+	for (size_t i = 0; i < y.size(); ++i) {
+		std::cout << 'y' << i << '\n';
+		y.at(i).print();
+	}
+}
+
+void Automat::encode_table(const Table &tbl, std::vector<std::string> &trig)
+{
+	int nr_triggers = tbl.get_w();
+
+	trig.resize(nr_triggers);
+	for (int tr = 0; tr < nr_triggers; ++tr) {
+		encode_trigger(tbl, trig.at(tr), tr);
+	}
+}
+
+void Automat::encode_trigger(const Table &tbl, std::string &s, int bit)
+{
+	int row_bits = ilog2(tbl.get_rows() - 1) + 1;
+	int col_bits = ilog2(tbl.get_cols() - 1) + 1;
+
+	s.resize(1 << (col_bits + row_bits), '-');
+
+	for (size_t r = 0; r < tbl.get_rows(); ++r) {
+		for (size_t c = 0; c < tbl.get_cols(); ++c) {
+			size_t pos = tbl_to_idx(r, c, row_bits, col_bits);
+			TableItem val = tbl.at(r, c);
+
+			if (val.inf()) {
+				s.at(pos) = '-';
+			} else if (val.get_bit(bit)) {
+				s.at(pos) = '1';
+			} else {
+				s.at(pos) = '0';
+			}
+		}
+	}
+	std::cerr << "encoded: " << s << '\n';
+}
+
+size_t Automat::tbl_to_idx(size_t r, size_t c, size_t rb, size_t cb) const
+{
+	(void) rb;
+	return (r << cb) + c;
 }
 

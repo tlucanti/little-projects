@@ -18,8 +18,18 @@ unsigned TableItem::get(void) const
 	return val.val;
 }
 
+bool TableItem::get_bit(int i) const
+{
+	return val[i];
+}
+
 bool TableItem::inf(void) const
 {
 	return inf_;
+}
+
+int TableItem::get_w(void) const
+{
+	return val.maxw;
 }
 

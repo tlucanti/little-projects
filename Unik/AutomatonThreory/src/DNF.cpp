@@ -49,9 +49,11 @@ int DNF::step()
 	for (unsigned int i = 0; i < data.size(); ++i) {
 		for (unsigned int j = 0; j < data.size(); ++j) {
 			if (Impl::can_patch(data.at(i), data.at(j))) {
-				std::cerr << "patching " << i << ' ' << j << std::endl;
+				std::cerr << "patching " << i << ' ' << j
+					  << std::endl;
 				Impl impl = Impl::patch(data.at(i), data.at(j));
-				if (std::find(next.begin(), next.end(), impl) == next.end()) {
+				if (std::find(next.begin(), next.end(), impl) ==
+				    next.end()) {
 					next.push_back(impl);
 				}
 				++patched;
@@ -98,7 +100,7 @@ bool DNF::full_coverage(const std::string &bitmask)
 	return sum == static_cast<int>(covered.size());
 }
 
-std::string DNF::minimize_table(void)
+std::string DNF::minimize_table(long maxiter)
 {
 	std::string max_removed(data.size(), 0);
 
@@ -110,9 +112,16 @@ std::string DNF::minimize_table(void)
 
 		do {
 			if (full_coverage(removed)) {
-				std::cerr << "minimized table down to " << data.size() - i << " rows" << std::endl;
+				std::cerr << "minimized table down to "
+					  << data.size() - i << " rows"
+					  << std::endl;
 				max_removed = removed;
 				success = true;
+				break;
+			}
+
+			if (maxiter-- < 0) {
+				std::cerr << "MINIMIZING STOP BY TIMEOUT\n";
 				break;
 			}
 
@@ -126,7 +135,7 @@ std::string DNF::minimize_table(void)
 	return max_removed;
 }
 
-void DNF::minimize(void)
+void DNF::minimize(long maxiter)
 {
 	std::string bitmask(input.size(), 0);
 	std::vector<Impl> data_min;
@@ -135,7 +144,8 @@ void DNF::minimize(void)
 		if (step() == 0) {
 			break;
 		}
-		std::cerr << "new implicants number: " << data.size() << std::endl;
+		std::cerr << "new implicants number: " << data.size()
+			  << std::endl;
 		dump();
 		std::cerr << std::endl;
 	}
@@ -146,7 +156,7 @@ void DNF::minimize(void)
 	table(bitmask);
 
 	std::cerr << std::endl;
-	bitmask = minimize_table();
+	bitmask = minimize_table(maxiter);
 	std::cerr << "\nminimized implicant table" << std::endl;
 	table(bitmask);
 	std::cerr << std::endl;
