@@ -205,7 +205,7 @@ void DNF::table(const std::string &bitmask)
 {
 	const int w = 3;
 
-	std::cout << " N | ";
+	std::cerr << " N | ";
 	for (size_t di = 0; di < data.size(); ++di) {
 		Impl &i = data.at(di);
 
@@ -216,7 +216,7 @@ void DNF::table(const std::string &bitmask)
 	}
 	std::cerr << '\n';
 
-	std::cout << " P | ";
+	std::cerr << " P | ";
 	for (size_t di = 0; di < data.size(); ++di) {
 		Impl &i = data.at(di);
 

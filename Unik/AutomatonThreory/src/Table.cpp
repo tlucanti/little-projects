@@ -40,11 +40,11 @@ void Table::dump(void) const
 {
 	for (size_t r = 0; r < rows; ++r) {
 		for (size_t c = 0; c < cols; ++c) {
-			std::cout << table.at(r).at(c) << ' ';
+			std::cerr << table.at(r).at(c) << ' ';
 		}
-		std::cout << '\n';
+		std::cerr << '\n';
 	}
-	std::cout << '\n';
+	std::cerr << '\n';
 }
 
 size_t Table::get_rows(void) const

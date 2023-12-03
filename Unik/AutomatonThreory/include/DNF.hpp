@@ -19,7 +19,7 @@ public:
 	DNF(const std::string &input);
 	~DNF();
 
-	void minimize(long maxiter=100000);
+	void minimize(long maxiter=1000000);
 	void dump(void);
 	void print(void);
 	void table(void);

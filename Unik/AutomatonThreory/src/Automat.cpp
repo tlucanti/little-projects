@@ -34,9 +34,9 @@ void Automat::init_automat(const Table &trans, const Table &out)
 		panic("transition and output shape mismatch");
 	}
 
-	std::cout << "Transition\n";
+	std::cerr << "Transition\n";
 	transition.dump();
-	std::cout << "Output\n";
+	std::cerr << "Output\n";
 	output.dump();
 }
 
@@ -78,13 +78,15 @@ void Automat::dump(void)
 void Automat::print(void)
 {
 	for (size_t i = 0; i < D.size(); ++i) {
-		std::cout << 'D' << i << '\n';
+		std::cout << 'D' << i << ":\n";
 		D.at(i).print();
+		std::cout << '\n';
 	}
 
 	for (size_t i = 0; i < y.size(); ++i) {
-		std::cout << 'y' << i << '\n';
+		std::cout << 'y' << i << ":\n";
 		y.at(i).print();
+		std::cout << '\n';
 	}
 }
 
