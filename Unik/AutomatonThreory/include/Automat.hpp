@@ -6,7 +6,7 @@
 
 class Automat {
 public:
-	Automat(const Table &transition, const std::vector<unsigned> &output);
+	Automat(const Table &transition, const std::vector<int> &output);
 	Automat(const Table &transition, const Table &output);
 
 private:

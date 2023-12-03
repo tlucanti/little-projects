@@ -7,7 +7,7 @@
 
 class Table {
 public:
-	Table(const std::vector<std::vector<unsigned>> &transition);
+	Table(const std::vector<std::vector<int>> &transition);
 	Table();
 
 	void dump(void) const;

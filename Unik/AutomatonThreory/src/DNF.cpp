@@ -75,14 +75,14 @@ bool DNF::full_coverage(const std::string &bitmask)
 	std::vector<int> covered(input.size(), 0);
 	int sum = 0;
 
-	for (int di = 0; di < data.size(); ++di) {
+	for (size_t di = 0; di < data.size(); ++di) {
 		Impl &d = data.at(di);
 
 		if (bitmask.at(di) == 1) {
 			continue;
 		}
 
-		for (int i = 0; i < input.size(); ++i) {
+		for (size_t i = 0; i < input.size(); ++i) {
 			if (input.at(i) == '1') {
 				covered.at(i) += d.was_overlap(i);
 			} else {
@@ -95,14 +95,14 @@ bool DNF::full_coverage(const std::string &bitmask)
 		sum += !!i;
 	}
 
-	return sum == covered.size();
+	return sum == static_cast<int>(covered.size());
 }
 
 std::string DNF::minimize_table(void)
 {
 	std::string max_removed(data.size(), 0);
 
-	for (int i = 1; i < data.size(); ++i) {
+	for (size_t i = 1; i < data.size(); ++i) {
 		std::string removed(i, 1);
 		bool success = false;
 
@@ -151,7 +151,7 @@ void DNF::minimize(void)
 	table(bitmask);
 	std::cerr << std::endl;
 
-	for (int di = 0; di < data.size(); ++di) {
+	for (size_t di = 0; di < data.size(); ++di) {
 		if (bitmask.at(di) == 0) {
 			data_min.push_back(data.at(di));
 		}
@@ -211,7 +211,7 @@ void DNF::table(const std::string &bitmask)
 	const int w = 3;
 
 	std::cerr << "N   \t|";
-	for (int i = 0; i < input.size(); ++i) {
+	for (size_t i = 0; i < input.size(); ++i) {
 		if (input.at(i) == '1') {
 			std::cerr << std::setw(w);
 			std::cerr << i + 1 << " |";
@@ -219,7 +219,7 @@ void DNF::table(const std::string &bitmask)
 	}
 
 	std::cerr << '|';
-	for (int i = 0; i < input.size(); ++i) {
+	for (size_t i = 0; i < input.size(); ++i) {
 		if (input.at(i) == '-') {
 			std::cerr << std::setw(w);
 			std::cerr << i + 1 << " |";
@@ -227,7 +227,7 @@ void DNF::table(const std::string &bitmask)
 	}
 	std::cerr << std::endl;
 
-	for (int di = 0; di < data.size(); ++di) {
+	for (size_t di = 0; di < data.size(); ++di) {
 		Impl &i = data.at(di);
 
 		if (bitmask.at(di) == 1) {
@@ -236,7 +236,7 @@ void DNF::table(const std::string &bitmask)
 
 		std::cerr << '(' << i.num << ", " << i.p << ")\t|";
 
-		for (int j = 0; j < input.size(); ++j) {
+		for (size_t j = 0; j < input.size(); ++j) {
 			if (input.at(j) == '1') {
 				std::cerr << std::setw(w);
 				if (i.was_overlap(j)) {
@@ -249,7 +249,7 @@ void DNF::table(const std::string &bitmask)
 		}
 
 		std::cerr << '|';
-		for (int j = 0; j < input.size(); ++j) {
+		for (size_t j = 0; j < input.size(); ++j) {
 			if (input.at(j) == '-') {
 				std::cerr << std::setw(w);
 				if (i.was_overlap(j)) {

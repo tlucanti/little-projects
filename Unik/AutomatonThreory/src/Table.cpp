@@ -4,7 +4,7 @@
 Table::Table()
 {}
 
-Table::Table(const std::vector<std::vector<unsigned>> &transition)
+Table::Table(const std::vector<std::vector<int>> &transition)
 {
 	unsigned val, maxw, v;
 
@@ -37,7 +37,7 @@ void Table::dump(void) const
 {
 	for (size_t r = 0; r < rows; ++r) {
 		for (size_t c = 0; c < cols; ++c) {
-			std::cout << table.at(r).at(c).val.val << ' ';
+			std::cout << table.at(r).at(c) << ' ';
 		}
 		std::cout << '\n';
 	}

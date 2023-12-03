@@ -1,9 +1,9 @@
 
 #include <Automat.hpp>
 
-Automat::Automat(const Table &transition, const std::vector<unsigned> &output)
+Automat::Automat(const Table &transition, const std::vector<int> &output)
 {
-	std::vector<std::vector<unsigned>> mt(transition.get_rows());
+	std::vector<std::vector<int>> mt(transition.get_rows());
 
 	if (transition.get_cols() != output.size()) {
 		panic("transition & output shape mismatch");

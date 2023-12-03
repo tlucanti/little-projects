@@ -8,7 +8,7 @@
 #include <vector>
 #include <sstream>
 
-static void parse_table(std::istream &in, std::vector<std::vector<unsigned>> &transition)
+static void parse_table(std::istream &in, std::vector<std::vector<int>> &transition)
 {
 	int rows = 0;
 	std::string line;
@@ -33,9 +33,9 @@ static void parse_table(std::istream &in, std::vector<std::vector<unsigned>> &tr
 			}
 
 			if (edge == "-") {
-				state = 0;
+				state = -1;
 			} else {
-				state = std::stoi(edge);
+				state = std::stoi(edge) - 1;
 			}
 
 			transition.back().push_back(state);
@@ -50,7 +50,7 @@ static void parse_table(std::istream &in, std::vector<std::vector<unsigned>> &tr
 	}
 }
 
-static void parse_output(std::ifstream &in, std::vector<unsigned> &output)
+static void parse_output(std::ifstream &in, std::vector<int> &output)
 {
 	std::string line;
 	std::getline(in, line);
@@ -69,8 +69,8 @@ static void parse_output(std::ifstream &in, std::vector<unsigned> &output)
 
 int main(int argc, char **argv)
 {
-	std::vector<std::vector<unsigned>> trans;
-	std::vector<unsigned> states;
+	std::vector<std::vector<int>> trans;
+	std::vector<int> states;
 
 	if (argc != 3) {
 		panic("argv err");
