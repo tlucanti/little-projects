@@ -173,40 +173,25 @@ void DNF::dump(void)
 {
 	const int w = 3;
 
-	std::cerr << "num |";
+	std::cerr << "| num | ind |  p  | pw|inf|\n";
 	for (auto &i : data) {
-		std::cerr << std::setw(w);
-		std::cerr << i.num << " |";
-	}
-	std::cerr << std::endl;
+		std::cerr << "| ";
+		std::cerr << std::setw(w) << i.num;
 
-	std::cerr << "ind |";
-	for (auto &i : data) {
-		std::cerr << std::setw(w);
-		std::cerr << i.ind << " |";
-	}
-	std::cerr << std::endl;
+		std::cerr << " | ";
+		std::cerr << std::setw(w) << i.ind;
 
-	std::cerr << "p   |";
-	for (auto &i : data) {
-		std::cerr << std::setw(w);
-		std::cerr << i.p << " |";
-	}
-	std::cerr << std::endl;
+		std::cerr << " | ";
+		std::cerr << std::setw(w) << i.p;
 
-	std::cerr << "pw  |";
-	for (auto &i : data) {
-		std::cerr << std::setw(w);
-		std::cerr << i.pw << " |";
-	}
-	std::cerr << std::endl;
+		std::cerr << " | ";
+		std::cerr << i.pw;
 
-	std::cerr << "inf |";
-	for (auto &i : data) {
-		std::cerr << std::setw(w);
-		std::cerr << i.inf << " |";
+		std::cerr << " | ";
+		std::cerr << i.inf;
+
+		std::cerr << " |\n";
 	}
-	std::cerr << std::endl;
 }
 
 void DNF::table(void)
@@ -220,57 +205,49 @@ void DNF::table(const std::string &bitmask)
 {
 	const int w = 3;
 
-	std::cerr << "N   \t|";
-	for (size_t i = 0; i < input.size(); ++i) {
-		if (input.at(i) == '1') {
-			std::cerr << std::setw(w);
-			std::cerr << i + 1 << " |";
-		}
-	}
-
-	std::cerr << '|';
-	for (size_t i = 0; i < input.size(); ++i) {
-		if (input.at(i) == '-') {
-			std::cerr << std::setw(w);
-			std::cerr << i + 1 << " |";
-		}
-	}
-	std::cerr << std::endl;
-
+	std::cout << " N | ";
 	for (size_t di = 0; di < data.size(); ++di) {
 		Impl &i = data.at(di);
 
 		if (bitmask.at(di) == 1) {
 			continue;
 		}
+		std::cerr << std::setw(w) << i.num << " | ";
+	}
+	std::cerr << '\n';
 
-		std::cerr << '(' << i.num << ", " << i.p << ")\t|";
+	std::cout << " P | ";
+	for (size_t di = 0; di < data.size(); ++di) {
+		Impl &i = data.at(di);
 
-		for (size_t j = 0; j < input.size(); ++j) {
-			if (input.at(j) == '1') {
-				std::cerr << std::setw(w);
-				if (i.was_overlap(j)) {
-					std::cerr << '+';
-				} else {
-					std::cerr << ' ';
-				}
-				std::cerr << " |";
-			}
+		if (bitmask.at(di) == 1) {
+			continue;
+		}
+		std::cerr << std::setw(w) << i.p << " | ";
+	}
+	std::cerr << '\n';
+
+	for (size_t j = 0; j < input.size(); ++j) {
+		if (input.at(j) != '1') {
+			continue;
 		}
 
-		std::cerr << '|';
-		for (size_t j = 0; j < input.size(); ++j) {
-			if (input.at(j) == '-') {
-				std::cerr << std::setw(w);
-				if (i.was_overlap(j)) {
-					std::cerr << '+';
-				} else {
-					std::cerr << ' ';
-				}
-				std::cerr << " |";
+		std::cerr << "   |  ";
+		for (size_t di = 0; di < data.size(); ++di) {
+			Impl &i = data.at(di);
+
+			if (bitmask.at(di) == 1) {
+				continue;
 			}
+
+			if (i.was_overlap(j)) {
+				std::cerr << '+';
+			} else {
+				std::cerr << ' ';
+			}
+			std::cerr << "  |  ";
 		}
-		std::cerr << std::endl;
+		std::cerr << '\n';
 	}
 }
 
