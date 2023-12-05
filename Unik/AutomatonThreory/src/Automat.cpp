@@ -28,6 +28,7 @@ void Automat::init_automat(const Table &trans, const Table &out)
 {
 	transition = trans;
 	output = out;
+	encoded = false;
 
 	if (transition.get_rows() != output.get_rows() ||
 	    transition.get_cols() != output.get_cols()) {
@@ -57,6 +58,8 @@ void Automat::encode(void)
 	for (const auto &s : ystr) {
 		y.emplace_back(s);
 	}
+
+	encoded = true;
 }
 
 void Automat::minimize(void)
@@ -88,6 +91,40 @@ void Automat::print(void)
 		y.at(i).print();
 		std::cout << '\n';
 	}
+}
+
+std::pair<int, int> Automat::run_encoded(int state, int input)
+{
+	if (!encoded) {
+		panic("cannot run before encoding");
+	}
+	(void) state;
+	(void ) input;
+	return {};
+}
+
+std::pair<int, int> Automat::run_table(int state, int input)
+{
+	int next_state = transition.at(state - 1, input - 1).get() + 1;
+	int next_outp = output.at(state - 1, input - 1).get() + 1;
+
+	return { next_state, next_outp };
+}
+
+void Automat::check_word_table(const std::vector<int> &states,
+			       const std::vector<int> &inputs)
+{
+	std::pair<int, int> next;
+
+	if (states.size() != inputs.size()) {
+		panic("check word length mismatch");
+	}
+
+	next = run_table(states.front(), inputs.front());
+	for (size_t i = 1; i < states.size(); ++i) {
+		std::cout << next.first << ' ' << next.second << '\n';
+	}
+
 }
 
 void Automat::encode_table(const Table &tbl, std::vector<std::string> &trig)

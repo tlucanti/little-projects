@@ -14,8 +14,13 @@ public:
 	void minimize(void);
 	void dump(void);
 	void print(void);
+	std::pair<int, int> run_encoded(int state, int input);
+	std::pair<int, int> run_table(int state, int input);
 
-private:
+	void check_word_table(const std::vector<int> &states,
+			      const std::vector<int> &inputs);
+
+    private:
 	void init_automat(const Table &trnsition, const Table &output);
 	void encode_table(const Table &tbl, std::vector<std::string> &trig);
 	void encode_trigger(const Table &tbl, std::string &s, int bit);
@@ -26,6 +31,8 @@ private:
 
 	std::vector<DNF> D;
 	std::vector<DNF> y;
+
+	bool encoded;
 };
 
 #endif /* AUTOMAT_HPP */
