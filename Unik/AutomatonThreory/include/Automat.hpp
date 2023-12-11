@@ -18,13 +18,22 @@ public:
 	std::pair<int, int> run_table(int state, int input);
 
 	void check_word_table(const std::vector<int> &states,
-			      const std::vector<int> &inputs);
+			      const std::vector<int> &inputs,
+			      const std::vector<int> &outputs);
+	void check_encoded_table(const std::vector<int> &states,
+				 const std::vector<int> &inputs,
+				 const std::vector<int> &outputs);
 
     private:
 	void init_automat(const Table &trnsition, const Table &output);
 	void encode_table(const Table &tbl, std::vector<std::string> &trig);
 	void encode_trigger(const Table &tbl, std::string &s, int bit);
 	size_t tbl_to_idx(size_t r, size_t c, size_t rb, size_t cb) const;
+
+	void _check_word(const std::vector<int> &states,
+			 const std::vector<int> &inputs,
+			 const std::vector<int> &outputs,
+			 bool table);
 
 	Table transition;
 	Table output;

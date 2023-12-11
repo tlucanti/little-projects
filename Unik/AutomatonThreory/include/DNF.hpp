@@ -19,6 +19,7 @@ public:
 	DNF(const std::string &input);
 	~DNF();
 
+	bool operator()(unsigned int value) const;
 	void minimize(long maxiter=10000);
 	void dump(void);
 	void print(void);

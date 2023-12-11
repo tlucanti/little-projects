@@ -50,7 +50,7 @@ static void parse_table(std::istream &in, std::vector<std::vector<int>> &transit
 	}
 }
 
-static void parse_output(std::ifstream &in, std::vector<int> &output)
+static void parse_output(std::istream &in, std::vector<int> &output)
 {
 	std::string line;
 	std::getline(in, line);
@@ -65,6 +65,12 @@ static void parse_output(std::ifstream &in, std::vector<int> &output)
 		}
 		output.push_back(std::stoi(sout, nullptr, 2));
 	}
+}
+
+static void parse_output(const std::string &s, std::vector<int> &output)
+{
+	std::stringstream ss(s);
+	parse_output(ss, output);
 }
 
 int main(int argc, char **argv)
@@ -97,5 +103,15 @@ int main(int argc, char **argv)
 	at.minimize();
 	at.dump();
 	at.print();
+
+	std::vector<int> w_states, w_inputs, w_outputs;
+	w_states = { 3, 4, 2, 1, 1, 3, 3 };
+	w_inputs = { 1, 7, 2, 9, 1, 2, 8, /*10*/ };
+	parse_output("10111 11010 10001 00011 10111 10001 01011", w_outputs);
+
+	std::cerr << "check word using table\n";
+	at.check_word_table(w_states, w_inputs, w_outputs);
+	std::cerr << "check word using encoded triggers\n";
+	at.check_encoded_table(w_states, w_inputs, w_outputs);
 }
 

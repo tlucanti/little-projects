@@ -59,6 +59,9 @@ void Automat::encode(void)
 		y.emplace_back(s);
 	}
 
+	if (D.size() != y.size()) {
+		// panic("encoded triggers size mismatch");
+	}
 	encoded = true;
 }
 
@@ -98,9 +101,24 @@ std::pair<int, int> Automat::run_encoded(int state, int input)
 	if (!encoded) {
 		panic("cannot run before encoding");
 	}
-	(void) state;
-	(void ) input;
-	return {};
+
+	int state_bits = ilog2(transition.get_cols() - 1) + 1;
+
+	unsigned int bitv = (input << state_bits) | state;
+	unsigned int next_state = 0;
+	unsigned int next_output = 0;
+
+	for (const auto &dt : D) {
+		next_state <<= 1;
+		next_state |= dt(bitv);
+	}
+
+	for (const auto &yt : y) {
+		next_output <<= 1;
+		next_output |= yt(bitv);
+	}
+
+	return { next_state, next_output };
 }
 
 std::pair<int, int> Automat::run_table(int state, int input)
@@ -111,20 +129,44 @@ std::pair<int, int> Automat::run_table(int state, int input)
 	return { next_state, next_outp };
 }
 
-void Automat::check_word_table(const std::vector<int> &states,
-			       const std::vector<int> &inputs)
+void Automat::_check_word(const std::vector<int> &states,
+			  const std::vector<int> &inputs,
+			  const std::vector<int> &outputs,
+			  bool table)
 {
 	std::pair<int, int> next;
 
-	if (states.size() != inputs.size()) {
+	if (states.size() != inputs.size() || inputs.size() != outputs.size()) {
 		panic("check word length mismatch");
 	}
 
-	next = run_table(states.front(), inputs.front());
-	for (size_t i = 1; i < states.size(); ++i) {
-		std::cout << next.first << ' ' << next.second << '\n';
+	for (size_t i = 0; i < states.size(); ++i) {
+		if (table) {
+			next = run_table(states.at(i), inputs.at(i));
+		} else {
+			next = run_encoded(states.at(i), inputs.at(i));
+		}
+
+		std::cout << "state: " << states.at(i)
+			  << " (" << next.first << "), ";
+		std::cout << "oputput: " << outputs.at(i)
+			  << " (" <<  next.second << ")\n";
 	}
 
+}
+
+void Automat::check_word_table(const std::vector<int> &states,
+			       const std::vector<int> &inputs,
+			       const std::vector<int> &outputs)
+{
+	_check_word(states, inputs, outputs, true);
+}
+
+void Automat::check_encoded_table(const std::vector<int> &states,
+				  const std::vector<int> &inputs,
+				  const std::vector<int> &outputs)
+{
+	_check_word(states, inputs, outputs, false);
 }
 
 void Automat::encode_table(const Table &tbl, std::vector<std::string> &trig)

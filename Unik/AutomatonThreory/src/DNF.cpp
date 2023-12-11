@@ -41,6 +41,11 @@ DNF::~DNF()
 {
 }
 
+bool DNF::operator ()(unsigned int value) const
+{
+	return input.at(value) != '0';
+}
+
 int DNF::step()
 {
 	std::vector<Impl> next;
