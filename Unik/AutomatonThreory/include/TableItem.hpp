@@ -30,6 +30,7 @@ class TableItem {
 public:
 	TableItem(int val, int maxw);
 	unsigned get(void) const;
+	std::string bin(int maxw) const;
 	bool get_bit(int i) const;
 	int get_w(void) const;
 	bool inf(void) const;

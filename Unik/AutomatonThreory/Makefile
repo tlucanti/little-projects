@@ -16,8 +16,8 @@ CXX_FLAGS =	-fdiagnostics-color=always	\
 		-std=c++20			\
 		-I include
 
-CC = 	c++
-LD =	c++
+CC = 	g++
+LD =	$(CC)
 
 all: run-lab2
 
@@ -30,17 +30,20 @@ build/%.o: %.cpp build Makefile
 build:
 	mkdir -p build
 
-lab1: $(LAB1_OBJ)
+build-lab1: $(LAB1_OBJ)
 	$(LD) $(LDFLAGS) $(LAB1_OBJ) -o lab1
 
-lab2: $(LAB2_OBJ)
+build-lab2: $(LAB2_OBJ)
 	$(LD) $(LDFLAGS) $(LAB2_OBJ) -o lab2
 
-run-lab1: lab1
+run-lab1: build-lab1
 	./lab1 1111101-11-01000
 
-run-lab2: lab2
+run-lab2: build-lab2
 	./lab2 transition.txt output.txt
 
-.PHONY: lab1 lab2 run-lab1 run-lab2
+clean:
+	rm -rf build
+
+.PHONY: build-lab1 build-lab2 run-lab1 run-lab2
 

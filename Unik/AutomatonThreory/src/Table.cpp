@@ -23,7 +23,11 @@ Table::Table(const std::vector<std::vector<int>> &transition)
 			maxw = std::max(maxw, v);
 		}
 	}
-	maxw = ilog2(maxw);
+	std::cout << "MAXW: " << maxw << ' ' << ilog2(maxw) << '\n';
+	if (maxw > 100) {
+		std::cout << "err\n";
+	}
+	maxw = ilog2(maxw) + 1;
 
 	table.resize(transition.size());
 	for (size_t r = 0; r < rows; ++r) {
@@ -36,11 +40,17 @@ Table::Table(const std::vector<std::vector<int>> &transition)
 	}
 }
 
-void Table::dump(void) const
+void Table::dump(bool binary) const
 {
 	for (size_t r = 0; r < rows; ++r) {
 		for (size_t c = 0; c < cols; ++c) {
-			std::cerr << table.at(r).at(c) << ' ';
+			TableItem v = table.at(r).at(c);
+			if (binary) {
+				std::cerr << v.bin(get_w());
+			} else {
+				std::cerr << v;
+			}
+			std::cerr << ' ';
 		}
 		std::cerr << '\n';
 	}

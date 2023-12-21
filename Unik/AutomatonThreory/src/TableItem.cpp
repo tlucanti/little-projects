@@ -18,6 +18,26 @@ unsigned TableItem::get(void) const
 	return val.val;
 }
 
+std::string TableItem::bin(int maxw) const
+{
+	unsigned v = val.val;
+	std::string ret(maxw, '0');
+	unsigned i = maxw - 1;
+
+	if (inf()) {
+		ret = std::string(maxw, '-');
+		return ret;
+	}
+
+	while (v) {
+		ret.at(i) = '0' + (v % 2);
+		v /= 2;
+		--i;
+	}
+	return ret;
+}
+
+
 bool TableItem::get_bit(int i) const
 {
 	return val[i];

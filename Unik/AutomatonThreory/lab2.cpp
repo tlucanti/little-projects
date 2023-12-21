@@ -100,18 +100,18 @@ int main(int argc, char **argv)
 	Automat at(trans, states);
 
 	at.encode();
-	at.minimize();
+	//at.minimize();
 	at.dump();
 	at.print();
 
 	std::vector<int> w_states, w_inputs, w_outputs;
-	w_states = { 3, 4, 2, 1, 1, 3, 3 };
-	w_inputs = { 1, 7, 2, 9, 1, 2, 8, /*10*/ };
+	w_inputs = { 3, 4, 2, 1, 1, 3, 3 };
+	w_states = { 1, 7, 2, 9, 1, 2, 8, /*10*/ };
 	parse_output("10111 11010 10001 00011 10111 10001 01011", w_outputs);
 
 	std::cerr << "check word using table\n";
-	at.check_word_table(w_states, w_inputs, w_outputs);
+	at.check_word_table(w_inputs, w_states, w_outputs);
 	std::cerr << "check word using encoded triggers\n";
-	at.check_encoded_table(w_states, w_inputs, w_outputs);
+	at.check_encoded_table(w_inputs, w_states, w_outputs);
 }
 

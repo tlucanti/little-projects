@@ -16,6 +16,8 @@ Automat::Automat(const Table &transition, const std::vector<int> &output)
 		}
 	}
 
+	std::cout << "TABLE DUMP\n";
+	Table(mt).dump();
 	init_automat(transition, Table(mt));
 }
 
@@ -59,9 +61,6 @@ void Automat::encode(void)
 		y.emplace_back(s);
 	}
 
-	if (D.size() != y.size()) {
-		// panic("encoded triggers size mismatch");
-	}
 	encoded = true;
 }
 
@@ -96,7 +95,7 @@ void Automat::print(void)
 	}
 }
 
-std::pair<int, int> Automat::run_encoded(int state, int input)
+std::pair<int, int> Automat::run_encoded(int input, int state)
 {
 	if (!encoded) {
 		panic("cannot run before encoding");
@@ -104,33 +103,37 @@ std::pair<int, int> Automat::run_encoded(int state, int input)
 
 	int state_bits = ilog2(transition.get_cols() - 1) + 1;
 
-	unsigned int bitv = (input << state_bits) | state;
+	unsigned int bitv = ((input - 1) << state_bits) | (state - 1);
 	unsigned int next_state = 0;
 	unsigned int next_output = 0;
 
 	for (const auto &dt : D) {
+		std::cout << "state " << next_state;
 		next_state <<= 1;
 		next_state |= dt(bitv);
+		std::cout << " -> " << dt(bitv) << ' ' << next_state << '\n';
 	}
 
 	for (const auto &yt : y) {
+		//std::cout << "out " << next_output;
 		next_output <<= 1;
 		next_output |= yt(bitv);
+		//std::cout << " -> " << yt(bitv) << ' ' << next_output << '\n';
 	}
 
 	return { next_state, next_output };
 }
 
-std::pair<int, int> Automat::run_table(int state, int input)
+std::pair<int, int> Automat::run_table(int input, int state)
 {
-	int next_state = transition.at(state - 1, input - 1).get() + 1;
-	int next_outp = output.at(state - 1, input - 1).get() + 1;
+	int next_state = transition.at(input - 1, state - 1).get() + 1;
+	int next_outp = output.at(input - 1, state - 1).get() + 1;
 
 	return { next_state, next_outp };
 }
 
-void Automat::_check_word(const std::vector<int> &states,
-			  const std::vector<int> &inputs,
+void Automat::_check_word(const std::vector<int> &inputs,
+			  const std::vector<int> &states,
 			  const std::vector<int> &outputs,
 			  bool table)
 {
@@ -142,15 +145,15 @@ void Automat::_check_word(const std::vector<int> &states,
 
 	for (size_t i = 0; i < states.size(); ++i) {
 		if (table) {
-			next = run_table(states.at(i), inputs.at(i));
+			next = run_table(inputs.at(i), states.at(i));
 		} else {
-			next = run_encoded(states.at(i), inputs.at(i));
+			next = run_encoded(inputs.at(i), states.at(i));
 		}
 
 		std::cout << "state: " << states.at(i)
 			  << " (" << next.first << "), ";
 		std::cout << "oputput: " << outputs.at(i)
-			  << " (" <<  next.second << ")\n";
+			  << " (" <<  next.second - 1 << ")\n";
 	}
 
 }
@@ -173,6 +176,8 @@ void Automat::encode_table(const Table &tbl, std::vector<std::string> &trig)
 {
 	int nr_triggers = tbl.get_w();
 
+	std::cout << "NR TRIGGERS:" << nr_triggers << '\n';
+	tbl.dump(true);
 	trig.resize(nr_triggers);
 	for (int tr = 0; tr < nr_triggers; ++tr) {
 		encode_trigger(tbl, trig.at(tr), tr);
@@ -183,8 +188,11 @@ void Automat::encode_trigger(const Table &tbl, std::string &s, int bit)
 {
 	int row_bits = ilog2(tbl.get_rows() - 1) + 1;
 	int col_bits = ilog2(tbl.get_cols() - 1) + 1;
+	size_t bsize = 1u << (col_bits + row_bits);
 
-	s.resize(1 << (col_bits + row_bits), '-');
+	std::cout << "encoding trigger size " << row_bits << ' ' << col_bits
+		  << ' ' << bsize << '\n';
+	s.resize(bsize, '-');
 
 	for (size_t r = 0; r < tbl.get_rows(); ++r) {
 		for (size_t c = 0; c < tbl.get_cols(); ++c) {
