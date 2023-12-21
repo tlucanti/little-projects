@@ -169,7 +169,7 @@ void Automat::check_encoded_table(const std::vector<int> &states,
 				  const std::vector<int> &inputs,
 				  const std::vector<int> &outputs)
 {
-	_check_word(states, inputs, outputs, false);
+	_check_word(states, inputs, outputs, true);
 }
 
 void Automat::encode_table(const Table &tbl, std::vector<std::string> &trig)

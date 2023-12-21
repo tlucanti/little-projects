@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	Automat at(trans, states);
 
 	at.encode();
-	//at.minimize();
+	at.minimize();
 	at.dump();
 	at.print();
 
