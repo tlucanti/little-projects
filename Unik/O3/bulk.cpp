@@ -21,21 +21,19 @@ static auto _solve(const vector<fl_t> &a, const vector<fl_t> &b, const vector<fl
 {
         int n = a.size();
 
-        vector<fl_t> ac(a);
-        vector<fl_t> bc(b);
         vector<fl_t> cc(c);
         vector<fl_t> dc(d);
 
-        cc.at(0) /= bc.at(0);
-        dc.at(0) /= bc.at(0);
+        cc.at(0) /= b.at(0);
+        dc.at(0) /= b.at(0);
 
         n -= 1;
         for (int i = 1; i < n; ++i) {
-            cc.at(i) /= bc.at(i) - ac.at(i) * cc.at(i - 1);
-            dc.at(i) = (dc.at(i) - ac.at(i) * dc.at(i - 1)) / (bc.at(i) - ac.at(i) * cc.at(i - 1));
+            cc.at(i) /= b.at(i) - a.at(i) * cc.at(i - 1);
+            dc.at(i) = (dc.at(i) - a.at(i) * dc.at(i - 1)) / (b.at(i) - a.at(i) * cc.at(i - 1));
         }
 
-        dc.at(n) = (dc.at(n) - ac.at(n) * dc.at(n - 1)) / (bc.at(n) - ac.at(n) * cc.at(n - 1));
+        dc.at(n) = (dc.at(n) - a.at(n) * dc.at(n - 1)) / (b.at(n) - a.at(n) * cc.at(n - 1));
 
         for (int i = n - 1; i >= 0; --i) {
             dc.at(i) -= cc.at(i) * dc.at(i + 1);
@@ -46,24 +44,27 @@ static auto _solve(const vector<fl_t> &a, const vector<fl_t> &b, const vector<fl
 
 static void solve(int n, fl_t dt, fl_t dx, const vector<fl_t> &tube, vector<vector<fl_t>> &temp)
 {
-        vector<fl_t> r1(n, 0);
-        vector<fl_t> r2(n, 0);
-
-        for (int i = 1; i < n; ++i) {
-                r1.at(i) = tube.at(i - 1) + tube.at(i);
-        }
-        for (int i = 0; i < n - 1; ++i) {
-                r2.at(i) = tube.at(i) + tube.at(i + 1);
-        }
-
         vector<fl_t> A(n, 0);
         vector<fl_t> B(n, 0);
         vector<fl_t> C(n, 0);
 
         for (int i = 0; i < n; ++i) {
-                A.at(i) = -(dt * r1.at(i)) / (2 * dx * dx);
-                B.at(i) = 1 + (dt * (r1.at(i) + r2.at(i))) / (2 * dx * dx);
-                C.at(i) = -(dt * r2.at(i)) / (2 * dx * dx);
+                fl_t r1, r2;
+                if (i == 0) {
+                  r1 = 0;
+                } else {
+                  r1 = tube.at(i - 1) + tube.at(i);
+                }
+
+                if (i == n - 1) {
+                  r2 = 0;
+                } else {
+                  r2 = tube.at(i) + tube.at(i + 1);
+                }
+          
+                A.at(i) = -(dt * r1) / (2 * dx * dx);
+                B.at(i) = 1 + (dt * (r1 + r2)) / (2 * dx * dx);
+                C.at(i) = -(dt * r2) / (2 * dx * dx);
         }
 
         B.front() = 1;
@@ -116,7 +117,7 @@ void backward(int maxiter, int t, int n, fl_t dt, fl_t dx, const vector<vector<f
 
     if (e < best_err) {
       printf("iter %d: err %.8f\n", it, e);
-      cout << tube;
+      //cout << tube;
       best_tube.swap(tube);
       best_err = e;
     }
@@ -148,8 +149,8 @@ int main()
         printf("dt %f\n", dt);
         printf("dx %f\n", dx);
 
-        cout << "tube\n" << tube << '\n';
-        cout << "temp\n" << temp << '\n';
+        //cout << "tube\n" << tube << '\n';
+        //cout << "temp\n" << temp << '\n';
 
         vector<vector<fl_t>> out(temp);
         solve(n, dt, dx, tube, out);
