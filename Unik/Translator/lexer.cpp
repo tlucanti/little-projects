@@ -18,7 +18,30 @@ POLIZ::poliz() const
 long
 POLIZ::compute() const
 {
-	panic("ENOSYS");
+	std::stack<long> op;
+	long a, b;
+
+	for (Lexema *i : pz) {
+		switch (i->type()) {
+		case Lexema::lex_literal:
+		case Lexema::lex_identifier:
+			op.push(i->compute());
+			break;
+		case Lexema::lex_operator:
+			panic_on(op.size() < 2, "invalid poliz: (no elements for operator)");
+			a = op.top();
+			op.pop();
+			b = op.top();
+			op.pop();
+			op.push(dynamic_cast<Operator *>(i)->compute(b, a));
+			break;
+		default:
+			panic("BUG");
+		}
+	}
+
+	panic_on(op.size() > 1, "invalid poliz: (too many identifiers)");
+	return op.top();
 }
 
 void
@@ -147,6 +170,20 @@ Operator::priority() const {
 		return 2;
 	default:
 		panic("BUG");
+	}
+}
+
+long
+Operator::compute(long a, long b) const {
+	switch (_type) {
+	case '+': return a + b;
+	case '-': return a - b;
+	case '*': return a * b;
+	case '/':
+		  panic_on(b == 0, "zero division");
+		  return a / b;
+	default:
+		  panic("BUG");
 	}
 }
 

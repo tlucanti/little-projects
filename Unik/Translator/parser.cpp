@@ -226,44 +226,63 @@ void parse(std::istream &in)
 	Symbol s(Symbol::eof);
 	std::string name;
 
-	/**
-	 * get lvalue before '=' operator
-	 */
-
-	/* get first char for identifier name */
-	s = get_sym(in, true);
-	s.assert_type(Symbol::sym_char);
-	name.push_back(s.get());
-
-	/* get next chars or numbers for variable name */
 	while (true) {
-		s = get_sym(in);
-		s.assert_type(Symbol::sym_char |
-			      Symbol::sym_digit |
-			      Symbol::sym_assign |
-			      Symbol::sym_space);
+		/**
+		 * get lvalue before '=' operator
+		 */
+		name.clear();
 
-		if (s.is_type(Symbol::sym_char | Symbol::sym_digit)) {
-			name.push_back(s.get());
-		} else {
+		/* get first char for identifier name */
+		s = get_sym(in, true);
+		s.assert_type(Symbol::sym_char);
+		name.push_back(s.get());
+
+		/* get next chars or numbers for variable name */
+		while (true) {
+			s = get_sym(in);
+			s.assert_type(Symbol::sym_char |
+				      Symbol::sym_digit |
+				      Symbol::sym_assign |
+				      Symbol::sym_space);
+
+			if (s.is_type(Symbol::sym_char | Symbol::sym_digit)) {
+				name.push_back(s.get());
+			} else {
+				break;
+			}
+		}
+
+		/* confirm that next character is '=' operator */
+		if (s.is_type(Symbol::sym_space)) {
+			s = get_sym(in, true);
+		}
+		s.assert_type(Symbol::sym_assign);
+
+		s = get_sym(in, true);
+
+		Expression expression = parse_expression(in, s);
+		std::cout << "prased expression:\t";
+		expression.print(false, name);
+
+		std::cout << "translate to poliz:\t";
+		expression.poliz().print(false);
+		std::cout << '\n';
+
+		std::cout << "subsitute values:\t";
+		expression.print(true, name);
+		std::cout << "substituted poliz:\t";
+		expression.poliz().print(true);
+		std::cout << '\n';
+
+		long value = expression.poliz().compute();
+		std::cout << "computed value:\t" << value << '\n';
+		Identifier::add_identifier(name, value);
+
+		std::cout << "-------------\n";
+
+		if (s.is_type(Symbol::sym_eof)) {
 			break;
 		}
 	}
-
-	/* confirm that next character is '=' operator */
-	if (s.is_type(Symbol::sym_space)) {
-		s = get_sym(in, true);
-	}
-	s.assert_type(Symbol::sym_assign);
-
-	s = get_sym(in, true);
-
-	Expression expression = parse_expression(in, s);
-	std::cout << "prased expression:\n";
-	expression.print(false, name);
-
-	std::cout << "translate to poliz:\n";
-	expression.poliz().print(false);
-	std::cout << '\n';
 }
 

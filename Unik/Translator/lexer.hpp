@@ -72,6 +72,7 @@ public:
 	void print(bool subs) const override;
 
 	int priority() const;
+	long compute(long a, long b) const;
 };
 
 class Expression : public Lexema {
