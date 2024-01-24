@@ -77,8 +77,7 @@ public:
 	void assert_type(long expected) const
 	{
 		if (not is_type(expected)) {
-			std::cerr << "invalid character " << get();
-			panic("translation error");
+			err("unexpected character `"s + get() + "`");
 		}
 	}
 
@@ -93,7 +92,9 @@ Symbol get_sym(std::istream &in, bool skip_spaces=false)
 	char c;
 
 again:
-	if (in >> c) {
+	in.get(c);
+
+	if (in.good()) {
 		Symbol s(c);
 
 		if (skip_spaces and s.is_type(Symbol::sym_space)) {
@@ -101,7 +102,7 @@ again:
 		}
 		return s;
 	} else {
-		return Symbol(Symbol::eof);
+		throw TranslationEOF();
 	}
 }
 
@@ -193,6 +194,7 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 			panic("BUG");
 		}
 
+		s.assert_type(Symbol::sym_close_bracket | Symbol::sym_semicolon | Symbol::sym_operator);
 		switch (s.type()) {
 		case Symbol::sym_close_bracket:
 			goto close_bracket;
@@ -213,8 +215,7 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 
 close_bracket:
 	if (bracket_counter == 0) {
-		std::cerr << "unmatched ')'";
-		panic("translation error");
+		err("unmatched ')'");
 	}
 
 done:
@@ -230,6 +231,7 @@ void parse(std::istream &in)
 		/**
 		 * get lvalue before '=' operator
 		 */
+		std::cout << " >> ";
 		name.clear();
 
 		/* get first char for identifier name */

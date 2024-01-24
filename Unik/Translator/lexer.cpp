@@ -127,8 +127,7 @@ Identifier::get_identifier(const std::string &name)
 	auto it = Identifier::identifiers.find(name);
 
 	if (it == Identifier::identifiers.end()) {
-		std::cerr << "identifier `" << name << "` is not defined";
-		panic("Translation error");
+		err("identifier `"s + name + "` is not defined");
 	}
 	return it->second;
 }
@@ -180,7 +179,7 @@ Operator::compute(long a, long b) const {
 	case '-': return a - b;
 	case '*': return a * b;
 	case '/':
-		  panic_on(b == 0, "zero division");
+		  err_on(b == 0, "zero division");
 		  return a / b;
 	default:
 		  panic("BUG");
