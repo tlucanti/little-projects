@@ -259,6 +259,11 @@ void parse(std::istream &in)
 	s = get_sym(in, true);
 
 	Expression expression = parse_expression(in, s);
+	std::cout << "prased expression:\n";
 	expression.print(false, name);
+
+	std::cout << "translate to poliz:\n";
+	expression.poliz().print(false);
+	std::cout << '\n';
 }
 
