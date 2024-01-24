@@ -120,7 +120,11 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 		switch (s.type()) {
 		case Symbol::sym_open_bracket: {
 			bracket_counter++;
+
+			s = get_sym(in, true);
 			expression.add_lexema(parse_expression(in, s));
+
+			s = get_sym(in, true);
 			break;
 
 		} case Symbol::sym_digit: {
@@ -132,9 +136,9 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 			while (true) {
 				s = get_sym(in);
 				s.assert_type(Symbol::sym_digit |
-					      Symbol::sym_open_bracket |
-					      Symbol::sym_semicolon |
 					      Symbol::sym_operator |
+					      Symbol::sym_semicolon |
+					      Symbol::sym_close_bracket |
 					      Symbol::sym_space);
 
 				if (not s.is_type(Symbol::sym_digit)) {
@@ -165,6 +169,7 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 				s = get_sym(in);
 				s.assert_type(Symbol::sym_char |
 					      Symbol::sym_digit |
+					      Symbol::sym_operator |
 					      Symbol::sym_semicolon |
 					      Symbol::sym_close_bracket |
 					      Symbol::sym_space);
@@ -198,6 +203,10 @@ static Expression parse_expression(std::istream &in, Symbol &s)
 		default:
 			panic("BUG");
 		}
+
+		s.assert_type(Symbol::sym_operator);
+		Operator op(s.get());
+		expression.add_lexema(op);
 
 		s = get_sym(in, true);
 	}
