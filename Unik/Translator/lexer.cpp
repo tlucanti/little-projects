@@ -1,22 +1,27 @@
 
 #include "lexer.hpp"
+#include "util.hpp"
+
+#include <iostream>
+
+std::map<std::string, long> Identifier::identifiers;
 
 Literal::Literal(long value) : value(value) {}
 
 long
-Literal::compute() const override
+Literal::compute() const
 {
 	return value;
 }
 
 Lexema *
-Literal::clone() const override
+Literal::clone() const
 {
 	return new Literal(value);
 }
 
 void
-Literal::print(bool) const override
+Literal::print(bool) const
 {
 	std::cout << value;
 }
@@ -24,19 +29,19 @@ Literal::print(bool) const override
 Identifier::Identifier(const std::string &name) : name(name) {}
 
 long
-Identifier::compute() const override
+Identifier::compute() const
 {
 	return Identifier::get_identifier(name);
 }
 
 Lexema *
-Identifier::clone() const override
+Identifier::clone() const
 {
 	return new Identifier(name);
 }
 
 void
-Identifier::print(bool subs) const override
+Identifier::print(bool subs) const
 {
 	if (subs) {
 		std::cout << compute();
@@ -52,13 +57,13 @@ Identifier::get_name() const
 }
 
 void
-static Identifier::add_identifier(const std::string &name, long value)
+Identifier::add_identifier(const std::string &name, long value)
 {
 	Identifier::identifiers[name] = value;
 }
 
 long
-static Identifier::get_identifier(const std::string &name)
+Identifier::get_identifier(const std::string &name)
 {
 	auto it = Identifier::identifiers.find(name);
 
@@ -72,18 +77,18 @@ static Identifier::get_identifier(const std::string &name)
 Operator::Operator(char type) : type(type) {}
 
 long
-Operator::compute() const override
+Operator::compute() const
 {
 	panic("cannot compute operator");
 }
 
 Lexema *
-Operator::clone() const override {
+Operator::clone() const {
 	return new Operator(type);
 }
 
 void
-Operator::print(bool) const override
+Operator::print(bool) const
 {
 	std::cout << type;
 }
@@ -91,13 +96,13 @@ Operator::print(bool) const override
 Expression::Expression() {}
 
 long
-Expression::compute() const override
+Expression::compute() const
 {
 	panic("ENOSYS");
 }
 
 Lexema *
-Expression::clone() const override
+Expression::clone() const
 {
 	Expression *e = new Expression;
 
@@ -106,13 +111,14 @@ Expression::clone() const override
 }
 
 void
-Expression::print(bool subs) const override
+Expression::print(bool subs) const
 {
 	std::cout << '(';
 	for (const auto &i : expression) {
-		std::cout << i.print(subs) << ' ';
+		i->print(subs);
+		std::cout << ' ';
 	}
-	std::cout << ") "
+	std::cout << ") ";
 }
 
 void
@@ -120,7 +126,8 @@ Expression::print(bool subs, const std::string &lvalue) const
 {
 	std::cout << lvalue << " = ";
 	for (const auto &i : expression) {
-		std::cout << i.print(subs) << ' ';
+		i->print(subs);
+		std::cout << ' ';
 	}
 	std::cout << ";\n";
 }

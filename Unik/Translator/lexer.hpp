@@ -7,9 +7,11 @@
 #include <map>
 
 class Lexema {
+public:
 	virtual long compute() const = 0;
 	virtual Lexema *clone() const = 0;
 	virtual void print(bool subs) const = 0;
+	virtual ~Lexema() {}
 };
 
 class Literal : public Lexema {
@@ -48,7 +50,7 @@ public:
 };
 
 class Expression : public Lexema {
-	std::vector<Lexema *> &expression;
+	std::vector<Lexema *> expression;
 
 public:
 	Expression();

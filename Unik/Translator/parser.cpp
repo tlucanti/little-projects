@@ -216,7 +216,6 @@ void parse(std::istream &in)
 {
 	Symbol s(Symbol::eof);
 	std::string name;
-	long literal;
 
 	/**
 	 * get lvalue before '=' operator
@@ -251,6 +250,6 @@ void parse(std::istream &in)
 	s = get_sym(in, true);
 
 	Expression expression = parse_expression(in, s);
-	expression->print(false, name);
+	expression.print(false, name);
 }
 
