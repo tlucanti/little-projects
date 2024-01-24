@@ -1,0 +1,7 @@
+
+*.o
+*.swo
+
+compile_commands.json
+.cache
+/lab4
