@@ -3,24 +3,20 @@
 #include <list>
 #include <iostream>
 
-template <class T>
-void bubble_sort(T begin, T end)
-{
-    if (begin == end) {
-	    return ;
-    }
+template <typename BidirectionalIterator>
+void bubble_sort(BidirectionalIterator begin, BidirectionalIterator end) {
+    if (begin == end) return;
 
-    std::size_t d = std::distance(begin, end);
-    for (std::size_t i = 0; i < d - 1; ++i) {
-	    for (std::size_t j = 0; j < d - i - 1; ++j) {
-		    T a(begin);
-		    std::advance(a, j);
-		    T b = std::next(a);
+    bool swapped = true;
 
-		    if (*a > *b) {
-			    std::swap(*a, *b);
-		    }
-	    }
+    while(begin != end-- && swapped) {
+        swapped = false;
+        for(auto i = begin; i != end; ++i) {
+            if(*std::next(i) < *i) {
+                std::swap(*i, *std::next(i));
+                swapped = true;
+            }
+        }
     }
 }
 
