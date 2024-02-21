@@ -4,33 +4,32 @@
 #include <iostream>
 
 template<typename T>
-class StackNode {
-public:
-    T value;
-    std::unique_ptr<StackNode<T>> next;
-
-    StackNode(T value, std::unique_ptr<StackNode<T>> next)
-        : value(value), next(std::move(next)) {}
-};
-
-template<typename T>
 class Stack {
+
+	struct StackNode {
+		T value;
+		std::unique_ptr<StackNode> next;
+
+		StackNode(T value, std::unique_ptr<StackNode> next)
+			: value(value), next(std::move(next)) {}
+	};
+
 public:
-    std::unique_ptr<StackNode<T>> top;
+	std::unique_ptr<StackNode> top;
 
-    void push(T value) {
-        top = std::make_unique<StackNode<T>>(value, std::move(top));
-    }
+	void push(T value) {
+		top = std::make_unique<StackNode>(value, std::move(top));
+	}
 
-    T pop() {
-        if (top != nullptr) {
-            T value = top->value;
-            top = std::move(top->next);
-            return value;
-        } else {
-            throw std::out_of_range("Stack is empty, can't pop");
-        }
-    }
+	T pop() {
+		if (top == nullptr) {
+			throw std::out_of_range("Stack is empty, can't pop");
+		}
+
+		T value = top->value;
+		top = std::move(top->next);
+		return value;
+	}
 };
 
 int main()
