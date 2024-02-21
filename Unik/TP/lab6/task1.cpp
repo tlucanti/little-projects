@@ -3,40 +3,34 @@
 #include <stdexcept>
 #include <iostream>
 
-template <class T>
-class Stack {
-	struct StackNode {
-		StackNode *next;
-		T data;
-
-		StackNode(const T &data, StackNode *next)
-			: next(next), data(data)
-		{}
-	};
-
-	StackNode *top;
+template<typename T>
+class StackNode {
 public:
-	Stack()
-		: top(nullptr)
-	{}
+    T value;
+    std::unique_ptr<StackNode<T>> next;
 
-	void push(const T &data)
-	{
-		auto next = new StackNode(data, top);
-		top = next;
-	}
+    StackNode(T value, std::unique_ptr<StackNode<T>> next)
+        : value(value), next(std::move(next)) {}
+};
 
-	T pop(void)
-	{
-		if (top == nullptr) {
-			throw std::out_of_range("poping from empty stack");
-		}
-		StackNode *prev = top;
-		T ret = top->data;
-		top = top->next;
-		delete prev;
-		return ret;
-	}
+template<typename T>
+class Stack {
+public:
+    std::unique_ptr<StackNode<T>> top;
+
+    void push(T value) {
+        top = std::make_unique<StackNode<T>>(value, std::move(top));
+    }
+
+    T pop() {
+        if (top != nullptr) {
+            T value = top->value;
+            top = std::move(top->next);
+            return value;
+        } else {
+            throw std::out_of_range("Stack is empty, can't pop");
+        }
+    }
 };
 
 int main()
