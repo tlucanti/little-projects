@@ -1,4 +1,5 @@
 
+size: 2048
 running simple multiplication:          36.482697s
 running cache-friendly multiplication:  1.834380s
 running block multiplication:           8.726767s
