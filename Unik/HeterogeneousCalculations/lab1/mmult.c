@@ -4,11 +4,11 @@
 #include <stdlib.h>
 
 #ifndef SIZE
-# define SIZE 4
+# define SIZE 2048
 #endif
 
 #ifndef BLOCK_SIZE
-# define BLOCK_SIZE 2
+# define BLOCK_SIZE 64
 #endif
 
 #ifndef MULT_TYPE
@@ -24,7 +24,7 @@ static void init_matrix(float **array, int size)
 {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			array[i][j] = (float)rand() / RAND_MAX * 10;
+			array[i][j] = (float)rand() / (float)RAND_MAX * 10;
 		}
 	}
 }
@@ -99,6 +99,33 @@ static void multiply_block(float **A, float **B, float **C, int size, int block_
 	}
 }
 
+__always_inline
+static void __multiply_ultimate(float **A, float **B, float **C, int off_i, int off_j, int off_k)
+{
+	for (int i = off_i; i < off_i + BLOCK_SIZE; ++i) {
+		for (int k = off_k; k < off_k + BLOCK_SIZE; ++k) {
+			for (int j = off_j; j < off_j + BLOCK_SIZE; ++j) {
+				C[i][j] += A[i][k] * B[k][j];
+			}
+		}
+	}
+}
+
+__always_inline
+static void multiply_ultimate(float **A, float **B, float **C)
+{
+	if (SIZE % BLOCK_SIZE) {
+		abort();
+	}
+	for (int i = 0; i < SIZE; i += BLOCK_SIZE) {
+		for (int j = 0; j < SIZE; j += BLOCK_SIZE) {
+			for (int k = 0; k < SIZE; k += BLOCK_SIZE) {
+				__multiply_ultimate(A, B, C, i, j, k);
+			}
+		}
+	}
+}
+
 static float timer_diff(struct timespec *begin, struct timespec *end)
 {
 	float res = 0;
@@ -130,11 +157,8 @@ int main()
 
 	alloc_matrix(&A, &B, &C, SIZE);
 	init_matrix((float **)A, SIZE);
-	printf("init A\n");
 	init_matrix((float **)B, SIZE);
-	printf("init B\n");
 	zero_matrix((float **)C, SIZE);
-	printf("init C\n");
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &begin);
 	switch (MULT_TYPE) {
@@ -146,6 +170,9 @@ int main()
 		break;
 	case 3:
 		multiply_block(A, B, C, SIZE, BLOCK_SIZE);
+		break;
+	case 4:
+		multiply_ultimate(A, B, C);
 		break;
 	default:
 		printf("mult type\n");
@@ -173,9 +200,14 @@ int main()
 		zero_matrix(C, SIZE);
 		multiply_block(A, B, C, SIZE, BLOCK_SIZE);
 		print_matrix(C, SIZE);
+
+		printf("multiply_ultimate:\n");
+		zero_matrix(C, SIZE);
+		multiply_ultimate(A, B, C);
+		print_matrix(C, SIZE);
 	}
 
-	printf("elapsed time: %fs\n", timer_diff(&begin, &end));
+	printf("%fs\n", timer_diff(&begin, &end));
 
 	return 0;
 }
