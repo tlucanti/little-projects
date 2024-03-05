@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #ifndef ARRAY_SIZE
-# define ARRAY_SIZE 10000
+# define ARRAY_SIZE 50000
 #endif
 
 #ifndef STRING_SIZE

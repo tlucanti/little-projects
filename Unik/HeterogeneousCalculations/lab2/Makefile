@@ -4,6 +4,14 @@ CFLAGS = -Wall -Wextra -O3
 CC = clang
 
 all: build_simple build_split build_multisplit
+.PHONY: all
+
+clean:
+	rm aos_simple.elf aos_split.elf aos_multisplit.elf
+.PHONY: clean
+
+re: clean all
+.PHONY: re
 
 build_simple:
 	@echo "[CC]\tsimple"

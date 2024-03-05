@@ -1,0 +1,6 @@
+
+size: 50000
+running simple comparison:              21.939909s
+running split comparison:               5.249132s
+running multisplit comparison:          5.244093s
+
