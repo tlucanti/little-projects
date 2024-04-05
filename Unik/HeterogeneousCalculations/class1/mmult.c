@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #ifndef SIZE
-# define SIZE 2048
+# define SIZE 4096
 #endif
 
 #ifndef BLOCK_SIZE
@@ -52,7 +52,6 @@ void multiply_simple(float **A, float **B, float **C, int size)
 {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-//#pragma novector
 			for (int k = 0; k < size; k++) {
 				C[i][j] += A[i][k] * B[k][j];
 			}
@@ -62,9 +61,10 @@ void multiply_simple(float **A, float **B, float **C, int size)
 
 static void multiply_cache_friendly(float **A, float **B, float **C, int size)
 {
+#pragma omp parallel num_threads(2)
+#pragma omp for
 	for (int i = 0; i < size; i++) {
 		for (int k = 0; k < size; k++) {
-//#pragma novector
 			for (int j = 0; j < size; j++) {
 				C[i][j] += A[i][k] * B[k][j];
 			}
@@ -160,7 +160,7 @@ int main()
 	init_matrix((float **)B, SIZE);
 	zero_matrix((float **)C, SIZE);
 
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &begin);
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 	switch (MULT_TYPE) {
 	case 1:
 		multiply_simple(A, B, C, SIZE);
@@ -178,7 +178,7 @@ int main()
 		printf("mult type\n");
 		abort();
 	}
-	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	if (SIZE < 20) {
 		printf("A:\n");
