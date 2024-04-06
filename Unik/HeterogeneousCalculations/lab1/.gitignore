@@ -1,0 +1,6 @@
+
+*.elf
+.cache
+perf.data
+compile_commands.json
+
