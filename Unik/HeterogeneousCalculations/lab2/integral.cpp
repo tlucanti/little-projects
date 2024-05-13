@@ -32,11 +32,16 @@ T integral(T h) {
 }
 #endif
 
+static inline T sq(T x)
+{
+	return x;
+}
+
 static void integral_runner(T h, int step, float *res) {
     T sum = 0;
 
     for (int i = step; i < Q; i += NR_THREADS) {
-        sum += (4 / sqrtf(4.f - powf((h * i + h / 2.f), 2.f))) * h;
+        sum += (4 / sqrtf(4.f - sq((h * i + h / 2.f)))) * h;
     }
 
     *res = sum;

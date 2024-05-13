@@ -20,6 +20,7 @@ static unsigned long ans = 0;
 
 static void nqueens_dfs(unsigned char row)
 {
+#pragma omp parallel for
         for (unsigned char col = 0; col < BOARD_SIZE; col++) {
                 unsigned char main, side;
 
