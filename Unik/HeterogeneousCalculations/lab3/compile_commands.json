@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-O0",
+      "-g3",
+      "-fdiagnostics-color=always",
+      "-o",
+      "slow",
+      "slow.cpp"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3",
+    "file": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/slow.cpp",
+    "output": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/slow"
+  }
+]
