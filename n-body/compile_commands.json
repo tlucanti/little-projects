@@ -1,0 +1,22 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c++2a",
+      "-fdiagnostics-color=always",
+      "-O0",
+      "-g3",
+      "-I",
+      "../../GUIlib/include/",
+      "-o",
+      "nbody",
+      "main.cpp"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/n-body",
+    "file": "/home/tlucanti/git/little-projects/n-body/main.cpp",
+    "output": "/home/tlucanti/git/little-projects/n-body/nbody"
+  }
+]
