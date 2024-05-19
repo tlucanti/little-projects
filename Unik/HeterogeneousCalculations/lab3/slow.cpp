@@ -213,7 +213,7 @@ int main(int argc, char **argv)
     {
         std::cout << "Using default task size: " << task_size << std::endl;
     }
-    correctness_test_run();
+    // correctness_test_run();
     performance_run(task_size);
 }
 

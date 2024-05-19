@@ -4,7 +4,7 @@ CFLAGS =
 
 CFLAGS += -Wall -Wextra
 CFLAGS += -fdiagnostics-color=always
-CFLAGS += -O0 -g3
+CFLAGS += -O3 -ffast-math
 
 CXXFLAGS += $(CFLAGS) -std=c++17
 
