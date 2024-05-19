@@ -1,18 +1,22 @@
 
 CXXFLAGS =
+CFLAGS =
 
-CXXFLAGS += -Wall -Wextra
-CXXFLAGS += -std=c++17
-CXXFLAGS += -O0 -g3
-CXXFLAGS += -fdiagnostics-color=always
+CFLAGS += -Wall -Wextra
+CFLAGS += -fdiagnostics-color=always
+CFLAGS += -O0 -g3
 
-CC = g++
+CXXFLAGS += $(CFLAGS) -std=c++17
+
+CXX = g++
+CC = gcc
 
 all: slow fast
+.PHONY: all
 
 slow:
-	$(CC) $(CXXFLAGS) slow.cpp -o slow
+	$(CXX) $(CXXFLAGS) slow.cpp -o slow.elf
 
 fast:
-	$(CC) $(CXXFLAGS) fast.cpp -o fast
+	$(CC) $(CFLAGS) fast.c -o fast.elf
 

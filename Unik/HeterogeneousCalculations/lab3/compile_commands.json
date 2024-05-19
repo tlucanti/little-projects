@@ -5,16 +5,33 @@
       "-c",
       "-Wall",
       "-Wextra",
-      "-std=c++17",
+      "-fdiagnostics-color=always",
       "-O0",
       "-g3",
-      "-fdiagnostics-color=always",
+      "-std=c++17",
       "-o",
-      "slow",
+      "slow.elf",
       "slow.cpp"
     ],
     "directory": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3",
     "file": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/slow.cpp",
-    "output": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/slow"
+    "output": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/slow.elf"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-fdiagnostics-color=always",
+      "-O0",
+      "-g3",
+      "-o",
+      "fast.elf",
+      "fast.c"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3",
+    "file": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/fast.c",
+    "output": "/home/tlucanti/git/little-projects/Unik/HeterogeneousCalculations/lab3/fast.elf"
   }
 ]

@@ -2,6 +2,21 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <ctime>
+
+struct timespec get_time(void)
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return ts;
+}
+
+double operator -(const struct timespec &end, const struct timespec &start)
+{
+	double sec = end.tv_sec - start.tv_sec;
+	sec += (end.tv_nsec - start.tv_nsec) * 1e-9;
+	return sec;
+}
 
 typedef double type;
 
@@ -15,12 +30,12 @@ struct linear_system
 
 class Gauss
 {
+    int n, m;
     std::vector<std::vector<type>> coefs;
     std::vector<std::vector<type>> coefs_tmp;
     std::vector<type> variables;
     std::vector<type> free_term;
     std::vector<type> free_term_tmp;
-    int n, m;
 
     linear_system system;
     linear_system tmp_system;
@@ -45,16 +60,14 @@ public:
             free_term[i] = free_term_tmp[i] = _free_terms[i];
         }
     }
-    double solve()
+    void solve()
     {
-        double start{}, end{};
-        start = omp_get_wtime();
+        auto start = get_time();
         forward();
         backward();
         get_answer();
-        end = omp_get_wtime();
+        auto end = get_time();
         std::cout << "Elapsed sequential Gaussian time: " << end - start << " seconds\n";
-        return end - start;
     }
 
     void forward()
@@ -137,7 +150,7 @@ bool correctness_test_run()
     type *coefs[] = {line_1, line_2, line_3};
 
     Gauss method{3, 3, coefs, free_terms};
-    double test_time = method.solve();
+    method.solve();
 
     for (int i = 0; i < 3; ++i)
     {
@@ -176,7 +189,7 @@ bool performance_run(int task_size)
     }
 
     Gauss method(task_size, task_size, coefs, free_term);
-    double seq_time = method.solve();
+    method.solve();
 
     delete[] (free_term);
     for (int i = 0; i < task_size; ++i)
