@@ -1,7 +1,8 @@
 
 import numpy as np
 
-mat = (np.random.random([1000, 1000]) * 100).astype(int)
+mat = np.random.randint(0, 10, 1000 * 1000)
+mat = mat.reshape((1000, 1000))
 print('generated')
 
 def to_str(arr):

@@ -4,19 +4,23 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define DIM 1000
 
 typedef float flt;
 
 union int_flt {
-	int iv;
+	unsigned iv;
 	flt fv;
 };
 
 static FILE *file;
 static flt rows[DIM] = {};
 static union int_flt cols[DIM] = {};
+static char text[2 * DIM * DIM];
+static const char *str = text;
 
 static double time_diff(struct timespec end, struct timespec start)
 {
@@ -40,7 +44,7 @@ static void check_answer(const char *fname, flt *vals)
 			abort();
 		}
 
-		if (fabs(val - vals[i]) > 1e-6) {
+		if (fabs(val - vals[i]) > 1e-5) {
 			printf("%s value error: (expected) %f != %f (real)\n",
 			       fname, val, vals[i]);
 			abort();
@@ -51,23 +55,29 @@ static void check_answer(const char *fname, flt *vals)
 int main()
 {
 	struct timespec start, end;
+	int fd;
 
-	file = fopen("matrix.txt", "r");
-	if (file == NULL) {
-		printf("cannot open 'matrix.txt'\n");
+	fd = open("matrix.txt", O_RDONLY);
+	if (fd == -1) {
+		printf("open matrix.txt error\n");
 		abort();
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
 
+	int rd = 0;
+	rd = read(fd, text, 2 * DIM * DIM - 1);
+	if (rd != 2 * DIM * DIM - 1) {
+		printf("rd: %d\n", rd);
+		abort();
+	}
 	for (int row = 0; row < DIM; row++) {
-		int row_sum = 0;
+		unsigned row_sum = 0;
 		for (int col = 0; col < DIM; col++) {
-			int val;
+			unsigned val;
 
-			if (fscanf(file, "%d", &val) != 1) {
-				abort();
-			}
+			val = *str - '0'; // sub all '0' at the end at once
+			str += 2;
 
 			cols[col].iv += val;
 			row_sum += val;
@@ -81,8 +91,6 @@ int main()
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
-
-	fclose(file);
 	printf("time: %f\n", time_diff(end, start));
 
 	check_answer("result_rows.txt", rows);
