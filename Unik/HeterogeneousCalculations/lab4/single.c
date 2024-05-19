@@ -1,15 +1,13 @@
 
-#include <fcntl.h>
-#include <math.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #define DIM 1000
-
 #ifndef __always_inline
 # define __always_inline inline __attribute__((__always_inline__))
 #endif
@@ -59,47 +57,6 @@ static void check_answer(const char *fname, flt *vals)
 	}
 }
 
-void *runner(void *thread_id)
-{
-	unsigned tid = (unsigned long)thread_id;
-	unsigned work_len = 128;
-
-	for (unsigned row = tid * work_len; row < (tid + 1) * work_len; row++) {
-		if (row >= DIM) {
-			break;
-		}
-
-		unsigned row_sum = 0;
-		for (unsigned col = 0; col < DIM; col++) {
-			unsigned val = str[(row * DIM + col) * 2];
-			row_sum += val;
-		}
-
-		rows[row] = (flt)(row_sum - '0' * DIM) / (flt)DIM;
-	}
-
-	for (unsigned row = 0; row < DIM; row++) {
-		for (unsigned col = tid * work_len; col < (tid + 1) * work_len; col++) {
-			if (col >= DIM) {
-				break;
-			}
-
-			unsigned val = str[(row * DIM + col) * 2];
-			cols[col].iv += val;
-		}
-	}
-
-	for (unsigned col = tid * work_len; col < (tid + 1) * work_len; col++) {
-		if (col >= DIM) {
-			break;
-		}
-
-		cols[col].fv = (flt)(cols[col].iv - '0' * DIM) / (flt)DIM;
-	}
-
-	return NULL;
-}
-
 int main()
 {
 	struct timespec start, end;
@@ -119,13 +76,23 @@ int main()
 		abort();
 	}
 
-	pthread_t threads[THREAD_NUM];
-	for (unsigned long i = 0; i < THREAD_NUM; i++) {
-		pthread_create(&threads[i], NULL, runner, (void *)i);
+	for (unsigned row = 0; row < DIM; row++) {
+		unsigned row_sum = 0;
+		for (unsigned col = 0; col < DIM; col++) {
+			unsigned val;
+
+			val = *str; // sub all '0' at the end at once
+			str += 2;
+
+			cols[col].iv += val;
+			row_sum += val;
+		}
+
+		rows[row] = (flt)(row_sum - '0' * DIM) / (flt)DIM;
 	}
 
-	for (unsigned i = 0; i < THREAD_NUM; i++) {
-		pthread_join(threads[i], NULL);
+	for (int col = 0; col < DIM; col++) {
+		cols[col].fv = (flt)(cols[col].iv - '0' * DIM) / (flt)DIM;
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
