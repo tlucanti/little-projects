@@ -8,6 +8,9 @@
 #include <fcntl.h>
 
 #define DIM 1000
+#ifndef __always_inline
+# define __always_inline inline __attribute__((__always_inline__))
+#endif
 
 typedef float flt;
 
@@ -19,9 +22,10 @@ union int_flt {
 static FILE *file;
 static flt rows[DIM] = {};
 static union int_flt cols[DIM] = {};
-static char text[2 * DIM * DIM];
-static const char *str = text;
+static unsigned char text[2 * DIM * DIM];
+static const unsigned char *str = text;
 
+__always_inline
 static double time_diff(struct timespec end, struct timespec start)
 {
         double sec = end.tv_sec - start.tv_sec;
@@ -29,6 +33,7 @@ static double time_diff(struct timespec end, struct timespec start)
         return sec;
 }
 
+__always_inline
 static void check_answer(const char *fname, flt *vals)
 {
 	file = fopen(fname, "r");
@@ -68,26 +73,27 @@ int main()
 	int rd = 0;
 	rd = read(fd, text, 2 * DIM * DIM - 1);
 	if (rd != 2 * DIM * DIM - 1) {
-		printf("rd: %d\n", rd);
 		abort();
 	}
-	for (int row = 0; row < DIM; row++) {
+
+	#pragma omp parallel for
+	for (unsigned row = 0; row < DIM; row++) {
 		unsigned row_sum = 0;
-		for (int col = 0; col < DIM; col++) {
+		for (unsigned col = 0; col < DIM; col++) {
 			unsigned val;
 
-			val = *str - '0'; // sub all '0' at the end at once
+			val = *str; // sub all '0' at the end at once
 			str += 2;
 
 			cols[col].iv += val;
 			row_sum += val;
 		}
 
-		rows[row] = (flt)row_sum / (flt)DIM;
+		rows[row] = (flt)(row_sum - '0' * DIM) / (flt)DIM;
 	}
 
 	for (int col = 0; col < DIM; col++) {
-		cols[col].fv = (flt)cols[col].iv / (flt)DIM;
+		cols[col].fv = (flt)(cols[col].iv - '0' * DIM) / (flt)DIM;
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
