@@ -6,7 +6,7 @@
 #include <time.h>
 
 #define TASK_SIZE 1000
-#define THREAD_NUM 1
+#define THREAD_NUM 8
 #define ROW_SIZE (TASK_SIZE + 1)
 #define TASK_LEN (TASK_SIZE * TASK_SIZE)
 
@@ -20,7 +20,7 @@
 # define __always_inline inline __attribute__((__always_inline__))
 #endif
 
-typedef float flt;
+typedef double flt;
 
 __always_inline
 static flt random_float(void)
@@ -107,26 +107,27 @@ static pthread_barrier_t barrier;
 __always_inline
 static void *solver_runner(void *thread_id)
 {
-	int tid = (unsigned long)thread_id;
+	const unsigned tid = (unsigned long)thread_id;
 	float frac;
 
-	for (int passage = 0; passage < TASK_SIZE; passage++) {
+	for (unsigned passage = 0; passage < TASK_SIZE; passage++) {
 
-		for (int row = passage + 1; row < TASK_SIZE; row++) {
+		for (unsigned row = passage + 1; row < TASK_SIZE; row++) {
 			// printf("frac: %7.3f / %7.3f\n", mat[row * ROW_SIZE + passage], mat[passage * ROW_SIZE + passage]);
 			frac = mat[row * ROW_SIZE + passage] / mat[passage * ROW_SIZE + passage];
-			for (int col = passage + 1 + tid; col < TASK_SIZE; col += THREAD_NUM) {
+
+			for (unsigned col = passage + 1 + tid; col < TASK_SIZE; col += THREAD_NUM) {
 				if (col < passage + 1) {
 					continue;
 				}
 				mat[ROW_SIZE * row + col] -= frac * mat[ROW_SIZE * passage + col];
 			}
+			pthread_barrier_wait(&barrier);
 			if (tid == 0) {
 				mat[ROW_SIZE * row + ROW_SIZE - 1] -= frac * mat[ROW_SIZE * passage + ROW_SIZE - 1];
 			}
 
 		}
-		pthread_barrier_wait(&barrier);
 		// print_matrix(mat);
 
 	}
@@ -153,9 +154,13 @@ void solve(void)
 	pthread_t threads[THREAD_NUM];
 
 	pthread_barrier_init(&barrier, NULL, THREAD_NUM);
-	pthread_create(&threads[0], NULL, solver_runner, NULL);
+	for (unsigned long i = 0; i < THREAD_NUM; i++) {
+		pthread_create(&threads[i], NULL, solver_runner, (void *)i);
+	}
 
-	pthread_join(threads[0], NULL);
+	for (unsigned i = 0; i < THREAD_NUM; i++) {
+		pthread_join(threads[0], NULL);
+	}
 	pthread_barrier_destroy(&barrier);
 }
 
