@@ -59,24 +59,10 @@ static void check_answer(const char *fname, flt *vals)
 	}
 }
 
-void *runner(void *thread_id)
+static void *col_runner(void *thread_id)
 {
-	unsigned tid = (unsigned long)thread_id;
-	unsigned work_len = 128;
-
-	for (unsigned row = tid * work_len; row < (tid + 1) * work_len; row++) {
-		if (row >= DIM) {
-			break;
-		}
-
-		unsigned row_sum = 0;
-		for (unsigned col = 0; col < DIM; col++) {
-			unsigned val = str[(row * DIM + col) * 2];
-			row_sum += val;
-		}
-
-		rows[row] = (flt)(row_sum - '0' * DIM) / (flt)DIM;
-	}
+	const unsigned tid = (unsigned long)thread_id;
+	const unsigned work_len = 256;
 
 	for (unsigned row = 0; row < DIM; row++) {
 		for (unsigned col = tid * work_len; col < (tid + 1) * work_len; col++) {
@@ -84,7 +70,7 @@ void *runner(void *thread_id)
 				break;
 			}
 
-			unsigned val = str[(row * DIM + col) * 2];
+			unsigned val = str[row * DIM + col];
 			cols[col].iv += val;
 		}
 	}
@@ -95,6 +81,28 @@ void *runner(void *thread_id)
 		}
 
 		cols[col].fv = (flt)(cols[col].iv - '0' * DIM) / (flt)DIM;
+	}
+
+	return NULL;
+}
+
+static void *row_runner(void *thread_id)
+{
+	const unsigned tid = (unsigned long)thread_id;
+	const unsigned work_len = 256;
+
+	for (unsigned row = tid * work_len; row < (tid + 1) * work_len; row++) {
+		if (row >= DIM) {
+			break;
+		}
+
+		unsigned row_sum = 0;
+		for (unsigned col = 0; col < DIM; col++) {
+			unsigned val = str[row * DIM + col];
+			row_sum += val;
+		}
+
+		rows[row] = (flt)(row_sum - '0' * DIM) / (flt)DIM;
 	}
 
 	return NULL;
@@ -118,10 +126,14 @@ int main()
 	if (rd != 2 * DIM * DIM - 1) {
 		abort();
 	}
+	for (unsigned i = 0; i < DIM * DIM; i++) {
+		text[i] = text[i * 2];
+	}
 
 	pthread_t threads[THREAD_NUM];
-	for (unsigned long i = 0; i < THREAD_NUM; i++) {
-		pthread_create(&threads[i], NULL, runner, (void *)i);
+	for (unsigned long i = 0; i < THREAD_NUM / 2; i++) {
+		pthread_create(&threads[i * 2], NULL, row_runner, (void *)i);
+		pthread_create(&threads[i * 2 + 1], NULL, col_runner, (void *)i);
 	}
 
 	for (unsigned i = 0; i < THREAD_NUM; i++) {

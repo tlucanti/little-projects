@@ -75,6 +75,9 @@ int main()
 	if (rd != 2 * DIM * DIM - 1) {
 		abort();
 	}
+	for (unsigned i = 0; i < DIM * DIM; i++) {
+		text[i] = text[i * 2];
+	}
 
 	for (unsigned row = 0; row < DIM; row++) {
 		unsigned row_sum = 0;
@@ -82,7 +85,7 @@ int main()
 			unsigned val;
 
 			val = *str; // sub all '0' at the end at once
-			str += 2;
+			str++;
 
 			cols[col].iv += val;
 			row_sum += val;
