@@ -1,4 +1,3 @@
 
 .cache
-/slow.elf
-/fast.elf
+*.elf

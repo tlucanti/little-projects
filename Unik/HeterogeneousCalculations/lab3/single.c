@@ -1,12 +1,10 @@
 
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #define TASK_SIZE 1000
-#define THREAD_NUM 1
 #define ROW_SIZE (TASK_SIZE + 1)
 #define TASK_LEN (TASK_SIZE * TASK_SIZE)
 
@@ -59,7 +57,7 @@ static void generate_matrix(flt *mat)
 	const int len = TASK_LEN + TASK_SIZE;
 
 	for (int i = 0; i < len; i++) {
-		mat[i] = random_float();
+		mat[i] = (int)(10 * random_float());
 	}
 }
 
@@ -99,15 +97,9 @@ static void print_matrix(flt *mat)
 	printf("\n");
 }
 
-static flt *cpy;
-static flt *mat;
-static flt ret[TASK_SIZE];
-static pthread_barrier_t barrier;
-
 __always_inline
-static void *solver_runner(void *thread_id)
+static void solve(flt *mat, flt *ret)
 {
-	int tid = (unsigned long)thread_id;
 	float frac;
 
 	for (int passage = 0; passage < TASK_SIZE; passage++) {
@@ -115,23 +107,17 @@ static void *solver_runner(void *thread_id)
 		for (int row = passage + 1; row < TASK_SIZE; row++) {
 			// printf("frac: %7.3f / %7.3f\n", mat[row * ROW_SIZE + passage], mat[passage * ROW_SIZE + passage]);
 			frac = mat[row * ROW_SIZE + passage] / mat[passage * ROW_SIZE + passage];
-			for (int col = passage + 1 + tid; col < TASK_SIZE; col += THREAD_NUM) {
-				if (col < passage + 1) {
-					continue;
-				}
+			for (int col = passage + 1; col < TASK_SIZE; col++) {
 				mat[ROW_SIZE * row + col] -= frac * mat[ROW_SIZE * passage + col];
 			}
-			if (tid == 0) {
-				mat[ROW_SIZE * row + ROW_SIZE - 1] -= frac * mat[ROW_SIZE * passage + ROW_SIZE - 1];
-			}
+			mat[ROW_SIZE * row + ROW_SIZE - 1] -= frac * mat[ROW_SIZE * passage + ROW_SIZE - 1];
 
 		}
-		pthread_barrier_wait(&barrier);
 		// print_matrix(mat);
 
 	}
 
-	for (int passage = TASK_SIZE - 1 - tid; passage >= 0; passage -= THREAD_NUM) {
+	for (int passage = TASK_SIZE - 1; passage >= 0; passage--) {
 
 		for (int row = passage - 1; row >= 0; row--) {
 			frac = mat[row * ROW_SIZE + passage] / mat[ROW_SIZE * passage + passage];
@@ -144,19 +130,6 @@ static void *solver_runner(void *thread_id)
 		ret[passage] = mat[passage * ROW_SIZE + TASK_SIZE] / mat[passage * ROW_SIZE + passage];
 		// print_matrix(mat);
 	}
-
-	return NULL;
-}
-
-void solve(void)
-{
-	pthread_t threads[THREAD_NUM];
-
-	pthread_barrier_init(&barrier, NULL, THREAD_NUM);
-	pthread_create(&threads[0], NULL, solver_runner, NULL);
-
-	pthread_join(threads[0], NULL);
-	pthread_barrier_destroy(&barrier);
 }
 
 __unused
@@ -176,20 +149,20 @@ static void check_solution(flt *mat, flt *ret)
 
 int main()
 {
+	// flt cpy[TASK_LEN + TASK_SIZE];
+	flt mat[TASK_LEN + TASK_SIZE];
+	flt ret[TASK_SIZE];
 	struct timespec start, end;
 
-	mat = malloc(sizeof(flt) * (TASK_LEN + TASK_SIZE));
-	cpy = malloc(sizeof(flt) * (TASK_LEN + TASK_SIZE));
-
 	generate_matrix(mat);
-	copy_matrix(cpy, mat);
+	// copy_matrix(cpy, mat);
 
 	// print_matrix(mat);
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	solve();
+	solve(mat, ret);
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	check_solution(cpy, ret);
+	// check_solution(cpy, ret);
 
 	printf("time: %f\n", time_diff(end, start));
 }
