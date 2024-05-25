@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 #include <thread>
 
 #define DIM 1000
@@ -111,10 +110,10 @@ static void *row_runner(void *thread_id)
 int main()
 {
 	struct timespec start, end;
-	int fd;
+	FILE *fd;
 
-	fd = open("matrix.txt", O_RDONLY);
-	if (fd == -1) {
+	fd = fopen("matrix.txt", "r");
+	if (fd == NULL) {
 		printf("open matrix.txt error\n");
 		abort();
 	}
@@ -122,10 +121,10 @@ int main()
 	clock_gettime(CLOCK_MONOTONIC, &start);
 
 	int rd = 0;
-	rd = read(fd, text, 2 * DIM * DIM - 1);
-	if (rd != 2 * DIM * DIM - 1) {
-		abort();
-	}
+	rd = fread(text, 2 * DIM * DIM - 1, 1, fd);
+	//if (rd != 2 * DIM * DIM - 1) {
+	//	abort();
+	//}
 	for (unsigned i = 0; i < DIM * DIM; i++) {
 		text[i] = text[i * 2];
 	}
