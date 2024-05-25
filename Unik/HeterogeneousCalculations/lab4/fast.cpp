@@ -1,12 +1,12 @@
 
 #include <fcntl.h>
 #include <math.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <thread>
 
 #define DIM 1000
 
@@ -130,14 +130,14 @@ int main()
 		text[i] = text[i * 2];
 	}
 
-	pthread_t threads[THREAD_NUM];
+	std::thread threads[THREAD_NUM];
 	for (unsigned long i = 0; i < THREAD_NUM / 2; i++) {
-		pthread_create(&threads[i * 2], NULL, row_runner, (void *)i);
-		pthread_create(&threads[i * 2 + 1], NULL, col_runner, (void *)i);
+		threads[i * 2] = std::thread(row_runner, (void *)i);
+		threads[i * 2 + 1] = std::thread(col_runner, (void *)i);
 	}
 
 	for (unsigned i = 0; i < THREAD_NUM; i++) {
-		pthread_join(threads[i], NULL);
+		threads[i].join();
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &end);
