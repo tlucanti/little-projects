@@ -5,18 +5,55 @@
       "-c",
       "-Wall",
       "-Wextra",
-      "-std=c++2a",
-      "-fdiagnostics-color=always",
-      "-O0",
-      "-g3",
-      "-I",
-      "../../GUIlib/include/",
+      "-std=c++17",
+      "-fdiagnostics-color",
+      "-O3",
+      "-D",
+      "DRAW=0",
       "-o",
-      "nbody",
+      "fast.elf",
       "main.cpp"
     ],
     "directory": "/home/tlucanti/git/little-projects/n-body",
     "file": "/home/tlucanti/git/little-projects/n-body/main.cpp",
-    "output": "/home/tlucanti/git/little-projects/n-body/nbody"
+    "output": "/home/tlucanti/git/little-projects/n-body/fast.elf"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-fdiagnostics-color",
+      "-O3",
+      "-I",
+      "slow",
+      "-o",
+      "slow.elf",
+      "slow/GSimulation.cpp"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/n-body",
+    "file": "/home/tlucanti/git/little-projects/n-body/slow/GSimulation.cpp",
+    "output": "/home/tlucanti/git/little-projects/n-body/slow.elf"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-fdiagnostics-color",
+      "-O3",
+      "-I",
+      "slow",
+      "-o",
+      "slow.elf",
+      "slow/main.cpp"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/n-body",
+    "file": "/home/tlucanti/git/little-projects/n-body/slow/main.cpp",
+    "output": "/home/tlucanti/git/little-projects/n-body/slow.elf"
   }
 ]

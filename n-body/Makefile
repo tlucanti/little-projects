@@ -6,14 +6,22 @@ CXXFLAGS = -Wall -Wextra
 CXXFLAGS += -std=c++17 -fdiagnostics-color
 CXXFLAGS += -O3
 
-all: fast slow
+all: fast slow nbody
 
-fast:
+nbody:
 	g++ $(CXXFLAGS) \
-		-I ../../GUIlib/include/ main.cpp \
+		-I ../../GUIlib/include/ \
+		main.cpp \
 		`$(GUIROOT)/guiflags.sh $(GUIROOT)` \
 		-lstdgui \
 		-o nbody.elf
+.PHONY: nbody
+
+fast:
+	g++ $(CXXFLAGS) \
+		-D DRAW=0 \
+		main.cpp \
+		-o fast.elf
 .PHONY: fast
 
 slow:

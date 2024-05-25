@@ -3,15 +3,25 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-
-#include <guilib.h>
-#include <stdguilib.h>
+#include <ctime>
 
 #ifndef DRAW
 # define DRAW true
 #endif
 
+#if DRAW
+# include <guilib.h>
+# include <stdguilib.h>
+#endif
+
 typedef float flt;
+
+double time_diff(struct timespec end, struct timespec start)
+{
+	double sec = end.tv_sec - start.tv_sec;
+	sec += (end.tv_nsec - start.tv_nsec) * 1e-9;
+	return sec;
+}
 
 namespace bruh {
 
@@ -219,6 +229,7 @@ class NBody {
 
 	void draw_bodies(void)
 	{
+#if DRAW
 		if (not DRAW) {
 			return;
 		}
@@ -232,6 +243,7 @@ class NBody {
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
 		}
 		gui_draw(window);
+#endif
 	}
 
 	struct body_container {
@@ -273,7 +285,11 @@ class NBody {
 	static constexpr int w = 800;
 	static constexpr int h = 600;
 	flt time_step;
+#if DRAW
 	gui_window *window;
+#else
+	void *window;
+#endif
 
 public:
 	NBody(int cnt, flt time_step)
@@ -281,49 +297,56 @@ public:
 	{
 		srand(time(nullptr));
 
-		if (DRAW) {
-			gui_bootstrap();
-			window = gui_alloc();
-			if (window == nullptr)
-				throw std::bad_alloc();
-			if (gui_create(window, w, h))
-				throw std::runtime_error("gui create fail");
-		}
+#if DRAW
+		gui_bootstrap();
+		window = gui_alloc();
+		if (window == nullptr)
+			throw std::bad_alloc();
+		if (gui_create(window, w, h))
+			throw std::runtime_error("gui create fail");
+#endif
 
 		make_bodies(cnt);
 	}
 
 	~NBody()
 	{
-		if (DRAW) {
-			gui_destroy(window);
-			gui_finalize();
-		}
+#if DRAW
+		gui_destroy(window);
+		gui_finalize();
+#endif
 	}
 
-	void run(flt max_time)
+	void run(int nr_steps)
 	{
-		flt time = 0;
+		struct timespec start, end;
 		flt energy = get_energy();
 
-		while (time < max_time) {
-			if (DRAW && gui_closed(window)) {
+		clock_gettime(CLOCK_MONOTONIC, &start);
+		while (nr_steps-- > 0) {
+#if DRAW
+			if (gui_closed(window)) {
 				return;
 			}
-
-			time += time_step;
+#endif
 
 			update_pos();
 			update_acc();
 			update_vel();
 
-			std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
-			for (int i = 0; i < bodies.size(); i++) {
-				std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
+			if (DRAW) {
+				std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
+				for (int i = 0; i < bodies.size(); i++) {
+					std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
+				}
+				std::cout << "\r\n";
+				draw_bodies();
 			}
-			std::cout << "\r\n";
-			draw_bodies();
 		}
+		clock_gettime(CLOCK_MONOTONIC, &end);
+
+		std::cout << "elapsed time: " << time_diff(end, start) << "\r\n";
+		std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "\r\n";
 	}
 };
 
@@ -342,11 +365,17 @@ std::ostream &operator <<(std::ostream &out, const NBody::vec3 &v)
 	return out;
 }
 
-int main()
+int main(int argc, char **argv)
 {
-	NBody sim(3, 0.005);
+	if (argc != 3) {
+		return 1;
+	}
 
-	sim.run(10);
+	int nr_bodies = atoi(argv[1]);
+	int nr_steps = atoi(argv[2]);
+	NBody sim(nr_bodies, 0.005);
+
+	sim.run(nr_steps);
 }
 
 
