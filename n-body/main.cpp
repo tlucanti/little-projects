@@ -1,6 +1,5 @@
 
 #include <cmath>
-#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -8,7 +7,9 @@
 #include <guilib.h>
 #include <stdguilib.h>
 
-#define DRAW true
+#ifndef DRAW
+# define DRAW true
+#endif
 
 typedef float flt;
 
@@ -144,51 +145,57 @@ class NBody {
 
 	void make_bodies(int cnt)
 	{
-		bodies.resize(cnt);
+		bodies.setsize(cnt);
 
-		bodies.at(0).pos = vec3(0, 0, 0);
-		bodies.at(0).vel = vec3(0, 0, 0);
-		bodies.at(0).acc = vec3(0, 0, 0);
-		bodies.at(0).mass = 2e12;
+		bodies.pos(0) = vec3(0, 0, 0);
+		bodies.vel(0) = vec3(0, 0, 0);
+		bodies.acc(0) = vec3(0, 0, 0);
+		bodies.mass(0) = 2e12;
 
 		for (int i = 1; i < cnt; i++) {
-			bodies.at(i).pos = random_unit();
-			bodies.at(i).vel = random_unit() * 1e1;
-			bodies.at(i).acc = vec3(0, 0, 0);
-			bodies.at(i).mass = random_float() * 2e11;
+			bodies.pos(i) = random_unit();
+			bodies.vel(i) = random_unit() * 1e1;
+			bodies.acc(i) = vec3(0, 0, 0);
+			bodies.mass(i) = random_float() * 1e11;
 		}
 	}
 
 	void update_pos(void)
 	{
-		for (body &b : bodies) {
-			b.pos += b.vel * time_step;
+		for (int i = 0; i < bodies.size(); i++) {
+			bodies.pos(i) += bodies.vel(i) * time_step;
 		}
+	}
+
+	vec3 compute_acc_once(int cur, vec3 init=vec3(0, 0, 0))
+	{
+		vec3 acc = init;
+
+		for (int other = 0; other < bodies.size(); other++) {
+			if (cur == other) {
+				continue;;
+			}
+
+			vec3 dr = bodies.pos(other) - bodies.pos(cur);
+			flt norm = std::pow<flt>(dr.abs(), (flt)-1.5);
+			acc += dr * (bodies.mass(other) * norm);
+		}
+
+		acc *= CONST_G;
+		return acc;
 	}
 
 	void update_acc(void)
 	{
-		for (body &b : bodies) {
-			b.acc = vec3(0, 0, 0);
-
-			for (const body &other : bodies) {
-				if (&b == &other) {
-					continue;;
-				}
-
-				vec3 dr = other.pos - b.pos;
-				flt norm = std::pow<flt>(dr.abs(), (flt)-1.5);
-				b.acc += dr * (other.mass * norm);
-			}
-
-			b.acc *= CONST_G;
+		for (int i = 0; i < bodies.size(); i++) {
+			bodies.acc(i) = compute_acc_once(i);
 		}
 	}
 
 	void update_vel(void)
 	{
-		for (body &b : bodies) {
-			b.vel += b.acc * time_step;
+		for (int i = 0; i < bodies.size(); i++) {
+			bodies.vel(i) += bodies.acc(i) * time_step;
 		}
 	}
 
@@ -196,15 +203,15 @@ class NBody {
 	{
 		 flt energy = 0;
 
-		 for (int i = 0; i < (int)bodies.size(); i++) {
-			 for (int j = i + 1; j < (int)bodies.size(); j++) {
-				 flt distance = (bodies.at(i).pos - bodies.at(j).pos).length();
-				 energy -= bodies.at(i).mass * bodies.at(j).mass * CONST_G / distance;
+		 for (int i = 0; i < bodies.size(); i++) {
+			 for (int j = i + 1; j < bodies.size(); j++) {
+				 flt distance = (bodies.pos(i) - bodies.pos(j)).length();
+				 energy -= bodies.mass(i) * bodies.mass(j) * CONST_G / distance;
 			 }
 		 }
 
-		 for (const body &b : bodies) {
-			 energy += b.mass * square(b.vel.length()) / 2;
+		 for (int i = 0; i < bodies.size(); i++) {
+			 energy += bodies.mass(i) * square(bodies.vel(i).length()) / 2;
 		 }
 
 		 return energy;
@@ -217,20 +224,54 @@ class NBody {
 		}
 
 		for (int i = 0; i < (int)bodies.size(); i++) {
-			int x = (bodies.at(i).pos.x - bodies.at(0).pos.x * 0.9 + 2) / 4 * w;
-			int y = (bodies.at(i).pos.y - bodies.at(0).pos.y * 0.9 + 2) / 4 * h;
+			int x = (bodies.pos(i).x - bodies.pos(0).x * 0.9 + 2) / 4 * w;
+			int y = (bodies.pos(i).y - bodies.pos(0).y * 0.9 + 2) / 4 * h;
 
 			// gui_draw_circle(window, old_x, old_y, 10, COLOR_BLACK);
-			flt r = bodies.at(i).mass * 1e-10;
+			flt r = bodies.mass(i) * 1e-10;
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
 		}
 		gui_draw(window);
 	}
 
+	struct body_container {
+		std::vector<body> bv;
+		int n;
+
+		body_container(void) {}
+
+		void setsize(int n) {
+			this->n = n;
+			bv.resize(n);
+		}
+
+		int size(void) {
+			return n;
+		}
+
+		vec3 &pos(int i) {
+			return bv[i].pos;
+		}
+
+		vec3 &vel(int i) {
+			return bv[i].vel;
+		}
+
+		vec3 &acc(int i) {
+			return bv[i].acc;
+		}
+
+		flt &mass(int i) {
+			return bv[i].mass;
+		}
+
+
+	};
+
+	body_container bodies;
 	static constexpr flt CONST_G = 6.6743015e-11L;
 	static constexpr int w = 800;
 	static constexpr int h = 600;
-	std::vector<body> bodies;
 	flt time_step;
 	gui_window *window;
 
@@ -277,8 +318,8 @@ public:
 			update_vel();
 
 			std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
-			for (const body &b : bodies) {
-				std::cout << "body pos: " << b.pos << ", vel: " << b.vel << ", acc: " << b.acc << "\r\n";
+			for (int i = 0; i < bodies.size(); i++) {
+				std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
 			}
 			std::cout << "\r\n";
 			draw_bodies();
