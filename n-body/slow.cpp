@@ -160,13 +160,19 @@ class NBody {
 		bodies.pos(0) = vec3(0, 0, 0);
 		bodies.vel(0) = vec3(0, 0, 0);
 		bodies.acc(0) = vec3(0, 0, 0);
-		bodies.mass(0) = 2e11;
+		bodies.mass(0) = random_float();
+		if (DRAW) {
+			bodies.mass(0) *= 2e11;
+		}
 
 		for (int i = 1; i < cnt; i++) {
 			bodies.pos(i) = random_unit();
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 1e10;
+			bodies.mass(i) = random_float();
+			if (DRAW) {
+				bodies.mass(i) *= 1e10;
+			}
 		}
 	}
 
@@ -313,13 +319,11 @@ class NBody {
 	flt time_step;
 #if DRAW
 	gui_window *window;
-#else
-	void *window;
 #endif
 
 public:
 	NBody(int cnt, flt time_step)
-		: time_step(time_step), window(nullptr)
+		: time_step(time_step)
 	{
 		srand(time(nullptr));
 
@@ -348,7 +352,9 @@ public:
 		struct timespec start, end;
 		flt energy = get_energy();
 
+#ifdef __linux__
 		clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 		while (nr_steps-- > 0) {
 #if DRAW
 			if (gui_closed(window)) {
@@ -360,8 +366,8 @@ public:
 			update_acc();
 			update_vel();
 
+			std::cout << "energy error: " << std::abs((get_energy() - energy) / energy) * 100 << "%\r\n";
 			if (DRAW) {
-				// std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
 				// for (int i = 0; i < bodies.size(); i++) {
 				// 	std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
 				// }
@@ -369,10 +375,12 @@ public:
 				draw_bodies();
 			}
 		}
+#ifdef __linux__
 		clock_gettime(CLOCK_MONOTONIC, &end);
+#endif
 
+		std::cout << "energy error: " << std::abs((get_energy() - energy) / energy) * 100 << "\r\n";
 		std::cout << "elapsed time: " << time_diff(end, start) << "\r\n";
-		std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "\r\n";
 	}
 };
 

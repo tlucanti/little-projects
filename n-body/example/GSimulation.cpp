@@ -229,7 +229,7 @@ void GSimulation::start()
 
     ts1 += time.stop();
     // if (!(s % get_sfreq()))
-    if (0)
+    if (1)
     {
       std::cout << " "
                 << std::left << std::setw(8) << s

@@ -1,33 +1,42 @@
 
 GUIROOT = ../../GUIlib
 GUILIB = opengl
+CC = g++
 
 CXXFLAGS = -Wall -Wextra
 CXXFLAGS += -std=c++17 -fdiagnostics-color
-CXXFLAGS += -O3
+CXXFLAGS += -O2
+CXXFLAGS += -D __linux__
 
-all: fast slow nbody
+all: fast slow example draw
 
-nbody:
-	g++ $(CXXFLAGS) \
+draw:
+	$(CC) $(CXXFLAGS) \
 		-I ../../GUIlib/include/ \
-		main.cpp \
+		slow.cpp \
 		`$(GUIROOT)/guiflags.sh $(GUIROOT)` \
 		-lstdgui \
 		-o nbody.elf
-.PHONY: nbody
+.PHONY: draw
 
 fast:
-	g++ $(CXXFLAGS) \
+	$(CC) $(CXXFLAGS) \
 		-D DRAW=0 \
-		main.cpp \
+		fast.cpp \
 		-o fast.elf
 .PHONY: fast
 
 slow:
-	g++ $(CXXFLAGS) \
-		-I slow \
-		slow/*.cpp \
+	$(CC) $(CXXFLAGS) \
+		-D DRAW=0 \
+		slow.cpp \
 		-o slow.elf
 .PHONY: slow
+
+example:
+	$(CC) $(CXXFLAGS) \
+		-I example \
+		example/*.cpp \
+		-o example.elf
+.PHONY: example
 
