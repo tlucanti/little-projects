@@ -160,13 +160,13 @@ class NBody {
 		bodies.pos(0) = vec3(0, 0, 0);
 		bodies.vel(0) = vec3(0, 0, 0);
 		bodies.acc(0) = vec3(0, 0, 0);
-		bodies.mass(0) = 2e12;
+		bodies.mass(0) = 2e11;
 
 		for (int i = 1; i < cnt; i++) {
 			bodies.pos(i) = random_unit();
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 1e11;
+			bodies.mass(i) = random_float() * 1e10;
 		}
 	}
 
@@ -177,21 +177,38 @@ class NBody {
 		}
 	}
 
-	vec3 compute_acc_once(int cur, vec3 init=vec3(0, 0, 0))
+	vec3 compute_acc_once(int cur)
 	{
-		vec3 acc = init;
+		vec3 acc = vec3(0, 0, 0);
+		vec3 tmp_vel;
+		vec3 tmp_pos;
 
 		for (int other = 0; other < bodies.size(); other++) {
 			if (cur == other) {
 				continue;;
 			}
 
-			vec3 dr = bodies.pos(other) - bodies.pos(cur);
-			flt norm = std::pow<flt>(dr.abs(), (flt)-1.5);
-			acc += dr * (bodies.mass(other) * norm);
+			vec3 dist = bodies.pos(other) - bodies.pos(cur);
+			flt r = std::pow<flt>(dist.abs(), (flt)-1.5);
+			flt norm = CONST_G * bodies.mass(other) * r;
+
+			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
+
+			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5;
+			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
+			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
+
+			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5;
+			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
+			vec3 k3 = (bodies.pos(other) - tmp_pos) * norm;
+
+			tmp_vel = bodies.vel(cur) + k3;
+			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
+			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
+
+			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
 		}
 
-		acc *= CONST_G;
 		return acc;
 	}
 
@@ -230,17 +247,26 @@ class NBody {
 	void draw_bodies(void)
 	{
 #if DRAW
-		if (not DRAW) {
-			return;
+		static std::vector<int> prev_x;
+		static std::vector<int> prev_y;
+
+		if (prev_x.empty()) {
+			prev_x.resize(bodies.size());
+			prev_y.resize(bodies.size());
 		}
 
 		for (int i = 0; i < (int)bodies.size(); i++) {
-			int x = (bodies.pos(i).x - bodies.pos(0).x * 0.9 + 2) / 4 * w;
-			int y = (bodies.pos(i).y - bodies.pos(0).y * 0.9 + 2) / 4 * h;
+			int x = (bodies.pos(i).x + 10) / 20 * w;
+			int y = (bodies.pos(i).y + 10) / 20 * h;
+			int old_x = prev_x.at(i);
+			int old_y = prev_y.at(i);
 
-			// gui_draw_circle(window, old_x, old_y, 10, COLOR_BLACK);
-			flt r = bodies.mass(i) * 1e-10;
+			flt r = bodies.mass(i) * 1e-9;
+			gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
+
+			prev_x.at(i) = x;
+			prev_y.at(i) = y;
 		}
 		gui_draw(window);
 #endif
@@ -282,8 +308,8 @@ class NBody {
 
 	body_container bodies;
 	static constexpr flt CONST_G = 6.6743015e-11L;
-	static constexpr int w = 800;
-	static constexpr int h = 600;
+	static constexpr int w = 3000;
+	static constexpr int h = 2000;
 	flt time_step;
 #if DRAW
 	gui_window *window;
@@ -335,11 +361,11 @@ public:
 			update_vel();
 
 			if (DRAW) {
-				std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
-				for (int i = 0; i < bodies.size(); i++) {
-					std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
-				}
-				std::cout << "\r\n";
+				// std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
+				// for (int i = 0; i < bodies.size(); i++) {
+				// 	std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
+				// }
+				// std::cout << "\r\n";
 				draw_bodies();
 			}
 		}
@@ -377,5 +403,4 @@ int main(int argc, char **argv)
 
 	sim.run(nr_steps);
 }
-
 
