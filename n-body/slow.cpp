@@ -4,14 +4,15 @@
 #include <stdexcept>
 #include <vector>
 #include <ctime>
+#include <iomanip>
 
 #ifndef DRAW
 # define DRAW true
 #endif
 
 #if DRAW
-# include <guilib.h>
-# include <stdguilib.h>
+#include <guilib.h>
+#include <stdguilib.h>
 #endif
 
 typedef float flt;
@@ -191,12 +192,13 @@ class NBody {
 
 		for (int other = 0; other < bodies.size(); other++) {
 			if (cur == other) {
-				continue;;
+				continue;
 			}
 
 			vec3 dist = bodies.pos(other) - bodies.pos(cur);
-			flt r = std::pow<flt>(dist.abs(), (flt)-1.5);
-			flt norm = CONST_G * bodies.mass(other) * r;
+			flt r = dist.abs();
+			r = bruh::sqrt<flt>(r);
+			flt norm = CONST_G * bodies.mass(other) / std::pow<flt>(r, 3);
 
 			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
 
@@ -212,7 +214,7 @@ class NBody {
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
-			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
+			acc += (k1 + k2 * 2 + k3 * 2 + k4) / (flt)6;
 		}
 
 		return acc;
@@ -247,6 +249,7 @@ class NBody {
 			 energy += bodies.mass(i) * square(bodies.vel(i).length()) / 2;
 		 }
 
+		 std::cout << ' ' << energy;
 		 return energy;
 	}
 
@@ -366,12 +369,13 @@ public:
 			update_acc();
 			update_vel();
 
-			std::cout << "energy error: " << std::abs((get_energy() - energy) / energy) * 100 << "%\r\n";
+			std::cout << "energy error: " << std::fixed << std::setprecision(10) << (get_energy() - energy) << "\r\n";
+				for (int i = 0; i < bodies.size(); i++) {
+					std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) <<
+						", acc: " << bodies.acc(i) << ", mass: " << bodies.mass(i) << "\r\n";
+				}
+				std::cout << "\r\n";
 			if (DRAW) {
-				// for (int i = 0; i < bodies.size(); i++) {
-				// 	std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
-				// }
-				// std::cout << "\r\n";
 				draw_bodies();
 			}
 		}
@@ -379,7 +383,7 @@ public:
 		clock_gettime(CLOCK_MONOTONIC, &end);
 #endif
 
-		std::cout << "energy error: " << std::abs((get_energy() - energy) / energy) * 100 << "\r\n";
+		std::cout << "energy error: " << (get_energy() - energy) << "\r\n";
 		std::cout << "elapsed time: " << time_diff(end, start) << "\r\n";
 	}
 };

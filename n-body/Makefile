@@ -5,7 +5,7 @@ CC = g++
 
 CXXFLAGS = -Wall -Wextra
 CXXFLAGS += -std=c++17 -fdiagnostics-color
-CXXFLAGS += -O3
+CXXFLAGS += -O0 -g3
 CXXFLAGS += -D __linux__
 
 all: fast slow example draw

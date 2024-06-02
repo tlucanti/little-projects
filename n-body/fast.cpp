@@ -18,7 +18,7 @@ static gui_window *window = nullptr;
 # define __always_inline inline __attribute__((__always_inline__))
 #endif
 
-#define BODIES 10000
+#define BODIES 3000
 #define TIME_STEPS 10
 #define time_step (flt)0.005
 #define CONST_G (flt)6.6743015e-11
@@ -272,7 +272,7 @@ static vec3 compute_acc_once(int cur)
 		tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
 		vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
-		acc += (k1 + k2 * 2 + k3 * 3 + k4) * ((flt)1 / 6);
+		acc += (k1 + k2 * 2 + k3 * 2 + k4) * ((flt)1 / 6);
 	}
 
 	return acc;

@@ -1,6 +1,9 @@
 #include "GSimulation.hpp"
 #include "cpu_time.hpp"
 
+std::mt19937 gen(time(nullptr));
+std::uniform_real_distribution<real_type> unif_d(-1.0, 1.0);
+
 GSimulation::GSimulation()
 {
   std::cout << "===============================" << std::endl;
@@ -22,10 +25,6 @@ void GSimulation::set_number_of_steps(int N)
 
 void GSimulation::init_pos()
 {
-  std::random_device rd;
-  std::mt19937 gen(42);
-  std::uniform_real_distribution<real_type> unif_d(0, 1.0);
-
   for (int i = 0; i < get_npart(); ++i)
   {
     particles[i].pos[0] = unif_d(gen);
@@ -36,15 +35,11 @@ void GSimulation::init_pos()
 
 void GSimulation::init_vel()
 {
-  std::random_device rd;
-  std::mt19937 gen(42);
-  std::uniform_real_distribution<real_type> unif_d(-1.0, 1.0);
-
   for (int i = 0; i < get_npart(); ++i)
   {
-    particles[i].vel[0] = unif_d(gen) * 1.0e-1f;
-    particles[i].vel[1] = unif_d(gen) * 1.0e-1f;
-    particles[i].vel[2] = unif_d(gen) * 1.0e-1f;
+    particles[i].vel[0] = unif_d(gen);
+    particles[i].vel[1] = unif_d(gen);
+    particles[i].vel[2] = unif_d(gen);
   }
 }
 
@@ -52,19 +47,15 @@ void GSimulation::init_acc()
 {
   for (int i = 0; i < get_npart(); ++i)
   {
-    particles[i].acc[0] = 0.f;
-    particles[i].acc[1] = 0.f;
-    particles[i].acc[2] = 0.f;
+    particles[i].acc[0] = 0;
+    particles[i].acc[1] = 0;
+    particles[i].acc[2] = 0;
   }
 }
 
 void GSimulation::init_mass()
 {
   real_type n = static_cast<real_type>(get_npart());
-  std::random_device rd;
-  std::mt19937 gen(42);
-  std::uniform_real_distribution<real_type> unif_d(0.0, 1.0);
-
   for (int i = 0; i < get_npart(); ++i)
   {
     particles[i].mass = n * unif_d(gen);
@@ -133,33 +124,67 @@ double compute_p_energy(Particle *particles, int num_parts)
   return p_energy / 2;
 }
 
-void computeAcc(Particle *buff, int part_num)
+void partial_step(double dst[3], double a[3], double b[3], double k)
+{
+	dst[0] = a[0] + b[0] * k;
+	dst[1] = a[1] + b[1] * k;
+	dst[2] = a[2] + b[2] * k;
+}
+
+void computeAcc(Particle *buff, int part_num, double time_step)
 {
   for (int i = 0; i < part_num; i++) // update acceleration
   {
-    buff[i].acc[0] = 0.;
-    buff[i].acc[1] = 0.;
-    buff[i].acc[2] = 0.;
+    buff[i].acc[0] = 0;
+    buff[i].acc[1] = 0;
+    buff[i].acc[2] = 0;
 
     for (int j = 0; j < part_num; j++)
     {
-      if (i != j)
-      {
-        real_type dx, dy, dz;
-        real_type distanceSqr = 0.0;
-        real_type distanceInv = 0.0;
+		if (i == j) {
+			continue;
+		}
 
-        dx = buff[j].pos[0] - buff[i].pos[0];
-        dy = buff[j].pos[1] - buff[i].pos[1];
-        dz = buff[j].pos[2] - buff[i].pos[2];
+	    	Particle *target_body = &buff[i];
+		Particle *external_body = &buff[j];
 
-        distanceSqr = std::pow(dx, 2) + std::pow(dy, 2) + std::pow(dz, 2) + softeningSquared;
-        distanceInv = 1.0 / sqrt(distanceSqr);
+		double k1[3], k2[3], k3[3], k4[3], tmp_vel[3], tmp_loc[3];
 
-        buff[i].acc[0] += dx * G * buff[j].mass * std::pow(distanceInv, 3);
-        buff[i].acc[1] += dy * G * buff[j].mass * std::pow(distanceInv, 3);
-        buff[i].acc[2] += dz * G * buff[j].mass * std::pow(distanceInv, 3);
-      }
+                double r = pow((target_body->pos[0] - external_body->pos[0]), 2) +
+			   pow((target_body->pos[1] - external_body->pos[1]), 2) +
+			   pow((target_body->pos[2] - external_body->pos[2]), 2);
+                r = sqrt(r);
+                double tmp = G * external_body->mass / pow(r, 3);
+
+                // k1 - regular Euler acceleration
+                k1[0] = tmp * (external_body->pos[0] - target_body->pos[0]);
+                k1[1] = tmp * (external_body->pos[1] - target_body->pos[1]);
+                k1[2] = tmp * (external_body->pos[2] - target_body->pos[2]);
+
+                // k2 - acceleration 0.5 timesteps in the future based on k1 acceleration value
+                partial_step(tmp_vel, target_body->vel, k1, 0.5);
+                partial_step(tmp_loc, target_body->pos, tmp_vel, 0.5 * time_step);
+                k2[0] = (external_body->pos[0] - tmp_loc[0]) * tmp;
+                k2[1] = (external_body->pos[1] - tmp_loc[1]) * tmp;
+                k2[2] = (external_body->pos[2] - tmp_loc[2]) * tmp;
+
+                // k3 acceleration 0.5 timesteps in the future using k2 acceleration
+                partial_step(tmp_vel, target_body->vel, k2, 0.5);
+                partial_step(tmp_loc, target_body->pos, tmp_vel, 0.5 * time_step);
+                k3[0] = (external_body->pos[0] - tmp_loc[0]) * tmp;
+                k3[1] = (external_body->pos[1] - tmp_loc[1]) * tmp;
+                k3[2] = (external_body->pos[2] - tmp_loc[2]) * tmp;
+
+                // k4 - location 1 timestep in the future using k3 acceleration
+                partial_step(tmp_vel, target_body->vel, k3, 1);
+                partial_step(tmp_loc, target_body->pos, tmp_vel, time_step);
+                k4[0] = (external_body->pos[0] - tmp_loc[0]) * tmp;
+                k4[1] = (external_body->pos[1] - tmp_loc[1]) * tmp;
+                k4[2] = (external_body->pos[2] - tmp_loc[2]) * tmp;
+
+                target_body->acc[0] += (k1[0] + k2[0] * 2 + k3[0] * 2 + k4[0]) / 6;
+                target_body->acc[1] += (k1[1] + k2[1] * 2 + k3[1] * 2 + k4[1]) / 6;
+                target_body->acc[2] += (k1[2] + k2[2] * 2 + k3[2] * 2 + k4[2]) / 6;
     }
   }
 }
@@ -215,7 +240,7 @@ void GSimulation::start()
     ts0 += time.start();
 
     // Simple Euler Method
-    computeAcc(particles, n);
+    computeAcc(particles, n, dt / 2);
     update_pos(particles, particles, particles, dt / 2, n);
 
     energy_k = compute_k_energy(particles, n);
