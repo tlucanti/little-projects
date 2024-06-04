@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <ctime>
+#include <iomanip>
 
 #ifndef DRAW
 # define DRAW true
@@ -14,7 +15,9 @@
 # include <stdguilib.h>
 #endif
 
-typedef float flt;
+#define MIN_SIMULATED_DIST (flt)1e-5
+
+typedef double flt;
 
 double time_diff(struct timespec end, struct timespec start)
 {
@@ -162,11 +165,14 @@ class NBody {
 		bodies.acc(0) = vec3(0, 0, 0);
 		bodies.mass(0) = 2e11;
 
-		for (int i = 1; i < cnt; i++) {
-			bodies.pos(i) = random_unit();
+		for (int i = 0; i < cnt; i++) {
+			bodies.pos(i) = random_unit() + vec3(1, 1, 1);
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 1e10;
+			bodies.mass(i) = random_float() * 1e9;
+			if (DRAW) {
+				bodies.mass(i) *= 1;
+			}
 		}
 	}
 
@@ -189,21 +195,24 @@ class NBody {
 			}
 
 			vec3 dist = bodies.pos(other) - bodies.pos(cur);
-			flt r = std::pow<flt>(dist.abs(), (flt)-1.5);
-			flt norm = CONST_G * bodies.mass(other) * r;
-
+			flt r = dist.abs();
+			r = std::pow<flt>(bruh::sqrt<flt>(r), 3);
+			if (r < MIN_SIMULATED_DIST) {
+				r = MIN_SIMULATED_DIST;
+			}
+			flt norm = CONST_G * bodies.mass(other) / r;
 			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
 
-			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5;
+			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5 * time_step;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
 
-			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5;
+			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5 * time_step;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k3 = (bodies.pos(other) - tmp_pos) * norm;
 
-			tmp_vel = bodies.vel(cur) + k3;
-			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
+			tmp_vel = bodies.vel(cur) + k3 * time_step;
+			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
 			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
@@ -308,8 +317,8 @@ class NBody {
 
 	body_container bodies;
 	static constexpr flt CONST_G = 6.6743015e-11L;
-	static constexpr int w = 3000;
-	static constexpr int h = 2000;
+	static constexpr int w = 1024;
+	static constexpr int h = 720;
 	flt time_step;
 #if DRAW
 	gui_window *window;
@@ -356,23 +365,22 @@ public:
 			}
 #endif
 
-			update_pos();
 			update_acc();
 			update_vel();
+			update_pos();
 
 			if (DRAW) {
-				// std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "%\r\n";
 				// for (int i = 0; i < bodies.size(); i++) {
 				// 	std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
 				// }
-				// std::cout << "\r\n";
 				draw_bodies();
 			}
+
+			std::cout << "energy error: " << std::fixed << std::setprecision(10) << std::abs((get_energy() - energy) / energy) << "\r\n";
 		}
 		clock_gettime(CLOCK_MONOTONIC, &end);
 
 		std::cout << "elapsed time: " << time_diff(end, start) << "\r\n";
-		std::cout << "energy error: " << abs((get_energy() - energy) / energy) * 100 << "\r\n";
 	}
 };
 
