@@ -173,7 +173,7 @@ class NBody {
 			bodies.acc(i) = vec3(0, 0, 0);
 			bodies.mass(i) = random_float() * 1e9;
 			if (DRAW) {
-				bodies.mass(i) *= 1e7;
+				bodies.mass(i) *= 1e4;
 			}
 		}
 	}
@@ -204,20 +204,22 @@ class NBody {
 			}
 			flt norm = CONST_G * bodies.mass(other) / r;
 			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
+			acc += k1;
+			continue;
 
-			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5 * time_step;
+			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
 
-			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5 * time_step;
+			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k3 = (bodies.pos(other) - tmp_pos) * norm;
 
-			tmp_vel = bodies.vel(cur) + k3 * time_step;
+			tmp_vel = bodies.vel(cur) + k3;
 			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
-			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6 * time_step;
+			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
 		}
 
 		return acc;
@@ -283,7 +285,9 @@ class NBody {
 
 			flt r = bodies.mass(i) / max_mass * 20;
 			//gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
-			gui_draw_line(window, old_x, old_y, x, y, COLOR_RED);
+			if (std::abs(x) < 2000 && std::abs(y) < 2000) {
+				gui_draw_line(window, old_x, old_y, x, y, COLOR_RED);
+			}
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
 
 			prev_x.at(i) = x;

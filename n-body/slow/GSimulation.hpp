@@ -25,7 +25,7 @@ public:
   void start();
 
 private:
-  Particle *particles;
+  std::vector<Particle> particles;
 
   int _npart;         // number of particles
   int _nsteps;        // number of integration steps
