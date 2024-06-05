@@ -166,7 +166,7 @@ class NBody {
 		bodies.mass(0) = 2e11;
 
 		for (int i = 0; i < cnt; i++) {
-			bodies.pos(i) = random_unit() + vec3(1, 1, 1);
+			bodies.pos(i) = random_unit() * 1.5;
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
 			bodies.mass(i) = random_float() * 1e9;
@@ -258,10 +258,14 @@ class NBody {
 #if DRAW
 		static std::vector<int> prev_x;
 		static std::vector<int> prev_y;
+		static flt max_mass = 0;
 
 		if (prev_x.empty()) {
 			prev_x.resize(bodies.size());
 			prev_y.resize(bodies.size());
+			for (int i = 0; i < (int)bodies.size(); i++) {
+				max_mass = std::max(max_mass, bodies.mass(i));
+			}
 		}
 
 		for (int i = 0; i < (int)bodies.size(); i++) {
@@ -270,12 +274,21 @@ class NBody {
 			int old_x = prev_x.at(i);
 			int old_y = prev_y.at(i);
 
-			flt r = bodies.mass(i) * 1e-9;
-			gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
+			flt r = bodies.mass(i) / max_mass * 50;
+			//gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
 
 			prev_x.at(i) = x;
 			prev_y.at(i) = y;
+
+			if (1) {
+				std::cout << x << ' ' << y << ' ';
+				std::cout << "pos: " << bodies.pos(i)
+					  << ", vel: " << bodies.vel(i)
+					  << ", acc: " << bodies.acc(i)
+					  << ", mass: " << bodies.mass(i)
+					  << '\n';
+			}
 		}
 		gui_draw(window);
 #endif
@@ -370,9 +383,6 @@ public:
 			update_pos();
 
 			if (DRAW) {
-				// for (int i = 0; i < bodies.size(); i++) {
-				// 	std::cout << "body pos: " << bodies.pos(i) << ", vel: " << bodies.vel(i) << ", acc: " << bodies.acc(i) << "\r\n";
-				// }
 				draw_bodies();
 			}
 
