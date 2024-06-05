@@ -15,7 +15,7 @@
 # include <stdguilib.h>
 #endif
 
-#define MIN_SIMULATED_DIST (flt)1e-5
+#define MIN_SIMULATED_DIST (flt)1e-6
 
 typedef double flt;
 
@@ -215,7 +215,7 @@ class NBody {
 			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
-			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
+			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6 * time_step;
 		}
 
 		return acc;
