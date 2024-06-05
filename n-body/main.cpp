@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <vector>
 #include <ctime>
-#include <iomanip>
 
 #ifndef DRAW
 # define DRAW true
@@ -15,7 +14,10 @@
 # include <stdguilib.h>
 #endif
 
-#define MIN_SIMULATED_DIST (flt)1e-6
+#define SCREEN_W 2000
+#define SCREEN_H 1500
+
+#define MIN_SIMULATED_DIST (flt)1e-15
 
 typedef double flt;
 
@@ -171,7 +173,7 @@ class NBody {
 			bodies.acc(i) = vec3(0, 0, 0);
 			bodies.mass(i) = random_float() * 1e9;
 			if (DRAW) {
-				bodies.mass(i) *= 1;
+				bodies.mass(i) *= 1e7;
 			}
 		}
 	}
@@ -269,13 +271,19 @@ class NBody {
 		}
 
 		for (int i = 0; i < (int)bodies.size(); i++) {
-			int x = (bodies.pos(i).x + 10) / 20 * w;
-			int y = (bodies.pos(i).y + 10) / 20 * h;
+			int x = (bodies.pos(i).x + 25) / 40 * SCREEN_W;
+			int y = (bodies.pos(i).y + 25) / 40 * SCREEN_H;
 			int old_x = prev_x.at(i);
 			int old_y = prev_y.at(i);
 
-			flt r = bodies.mass(i) / max_mass * 50;
+			if (old_x == 0 && old_y == 0) {
+				old_x = x;
+				old_y = y;
+			}
+
+			flt r = bodies.mass(i) / max_mass * 20;
 			//gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
+			gui_draw_line(window, old_x, old_y, x, y, COLOR_RED);
 			gui_draw_circle(window, x, y, r, COLOR_GREEN);
 
 			prev_x.at(i) = x;
@@ -330,8 +338,6 @@ class NBody {
 
 	body_container bodies;
 	static constexpr flt CONST_G = 6.6743015e-11L;
-	static constexpr int w = 1024;
-	static constexpr int h = 720;
 	flt time_step;
 #if DRAW
 	gui_window *window;
@@ -350,7 +356,7 @@ public:
 		window = gui_alloc();
 		if (window == nullptr)
 			throw std::bad_alloc();
-		if (gui_create(window, w, h))
+		if (gui_create(window, SCREEN_W, SCREEN_H))
 			throw std::runtime_error("gui create fail");
 #endif
 
@@ -370,6 +376,10 @@ public:
 		struct timespec start, end;
 		flt energy = get_energy();
 
+#if DRAW
+		draw_bodies();
+#endif
+
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		while (nr_steps-- > 0) {
 #if DRAW
@@ -386,7 +396,7 @@ public:
 				draw_bodies();
 			}
 
-			std::cout << "energy error: " << std::fixed << std::setprecision(10) << std::abs((get_energy() - energy) / energy) << "\r\n";
+			printf("energy error: %.10f\n", std::abs((get_energy() - energy) / energy));
 		}
 		clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -397,7 +407,11 @@ public:
 std::string print_float(flt val)
 {
 	char buf[128];
-	sprintf(buf, "%7.4Lf", (long double)val);
+	if (std::abs(val) > 1e10) {
+		sprintf(buf, "%Lg", (long double)val);
+	} else {
+		sprintf(buf, "%8.4Lf", (long double)val);
+	}
 	return std::string(buf);
 }
 
