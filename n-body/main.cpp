@@ -14,8 +14,8 @@
 # include <stdguilib.h>
 #endif
 
-#define SCREEN_W 2000
-#define SCREEN_H 1500
+#define SCREEN_W 1024
+#define SCREEN_H 720
 
 #define MIN_SIMULATED_DIST (flt)1e-15
 
@@ -205,6 +205,7 @@ class NBody {
 			flt norm = CONST_G * bodies.mass(other) / r;
 			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
 
+#ifdef RK4
 			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5 * time_step;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
@@ -218,10 +219,19 @@ class NBody {
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
 			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6 * time_step;
+#elif defined(HEUN)
+			tmp_vel = bodies.vel(cur) + k1 * (flt)time_step;
+			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
+			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
+
+			acc += (k1 + k2) * time_step / 2;
+
+#endif
 		}
 
 		return acc;
 	}
+
 
 	void update_acc(void)
 	{
@@ -430,6 +440,11 @@ int main(int argc, char **argv)
 	if (argc != 3) {
 		return 1;
 	}
+#ifdef RK4
+	std::cout << "RK4" << std::endl;
+#elif defined(HEUN)
+	std::cout << "HEUN" << std::endl;
+#endif
 
 	int nr_bodies = atoi(argv[1]);
 	int nr_steps = atoi(argv[2]);
