@@ -204,10 +204,8 @@ class NBody {
 			}
 			flt norm = CONST_G * bodies.mass(other) / r;
 			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
-			acc += k1;
-			continue;
 
-			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5;
+			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5 * time_step;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
 			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
 
@@ -219,7 +217,7 @@ class NBody {
 			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
 			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
 
-			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6;
+			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6 * time_step;
 		}
 
 		return acc;
