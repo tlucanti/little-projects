@@ -7,12 +7,15 @@ CXXFLAGS += -std=c++17 -fdiagnostics-color
 CXXFLAGS += -O0 -g3
 CXXFLAGS += -D __linux__
 
+ALGO = RK4
+
 all: fast slow nbody
 
 nbody:
 	g++ $(CXXFLAGS) \
 		-I ../../GUIlib/include/ \
 		main.cpp \
+		-D ${ALGO} \
 		`$(GUIROOT)/guiflags.sh $(GUIROOT)` \
 		-lstdgui \
 		-o nbody.elf
@@ -21,6 +24,7 @@ nbody:
 fast:
 	g++ $(CXXFLAGS) \
 		-D DRAW=0 \
+		-D ${ALGO} \
 		main.cpp \
 		-o fast.elf
 .PHONY: fast
