@@ -235,6 +235,7 @@ class NBody {
 
 	void update_acc(void)
 	{
+#pragma omp parallel for
 		for (int i = 0; i < bodies.size(); i++) {
 			bodies.acc(i) = compute_acc_once(i);
 		}

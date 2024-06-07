@@ -4,8 +4,9 @@ GUILIB = opengl
 
 CXXFLAGS = -Wall -Wextra
 CXXFLAGS += -std=c++17 -fdiagnostics-color
-CXXFLAGS += -O0 -g3
+CXXFLAGS += -O3 -ffast-math -fopenmp
 CXXFLAGS += -D __linux__
+CXXFLAGS_SLOW += -O3 -g3
 
 ALGO = RK4
 
@@ -30,9 +31,10 @@ fast:
 .PHONY: fast
 
 slow:
-	g++ $(CXXFLAGS) \
-		-I slow \
-		slow/*.cpp \
+	g++ $(CXXFLAGS_SLOW) \
+		-D DRAW=0 \
+		-D ${ALGO} \
+		main.cpp \
 		-o slow.elf
 .PHONY: slow
 
