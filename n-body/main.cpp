@@ -1,7 +1,6 @@
 
 #include <cmath>
 #include <iostream>
-#include <stdexcept>
 #include <vector>
 #include <ctime>
 
@@ -14,12 +13,26 @@
 # include <stdguilib.h>
 #endif
 
-#define SCREEN_W 1024
-#define SCREEN_H 720
+#ifndef ALGO
+# define ALGO RK1
+#endif
+
+#define SCREEN_W 1920
+#define SCREEN_H 1080
+#define ZOOM (flt)20
 
 #define MIN_SIMULATED_DIST (flt)1e-15
 
 typedef double flt;
+
+enum algo {
+	EULER,
+	HEUN,
+	RK3,
+	RK4,
+	RK1 = EULER,
+	RK2 = HEUN,
+};
 
 double time_diff(struct timespec end, struct timespec start)
 {
@@ -162,18 +175,13 @@ class NBody {
 	{
 		bodies.setsize(cnt);
 
-		bodies.pos(0) = vec3(0, 0, 0);
-		bodies.vel(0) = vec3(0, 0, 0);
-		bodies.acc(0) = vec3(0, 0, 0);
-		bodies.mass(0) = 2e11;
-
 		for (int i = 0; i < cnt; i++) {
 			bodies.pos(i) = random_unit() * 1.5;
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
 			bodies.mass(i) = random_float() * 1e9;
 			if (DRAW) {
-				bodies.mass(i) *= 1e4;
+				bodies.mass(i) *= 1e6;
 			}
 		}
 	}
@@ -190,6 +198,7 @@ class NBody {
 		vec3 acc = vec3(0, 0, 0);
 		vec3 tmp_vel;
 		vec3 tmp_pos;
+		vec3 k1, k2, k3, k4;
 
 		for (int other = 0; other < bodies.size(); other++) {
 			if (cur == other) {
@@ -203,30 +212,29 @@ class NBody {
 				r = MIN_SIMULATED_DIST;
 			}
 			flt norm = CONST_G * bodies.mass(other) / r;
-			vec3 k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
+			k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
+			if (ALGO == EULER) {
+				acc += k1 * time_step;
+				continue;
+			}
 
-#ifdef RK4
-			tmp_vel = bodies.vel(cur) + k1 * (flt)0.5 * time_step;
-			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
-			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
+			tmp_vel = bodies.vel(cur) + k1 * time_step;
+			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
+			k2 = (bodies.pos(other) - tmp_pos) * norm;
+			if (ALGO == HEUN) {
+				acc += (k1 + k2) * 0.5 * time_step;
+				continue;
+			}
 
 			tmp_vel = bodies.vel(cur) + k2 * (flt)0.5;
 			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)0.5 * time_step;
-			vec3 k3 = (bodies.pos(other) - tmp_pos) * norm;
+			k3 = (bodies.pos(other) - tmp_pos) * norm;
 
 			tmp_vel = bodies.vel(cur) + k3;
 			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
-			vec3 k4 = (bodies.pos(other) - tmp_pos) * norm;
+			k4 = (bodies.pos(other) - tmp_pos) * norm;
 
 			acc += (k1 + k2 * 2 + k3 * 3 + k4) / (flt)6 * time_step;
-#elif defined(HEUN)
-			tmp_vel = bodies.vel(cur) + k1 * (flt)time_step;
-			tmp_pos = bodies.pos(cur) + tmp_vel * (flt)time_step;
-			vec3 k2 = (bodies.pos(other) - tmp_pos) * norm;
-
-			acc += (k1 + k2) * time_step / 2;
-
-#endif
 		}
 
 		return acc;
@@ -265,6 +273,17 @@ class NBody {
 		 return energy;
 	}
 
+	unsigned get_color(flt x)
+	{
+		unsigned r, g;
+
+		x *= 0.01;
+		r = 255 * (1 - exp(-x));
+		g = 255 * (1 - exp(-2/x));
+
+		return r | (g << 8);
+	}
+
 	void draw_bodies(void)
 	{
 #if DRAW
@@ -281,10 +300,11 @@ class NBody {
 		}
 
 		for (int i = 0; i < (int)bodies.size(); i++) {
-			int x = (bodies.pos(i).x + 25) / 40 * SCREEN_W;
-			int y = (bodies.pos(i).y + 25) / 40 * SCREEN_H;
+			int x = (bodies.pos(i).x + ZOOM / 2) / ZOOM * SCREEN_W;
+			int y = (bodies.pos(i).y + ZOOM / 2) / ZOOM * SCREEN_H;
 			int old_x = prev_x.at(i);
 			int old_y = prev_y.at(i);
+			unsigned color;
 
 			if (old_x == 0 && old_y == 0) {
 				old_x = x;
@@ -292,11 +312,13 @@ class NBody {
 			}
 
 			flt r = bodies.mass(i) / max_mass * 20;
+			r = std::min(r, (flt)5);
 			//gui_draw_circle(window, old_x, old_y, r, COLOR_BLACK);
-			if (std::abs(x) < 2000 && std::abs(y) < 2000) {
-				gui_draw_line(window, old_x, old_y, x, y, COLOR_RED);
+			if (std::abs(x) < SCREEN_W && std::abs(y) < SCREEN_H) {
+				gui_draw_line(window, old_x, old_y, x, y, 0xFF0000);
 			}
-			gui_draw_circle(window, x, y, r, COLOR_GREEN);
+			color = get_color(bodies.vel(i).abs());
+			gui_draw_circle(window, x, y, r, color);
 
 			prev_x.at(i) = x;
 			prev_y.at(i) = y;
@@ -353,15 +375,14 @@ class NBody {
 	flt time_step;
 #if DRAW
 	gui_window *window;
-#else
-	void *window;
 #endif
 
 public:
 	NBody(int cnt, flt time_step)
-		: time_step(time_step), window(nullptr)
+		: time_step(time_step)
 	{
 		srand(time(nullptr));
+		// srand(4);
 
 #if DRAW
 		gui_bootstrap();

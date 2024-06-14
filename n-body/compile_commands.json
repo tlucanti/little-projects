@@ -1,0 +1,24 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-Wall",
+      "-Wextra",
+      "-std=c++17",
+      "-fdiagnostics-color",
+      "-O0",
+      "-g3",
+      "-D",
+      "__linux__",
+      "-I",
+      "../../GUIlib/include/",
+      "-o",
+      "nbody.elf",
+      "main.cpp"
+    ],
+    "directory": "/home/tlucanti/git/little-projects/n-body",
+    "file": "/home/tlucanti/git/little-projects/n-body/main.cpp",
+    "output": "/home/tlucanti/git/little-projects/n-body/nbody.elf"
+  }
+]
