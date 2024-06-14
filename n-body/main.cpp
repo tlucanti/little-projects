@@ -14,7 +14,7 @@
 #endif
 
 #ifndef ALGO
-# define ALGO RK1
+# define ALGO RK2
 #endif
 
 #define SCREEN_W 1920
@@ -179,7 +179,7 @@ class NBody {
 			bodies.pos(i) = random_unit() * 1.5;
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 3e7;
+			bodies.mass(i) = random_float() * 3e6;
 			if (DRAW) {
 				bodies.mass(i) *= 1;
 			}
@@ -368,9 +368,50 @@ class NBody {
 		flt &mass(int i) {
 			return bv[i].mass;
 		}
-
-
 	};
+
+	vec3 computeAcc(int cur)
+	{
+		vec3 acc = { 0, 0, 0 };
+
+		for (int other = 0; other < bodies.size(); other++) {
+			if (other == cur)
+				continue;
+			vec3 dr = bodies.pos(cur) - bodies.pos(other);
+			acc -= dr * CONST_G * bodies.mass(cur) * bodies.mass(other) / std::pow(dr.length(), 3);
+		}
+
+		return acc;
+	}
+
+	void updatePlanets(void)
+	{
+		for (int i = 0; i < bodies.size(); i++) {
+			bodies.acc(i) = computeAcc(i);
+		}
+
+		for (int i = 0; i < bodies.size(); i++) {
+			vec3 pk1 = bodies.vel(i) * time_step;
+			bodies.pos(i) += pk1; continue;
+
+			vec3 pk2 = (bodies.vel(i) + pk1 * 0.5) * time_step;
+			vec3 pk3 = (bodies.vel(i) + pk2 * 0.5) * time_step;
+			vec3 pk4 = (bodies.vel(i) + pk3) * time_step;
+
+			bodies.pos(i) += (pk1 + pk2 * 2 + pk3 * 2 + pk4) * (flt)1/6;
+		}
+
+		for (int i = 0; i < bodies.size(); i++) {
+			vec3 vk1 = bodies.acc(i) * time_step;
+			bodies.vel(i) += vk1; continue;
+
+			vec3 vk2 = (bodies.acc(i) + vk1 * 0.5) * time_step;
+			vec3 vk3 = (bodies.acc(i) + vk2 * 0.5) * time_step;
+			vec3 vk4 = (bodies.acc(i) + vk3) * time_step;
+
+			bodies.vel(i) += (vk1 + vk2 * 2 + vk3 * 2 + vk4) * (flt)1/6;
+		}
+	}
 
 	body_container bodies;
 	static constexpr flt CONST_G = 6.6743015e-11L;
@@ -423,9 +464,10 @@ public:
 			}
 #endif
 
-			update_pos();
-			update_acc();
-			update_vel();
+			updatePlanets();
+			// update_pos();
+			// update_acc();
+			// update_vel();
 
 			if (DRAW) {
 				draw_bodies();
