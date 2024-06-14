@@ -179,9 +179,9 @@ class NBody {
 			bodies.pos(i) = random_unit() * 1.5;
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 1e9;
+			bodies.mass(i) = random_float() * 3e7;
 			if (DRAW) {
-				bodies.mass(i) *= 1e6;
+				bodies.mass(i) *= 1;
 			}
 		}
 	}
@@ -205,24 +205,26 @@ class NBody {
 				continue;;
 			}
 
+
 			vec3 dist = bodies.pos(other) - bodies.pos(cur);
 			flt r = dist.abs();
 			r = std::pow<flt>(bruh::sqrt<flt>(r), 3);
 			if (r < MIN_SIMULATED_DIST) {
 				r = MIN_SIMULATED_DIST;
 			}
-			flt norm = CONST_G * bodies.mass(other) / r;
+			flt norm = CONST_G * bodies.mass(other) * bodies.mass(cur) / r;
 			k1 = (bodies.pos(other) - bodies.pos(cur)) * norm;
 			if (ALGO == EULER) {
 				acc += k1 * time_step;
 				continue;
 			}
 
-			tmp_vel = bodies.vel(cur) + k1 * time_step;
-			tmp_pos = bodies.pos(cur) + tmp_vel * time_step;
+			tmp_vel = bodies.vel(cur) + k1 * time_step * (flt)0.5;
+			tmp_pos = bodies.pos(cur) + tmp_vel * time_step * (flt)0.5;
 			k2 = (bodies.pos(other) - tmp_pos) * norm;
 			if (ALGO == HEUN) {
-				acc += (k1 + k2) * 0.5 * time_step;
+				// acc += (k1 + k2) * 0.5 * time_step;
+				acc += k2 * time_step;
 				continue;
 			}
 
@@ -421,9 +423,9 @@ public:
 			}
 #endif
 
+			update_pos();
 			update_acc();
 			update_vel();
-			update_pos();
 
 			if (DRAW) {
 				draw_bodies();
