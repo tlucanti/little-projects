@@ -4,8 +4,9 @@ GUILIB = opengl
 
 CXXFLAGS = -Wall -Wextra
 CXXFLAGS += -std=c++17 -fdiagnostics-color
-CXXFLAGS += -O0 -g3
+CXXFLAGS += -O3
 CXXFLAGS += -D __linux__
+CXXFLAGS += -fopenmp
 
 all: fast slow nbody
 

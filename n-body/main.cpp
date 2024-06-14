@@ -179,10 +179,19 @@ class NBody {
 			bodies.pos(i) = random_unit() * 1.5;
 			bodies.vel(i) = random_unit() * 1e1;
 			bodies.acc(i) = vec3(0, 0, 0);
-			bodies.mass(i) = random_float() * 3e6;
+			bodies.mass(i) = random_float() * 1e3;
 			if (DRAW) {
-				bodies.mass(i) *= 1;
+				bodies.mass(i) *= 3e3;
 			}
+		}
+
+		if (DRAW) {
+			bodies.pos(0) = { 1, 0, 0 };
+			bodies.pos(1) = { -1, 0, 0 };
+			bodies.vel(0) = { 0, 10, 0 };
+			bodies.vel(1) = { 0, -10, 0 };
+			bodies.mass(0) = 3e6;
+			bodies.mass(1) = 3e6;
 		}
 	}
 
@@ -386,14 +395,15 @@ class NBody {
 
 	void updatePlanets(void)
 	{
+		#pragma omp parallel for
 		for (int i = 0; i < bodies.size(); i++) {
 			bodies.acc(i) = computeAcc(i);
 		}
 
+		#pragma omp parallel for
 		for (int i = 0; i < bodies.size(); i++) {
 			vec3 pk1 = bodies.vel(i) * time_step;
-			bodies.pos(i) += pk1; continue;
-
+			// bodies.pos(i) += pk1; continue;
 			vec3 pk2 = (bodies.vel(i) + pk1 * 0.5) * time_step;
 			vec3 pk3 = (bodies.vel(i) + pk2 * 0.5) * time_step;
 			vec3 pk4 = (bodies.vel(i) + pk3) * time_step;
@@ -401,10 +411,10 @@ class NBody {
 			bodies.pos(i) += (pk1 + pk2 * 2 + pk3 * 2 + pk4) * (flt)1/6;
 		}
 
+		#pragma omp parallel for
 		for (int i = 0; i < bodies.size(); i++) {
 			vec3 vk1 = bodies.acc(i) * time_step;
-			bodies.vel(i) += vk1; continue;
-
+			// bodies.vel(i) += vk1; continue;
 			vec3 vk2 = (bodies.acc(i) + vk1 * 0.5) * time_step;
 			vec3 vk3 = (bodies.acc(i) + vk2 * 0.5) * time_step;
 			vec3 vk4 = (bodies.acc(i) + vk3) * time_step;
