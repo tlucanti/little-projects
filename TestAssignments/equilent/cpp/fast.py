@@ -368,8 +368,11 @@ class segtree():
 
 import numpy as np
 def solve(array, window):
-    st = segtree(array)
+    array = np.array(array)
     out = np.zeros((2, len(array)))
+
+    # upper convex hull
+    st = segtree(array)
 
     out[0, 0] = 0
     out[0, 1] = math.atan2(array[0] - array[1], 1)
@@ -377,25 +380,41 @@ def solve(array, window):
         bridge = st.get_local_bridge(max(0, i - 9), i - 1, Point(i, array[i]))
         ang = math.atan2(bridge[0].y - bridge[1].y, bridge[1].x - bridge[0].x)
         out[0, i] = ang
+
+    # lower convex hull
+    array *= -1
+    st = segtree(array)
+
+    out[1, 0] = 0
+    out[1, 1] = out[0, 1]
+    for i in range(2, len(array)):
+        bridge = st.get_local_bridge(max(0, i - 9), i - 1, Point(i, array[i]))
+        ang = math.atan2(bridge[1].y - bridge[0].y, bridge[1].x - bridge[0].x)
+        out[1, i] = ang
+
     return out
+
 
 def main():
     X = list(map(float, open('input.csv').readlines()))
-    out = solve(X, 10)
-    for i in out[0]:
-        print(format(i, 'g'))
+    out = solve(X[:10000], 10)
+    for i in range(out.shape[1]):
+        print(f'{out[0, i]:g},{out[1, i]:g}')
 
 
 def test():
     y = list(map(float, open('input.csv').readlines()))
     #y = [1, 0, 3, 0, 4, 0, 2, 0, 1, 0]
     y = [11384.96, 11373.01, 11324.0, 11329.41, 11289.0, 11275.09, 11259.0, 11258.34, 11277.64, 11285.74, 11272.63, 11256.93, 11246.78, 11287.5, 11277.02, 11298.6, 11296.81, 11292.39, 11290.0, 11306.58]
-    v = 13
+    y = [-i for i in y]
+    v = 2
     st = segtree(y)
     print('Y:', st.points)
     print('HC:', st.get_hc())
-    print(f'Bridge with ({v}, {y[v]}):', st.get_local_bridge(max(0, v - 9), v - 1, Point(v, y[v])))
+    br = st.get_local_bridge(max(0, v - 9), v - 1, Point(v, y[v]))
     print(f'subtree {max(0, v - 9)} .. {v - 1}:', st._get_hc(st.subtree[1]))
+    print(f'Bridge:', br)
+    print(f'angle:', math.atan2(br[0].y - br[1].y, br[1].x - br[0].x))
 
 
 if __name__ == '__main__':
