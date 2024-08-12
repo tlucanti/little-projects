@@ -1,4 +1,8 @@
 
+CXXFLAGS =
+CXXFLAGS += -Wall -Wextra -Wmost -Wconversion -pedantic
+CXXFLAGS += -O3 -fdiagnostics-color=always
+
 all: init build run check
 
 init:
@@ -15,9 +19,9 @@ build:
 	clang++ -O3 slow.cpp -D WINDOW=100 -o slow100.elf
 	clang++ -O3 slow.cpp -D WINDOW=1000 -o slow1000.elf
 	#
-	clang++ -O3 fast.cpp -D WINDOW=10 -o fast10.elf
-	clang++ -O3 fast.cpp -D WINDOW=100 -o fast100.elf
-	clang++ -O3 fast.cpp -D window=1000 -o fast1000.elf
+	clang++ $(CXXFLAGS) fast.cpp -D WINDOW=10 -o fast10.elf
+	clang++ $(CXXFLAGS) fast.cpp -D WINDOW=100 -o fast100.elf
+	clang++ $(CXXFLAGS) fast.cpp -D WINDOW=1000 -o fast1000.elf
 
 run:
 	./fast10.elf < input.csv > f10.csv

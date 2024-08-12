@@ -11,7 +11,7 @@ struct Vector;
 
 static bool same_sign(double a, double b);
 static bool different_sign(double a, double b);
-static Point intersect(const Vector &v1, const Vector &v2);
+static std::pair<double, double> intersect(const Vector &v1, const Vector &v2);
 
 struct Point {
 	int x;
@@ -71,7 +71,7 @@ static inline bool different_sign(double a, double b)
 	return a * b < 0;
 }
 
-static inline Point intersect(const Vector &v1, const Vector &v2)
+static inline std::pair<double, double> intersect(const Vector &v1, const Vector &v2)
 {
 	const Point A = v1.start,
 		    B = v1.end,
@@ -90,7 +90,7 @@ static inline Point intersect(const Vector &v1, const Vector &v2)
 
 	const double x = (b2 * c1 - b1 * c2) / det;
 	const double y = (a1 * c2 - a2 * c1) / det;
-	return Point(x, y);
+	return { x, y };
 }
 
 
@@ -103,7 +103,6 @@ struct segtree {
 		virtual Point max(void) const = 0;
 		virtual Point min(void) const = 0;
 		virtual Point find(double point) const = 0;
-		virtual Point find(int point) const = 0;
 		virtual ~Node(void) {}
 	};
 
@@ -151,12 +150,6 @@ struct segtree {
 			(void)p;
 			return point;
 		}
-
-		 Point find(int p) const override
-		 {
-			 (void)p;
-			 return point;
-		 }
 	};
 
 	struct Inode : public Node {
@@ -241,22 +234,6 @@ struct segtree {
 			else
 				return left->find(point);
 		}
-
-		Point find(int point) const override
-		{
-			int L = bridge.br_left.x;
-			int R = bridge.br_right.x;
-			double C = (L + R) / 2.0;
-
-			if (point > R)
-				return right->find(point);
-			else if (point > C)
-				return bridge.br_right;
-			else if (point >= L)
-				return bridge.br_left;
-			else
-				return left->find(point);
-		}
 	};
 
 	const std::vector<double> &array;
@@ -267,7 +244,7 @@ struct segtree {
 		: array(array)
 	{
 		tree.resize(4 * array.size());
-		_build(1, 0, array.size() - 1);
+		_build(1, 0, (int)array.size() - 1);
 	}
 
 	~segtree(void)
@@ -279,7 +256,7 @@ struct segtree {
 
 	std::pair<Point, Point> query_bridge(int start, int end, const Point &point)
 	{
-		Node *subtree = _query(1, 0, array.size() - 1, start, end);
+		Node *subtree = _query(1, 0, (int)array.size() - 1, start, end);
 		Lnode right = Lnode(point);
 		auto ret = _get_bridge(subtree, &right);
 
@@ -297,7 +274,7 @@ struct segtree {
 			return nullptr;
 
 		if (start == subtree_start and end == subtree_end) {
-			return tree.at(node);
+			return tree.at((size_t)node);
 		} else {
 			int subtree_middle = (subtree_start + subtree_end) / 2;
 			Node *left = _query(node * 2, subtree_start, subtree_middle,
@@ -321,12 +298,12 @@ struct segtree {
 	void _build(int node, int start, int end)
 	{
 		if (start == end) {
-			tree.at(node) = new Lnode(Point(start, array.at(start)));
+			tree.at((size_t)node) = new Lnode(Point(start, array.at((size_t)start)));
 		} else {
 			int middle = (start + end) / 2;
 			_build(node * 2, start, middle);
 			_build(node * 2 + 1, middle + 1, end);
-			tree.at(node) = _merge(tree.at(node * 2), tree.at(node * 2 + 1));
+			tree.at((size_t)node) = _merge(tree.at((size_t)node * 2), tree.at((size_t)node * 2 + 1));
 		}
 	}
 
@@ -471,7 +448,7 @@ struct segtree {
 				// case i:
 
 				int mid = right->min().x;
-				if (intersect(Vector(L, Ln), Vector(R, Rp)).x <= mid) {
+				if (intersect(Vector(L, Ln), Vector(R, Rp)).first <= mid) {
 					// case i/1: truncate only left's left half
 					Lmin = L.x;
 				} else {
@@ -483,13 +460,7 @@ struct segtree {
 	}
 };
 
-#ifndef SIZE
-# define SIZE 100000
-#endif
-
-#ifndef WINDOW
-# define WINDOW 10
-#endif
+#define SIZE 100000
 
 struct Angles {
 	double a;
@@ -504,8 +475,8 @@ static void calc(std::vector<double> &inputs, std::vector<Angles> &out)
 	out.at(0).a = 0;
 	out.at(1).a = atan2(inputs.at(0) - inputs.at(1), 1);
 	for (int i = 2; i < (int)inputs.size(); i++) {
-        	auto bridge = upper.query_bridge(std::max(0, i - WINDOW + 1), i - 1, Point(i, inputs.at(i)));
-        	out.at(i).a = atan2(bridge.first.y - bridge.second.y, bridge.second.x - bridge.first.x);
+        	auto bridge = upper.query_bridge(std::max(0, i - WINDOW + 1), i - 1, Point(i, inputs.at((size_t)i)));
+        	out.at((size_t)i).a = atan2(bridge.first.y - bridge.second.y, bridge.second.x - bridge.first.x);
 	}
 
 	// lower convex hull
@@ -517,8 +488,8 @@ static void calc(std::vector<double> &inputs, std::vector<Angles> &out)
 	out.at(0).b = 0;
 	out.at(1).b = out.at(1).a;
 	for (int i = 2; i < (int)inputs.size(); i++) {
-        	auto bridge = lower.query_bridge(std::max(0, i - WINDOW + 1), i - 1, Point(i, inputs.at(i)));
-        	out.at(i).b = atan2(bridge.second.y - bridge.first.y, bridge.second.x - bridge.first.x);
+        	auto bridge = lower.query_bridge(std::max(0, i - WINDOW + 1), i - 1, Point(i, inputs.at((size_t)i)));
+        	out.at((size_t)i).b = atan2(bridge.second.y - bridge.first.y, bridge.second.x - bridge.first.x);
 	}
 }
 
@@ -528,7 +499,7 @@ int main()
 	std::vector<Angles> outputs(SIZE);
 
 	for (int i = 0; i < SIZE; i++) {
-		std::cin >> inputs.at(i);
+		std::cin >> inputs.at((size_t)i);
 	}
 
 	calc(inputs, outputs);
