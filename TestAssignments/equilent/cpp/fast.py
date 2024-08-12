@@ -377,7 +377,7 @@ def solve(array, window):
     out[0, 0] = 0
     out[0, 1] = math.atan2(array[0] - array[1], 1)
     for i in range(2, len(array)):
-        bridge = st.get_local_bridge(max(0, i - 9), i - 1, Point(i, array[i]))
+        bridge = st.get_local_bridge(max(0, i - window + 1), i - 1, Point(i, array[i]))
         ang = math.atan2(bridge[0].y - bridge[1].y, bridge[1].x - bridge[0].x)
         out[0, i] = ang
 
@@ -388,7 +388,7 @@ def solve(array, window):
     out[1, 0] = 0
     out[1, 1] = out[0, 1]
     for i in range(2, len(array)):
-        bridge = st.get_local_bridge(max(0, i - 9), i - 1, Point(i, array[i]))
+        bridge = st.get_local_bridge(max(0, i - window + 1), i - 1, Point(i, array[i]))
         ang = math.atan2(bridge[1].y - bridge[0].y, bridge[1].x - bridge[0].x)
         out[1, i] = ang
 
@@ -397,7 +397,7 @@ def solve(array, window):
 
 def main():
     X = list(map(float, open('input.csv').readlines()))
-    out = solve(X[:10000], 10)
+    out = solve(X[:10000], 1000)
     for i in range(out.shape[1]):
         print(f'{out[0, i]:g},{out[1, i]:g}')
 
