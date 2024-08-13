@@ -32,6 +32,3 @@ run:
 	./slow100.elf < input.csv > s100.csv
 	./slow1000.elf < input.csv > s1000.csv
 
-check:
-	if [ "" == "" ]; then echo "ok"; fi
-

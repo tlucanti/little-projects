@@ -27,6 +27,15 @@ struct win_state {
 	struct argm min;
 };
 
+/**
+ * Intuitive implementation:
+ * For each sliding window compute angles of all points from this window and
+ * chose maximum for upper line and minimum for lower line.
+ * Time complexity:
+ *  - rolling window O(n), n = len(input)
+ *  - each window takes O(w) iterations, w = window width
+ * total: O(n * w)
+ */
 static void calc(const std::vector<double> &inputs, std::vector<Angles> &outputs)
 {
 	struct win_state window;

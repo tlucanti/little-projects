@@ -467,6 +467,32 @@ struct Angles {
 	double b;
 };
 
+/**
+ * Compute convex hull of input data and store it as binary tree, constructing
+ * segment tree. Tree filled using divide and conquer algoritm.
+ * Time complexity of traversal:
+ *  - 2 traverses: for upper and lower convex hulls, each has
+ *      O(n) rolling windows total
+ *  - each rolling window makes 1 query to segment tree
+ *      each query needs to descent the tree: O(log(n))
+ *  - at evenry layer of segment tree - two halves of convex hull are merged
+ *      merge operation use binary search to find bridge between hulls:
+ *      each hull inside window not biggier than w (window with), so binary
+ *      search in this hull cost O(log(w))
+ * total complexity of traversal: O(n log(n) log(w))
+ * Time complexity of precomputing:
+ *  - building segment tree is done similar to querying it: all points are split
+ *      in 2 halves, for each half recursively computed convex hull, so there
+ *      are O(log(n)) descendings
+ *  - at each tree layer two parts of convex hulls are merged, merge operation
+ *      uses binary search, but now size of hull can be up to n, so search cost
+ *      is O(log(n))
+ *  total complexity of building: there are 1 operation of O(log(n)), 2 operations of O(log(n/2)),
+ *      4 operations of O(log(n/4)), and so on, up to n / 2 operations of O(log(2)) and
+ *      n operations of O(log(1)), wich is converges to O(n)
+ *
+ * total complexity: O(n * log(n) * log(w))
+ */
 static void calc(std::vector<double> &inputs, std::vector<Angles> &out)
 {
 	// upper convex hull
