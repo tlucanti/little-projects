@@ -91,11 +91,10 @@ static void gauss_single_thread(flt **mat, int size)
 {
 	// forward pass
 	for (int pass = 0; pass < size; pass++) {
-		float frac;
-
 		for (int row = pass + 1; row < size; row++) {
-			frac = mat[row][pass] / mat[pass][pass];
-			for (int col = 0; col <= size; col++) {
+			float frac = mat[row][pass] / mat[pass][pass];
+
+			for (int col = pass + 1; col <= size; col++) {
 				mat[row][col] -= frac * mat[pass][col];
 			}
 		}
@@ -113,13 +112,10 @@ static void gauss_single_thread(flt **mat, int size)
 		for (int row = size - 2 - pass; row >= 0; row--) {
 			frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
 
-			for (int col = 0; col <= size; col++) {
-				mat[row][col] -= frac * mat[size - 1 - pass][col];
-			}
+			mat[row][size] -= frac * mat[size - 1 - pass][size];
 		}
 
 		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
-		mat[size - pass - 1][size - 1 - pass] = 1;
 
 		// printf("\nbackward pass %d:\n", pass);
 		// print_matrix(mat, size);
