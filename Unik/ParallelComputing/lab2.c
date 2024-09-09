@@ -190,6 +190,44 @@ static void gauss_pthread(flt **mat, int size)
 	pthread_barrier_destroy(&barrier);
 }
 
+static void gauss_omp(flt **mat, int size)
+{
+	// forward pass
+	for (int pass = 0; pass < size; pass++) {
+		#pragma omp parallel for num_threads(NR_THREADS)
+		for (int row = pass + 1; row < size; row++) {
+			flt frac = mat[row][pass] / mat[pass][pass];
+
+			for (int col = pass + 1; col <= size; col++) {
+				mat[row][col] -= frac * mat[pass][col];
+			}
+		}
+
+		// printf("\nforward pass %d:\n", pass);
+		// print_matrix(mat, size);
+	}
+	printf("\nforward done:\n");
+	print_matrix(mat, size);
+
+	// backward pass
+	for (int pass = 0; pass < size; pass++) {
+		#pragma omp parallel for num_threads(NR_THREADS)
+		for (int row = size - 2 - pass; row >= 0; row--) {
+			flt frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
+
+			mat[row][size] -= frac * mat[size - 1 - pass][size];
+		}
+
+		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
+
+		// printf("\nbackward pass %d:\n", pass);
+		// print_matrix(mat, size);
+	}
+
+	printf("\nbackward done:\n");
+	print_matrix(mat, size);
+}
+
 static void check_solution(flt **orig, flt **res, int size)
 {
 	for (int row = 0; row < size; row++) {
@@ -231,6 +269,9 @@ int main(int argc, char **argv)
 		break;
 	case 'p':
 		gauss_pthread(mat, SIZE);
+		break;
+	case 'o':
+		gauss_omp(mat, SIZE);
 		break;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
