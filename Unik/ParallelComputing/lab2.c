@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
 
 #define SIZE 10
+#define NR_THREADS 8
 
 typedef float flt;
 
@@ -83,16 +85,12 @@ static void print_matrix(flt **mat, int size)
 	}
 }
 
-static void gauss_passage(flt **mat, int pass, int size)
-{
-}
-
 static void gauss_single_thread(flt **mat, int size)
 {
 	// forward pass
 	for (int pass = 0; pass < size; pass++) {
 		for (int row = pass + 1; row < size; row++) {
-			float frac = mat[row][pass] / mat[pass][pass];
+			flt frac = mat[row][pass] / mat[pass][pass];
 
 			for (int col = pass + 1; col <= size; col++) {
 				mat[row][col] -= frac * mat[pass][col];
@@ -107,10 +105,8 @@ static void gauss_single_thread(flt **mat, int size)
 
 	// backward pass
 	for (int pass = 0; pass < size; pass++) {
-		float frac;
-
 		for (int row = size - 2 - pass; row >= 0; row--) {
-			frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
+			flt frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
 
 			mat[row][size] -= frac * mat[size - 1 - pass][size];
 		}
@@ -123,6 +119,75 @@ static void gauss_single_thread(flt **mat, int size)
 
 	printf("\nbackward done:\n");
 	print_matrix(mat, size);
+}
+
+flt **Mat;
+pthread_barrier_t barrier;
+
+static void *gauss_worker(long tid)
+{
+	const int size = SIZE;
+
+	// forward pass
+	for (int pass = 0; pass < size; pass++) {
+		for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
+			flt frac = Mat[row][pass] / Mat[pass][pass];
+
+			for (int col = /*pass + 1*/0; col <= size; col++) {
+				Mat[row][col] -= frac * Mat[pass][col];
+			}
+		}
+
+		// printf("\nforward pass %d:\n", pass);
+		// print_matrix(mat, size);
+		pthread_barrier_wait(&barrier);
+	}
+
+	if (tid == 0) {
+		printf("\nforward done:\n");
+		print_matrix(Mat, size);
+	}
+
+	// backward pass
+	for (int pass = 0; pass < size; pass++) {
+		for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
+			flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+
+			Mat[row][size] -= frac * Mat[size - 1 - pass][size];
+		}
+
+		pthread_barrier_wait(&barrier);
+		if (tid == 0)
+			Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
+
+		// printf("\nbackward pass %d:\n", pass);
+		// print_matrix(mat, size);
+	}
+
+	if (tid == 0) {
+		printf("\nbackward done:\n");
+		print_matrix(Mat, size);
+	}
+
+	return NULL;
+}
+
+static void gauss_pthread(flt **mat, int size)
+{
+	pthread_t threads[NR_THREADS];
+
+	Mat = mat;
+	pthread_barrier_init(&barrier, NULL, NR_THREADS);
+
+	for (long i = 0; i < NR_THREADS; i++) {
+		pthread_create(&threads[i], NULL, (void *)gauss_worker, (void *)i);
+	}
+
+	for (int i = 0; i < NR_THREADS; i++) {
+		pthread_join(threads[i], NULL);
+	}
+
+	pthread_barrier_destroy(&barrier);
 }
 
 static void check_solution(flt **orig, flt **res, int size)
@@ -138,11 +203,14 @@ static void check_solution(flt **orig, flt **res, int size)
 	}
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	flt **mat = NULL;
 	flt **orig = NULL;
 	struct timespec start, end;
+
+	if (argc != 2)
+		return 1;
 
 	srand(time(NULL));
 	allocate_matrix(&mat, SIZE);
@@ -157,7 +225,14 @@ int main()
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	gauss_single_thread(mat, SIZE);
+	switch (argv[1][0]) {
+	case 's':
+		gauss_single_thread(mat, SIZE);
+		break;
+	case 'p':
+		gauss_pthread(mat, SIZE);
+		break;
+	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	check_solution(orig, mat, SIZE);
