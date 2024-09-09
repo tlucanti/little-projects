@@ -96,12 +96,7 @@ static void gauss_single_thread(flt **mat, int size)
 				mat[row][col] -= frac * mat[pass][col];
 			}
 		}
-
-		// printf("\nforward pass %d:\n", pass);
-		// print_matrix(mat, size);
 	}
-	printf("\nforward done:\n");
-	print_matrix(mat, size);
 
 	// backward pass
 	for (int pass = 0; pass < size; pass++) {
@@ -112,19 +107,15 @@ static void gauss_single_thread(flt **mat, int size)
 		}
 
 		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
-
-		// printf("\nbackward pass %d:\n", pass);
-		// print_matrix(mat, size);
 	}
 
-	printf("\nbackward done:\n");
-	print_matrix(mat, size);
 }
 
-flt **Mat;
-pthread_barrier_t barrier;
+static flt **Mat;
+static volatile int Pass;
+static pthread_barrier_t barrier;
 
-static void *gauss_worker(long tid)
+static void *gauss_worker_barrier(long tid)
 {
 	const int size = SIZE;
 
@@ -133,19 +124,11 @@ static void *gauss_worker(long tid)
 		for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
 			flt frac = Mat[row][pass] / Mat[pass][pass];
 
-			for (int col = /*pass + 1*/0; col <= size; col++) {
+			for (int col = pass + 1; col <= size; col++) {
 				Mat[row][col] -= frac * Mat[pass][col];
 			}
 		}
-
-		// printf("\nforward pass %d:\n", pass);
-		// print_matrix(mat, size);
 		pthread_barrier_wait(&barrier);
-	}
-
-	if (tid == 0) {
-		printf("\nforward done:\n");
-		print_matrix(Mat, size);
 	}
 
 	// backward pass
@@ -159,20 +142,12 @@ static void *gauss_worker(long tid)
 		pthread_barrier_wait(&barrier);
 		if (tid == 0)
 			Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
-
-		// printf("\nbackward pass %d:\n", pass);
-		// print_matrix(mat, size);
-	}
-
-	if (tid == 0) {
-		printf("\nbackward done:\n");
-		print_matrix(Mat, size);
 	}
 
 	return NULL;
 }
 
-static void gauss_pthread(flt **mat, int size)
+static void gauss_pthread_barrier(flt **mat, int size)
 {
 	pthread_t threads[NR_THREADS];
 
@@ -180,7 +155,7 @@ static void gauss_pthread(flt **mat, int size)
 	pthread_barrier_init(&barrier, NULL, NR_THREADS);
 
 	for (long i = 0; i < NR_THREADS; i++) {
-		pthread_create(&threads[i], NULL, (void *)gauss_worker, (void *)i);
+		pthread_create(&threads[i], NULL, (void *)gauss_worker_barrier, (void *)i);
 	}
 
 	for (int i = 0; i < NR_THREADS; i++) {
@@ -188,6 +163,54 @@ static void gauss_pthread(flt **mat, int size)
 	}
 
 	pthread_barrier_destroy(&barrier);
+}
+
+static void *gauss_worker_forward_join(long tid)
+{
+	const int size = SIZE;
+	const int pass = Pass;
+
+	for (int row = Pass + 1 + tid; row < size; row += NR_THREADS) {
+		flt frac = Mat[row][pass] / Mat[pass][pass];
+
+		for (int col = pass + 1; col <= size; col++) {
+			Mat[row][col] -= frac * Mat[pass][col];
+		}
+	}
+
+	return NULL;
+}
+
+static void gauss_worker_backward_join(long tid)
+{
+}
+
+static void gauss_pthread_join(flt **mat, int size)
+{
+	pthread_t threads[NR_THREADS];
+	Mat = mat;
+
+	// forward pass
+	for (int pass = 0; pass < size; pass++) {
+		Pass = pass;
+		for (long t = 0; t < NR_THREADS; t++) {
+			pthread_create(&threads[t], NULL, (void *)gauss_worker_forward_join, (void *)t);
+		}
+		for (long t = 0; t < NR_THREADS; t++) {
+			pthread_join(threads[t], NULL);
+		}
+	}
+
+	// backward pass
+	for (int pass = 0; pass < size; pass++) {
+		for (int row = size - 2 - pass; row >= 0; row--) {
+			flt frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
+
+			mat[row][size] -= frac * mat[size - 1 - pass][size];
+		}
+
+		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
+	}
 }
 
 static void gauss_omp(flt **mat, int size)
@@ -202,12 +225,7 @@ static void gauss_omp(flt **mat, int size)
 				mat[row][col] -= frac * mat[pass][col];
 			}
 		}
-
-		// printf("\nforward pass %d:\n", pass);
-		// print_matrix(mat, size);
 	}
-	printf("\nforward done:\n");
-	print_matrix(mat, size);
 
 	// backward pass
 	for (int pass = 0; pass < size; pass++) {
@@ -219,13 +237,8 @@ static void gauss_omp(flt **mat, int size)
 		}
 
 		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
-
-		// printf("\nbackward pass %d:\n", pass);
-		// print_matrix(mat, size);
 	}
 
-	printf("\nbackward done:\n");
-	print_matrix(mat, size);
 }
 
 static void check_solution(flt **orig, flt **res, int size)
@@ -267,8 +280,11 @@ int main(int argc, char **argv)
 	case 's':
 		gauss_single_thread(mat, SIZE);
 		break;
-	case 'p':
-		gauss_pthread(mat, SIZE);
+	case 'b':
+		gauss_pthread_barrier(mat, SIZE);
+		break;
+	case 'j':
+		gauss_pthread_join(mat, SIZE);
 		break;
 	case 'o':
 		gauss_omp(mat, SIZE);
@@ -276,7 +292,8 @@ int main(int argc, char **argv)
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	check_solution(orig, mat, SIZE);
+	if (SIZE < 20)
+		check_solution(orig, mat, SIZE);
 
 	printf("time: %f\n", time_diff(end, start));
 }
