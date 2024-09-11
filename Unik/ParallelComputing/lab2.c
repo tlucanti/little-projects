@@ -5,7 +5,7 @@
 #include <time.h>
 #include <pthread.h>
 
-#define SIZE 10
+#define SIZE 2048
 #define NR_THREADS 8
 
 typedef float flt;
@@ -181,8 +181,18 @@ static void *gauss_worker_forward_join(long tid)
 	return NULL;
 }
 
-static void gauss_worker_backward_join(long tid)
+static void *gauss_worker_backward_join(long tid)
 {
+	const int size = SIZE;
+	const int pass = Pass;
+
+	for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
+		flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+
+		Mat[row][size] -= frac * Mat[size - 1 - pass][size];
+	}
+
+	return NULL;
 }
 
 static void gauss_pthread_join(flt **mat, int size)
@@ -203,12 +213,13 @@ static void gauss_pthread_join(flt **mat, int size)
 
 	// backward pass
 	for (int pass = 0; pass < size; pass++) {
-		for (int row = size - 2 - pass; row >= 0; row--) {
-			flt frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
-
-			mat[row][size] -= frac * mat[size - 1 - pass][size];
+		Pass = pass;
+		for (long t = 0; t < NR_THREADS; t++) {
+			pthread_create(&threads[t], NULL, (void *)gauss_worker_backward_join, (void *)t);
 		}
-
+		for (long t = 0; t < NR_THREADS; t++) {
+			pthread_join(threads[t], NULL);
+		}
 		mat[size - pass - 1][size] /= mat[size - 1 - pass][size - 1 - pass];
 	}
 }
@@ -289,6 +300,8 @@ int main(int argc, char **argv)
 	case 'o':
 		gauss_omp(mat, SIZE);
 		break;
+	default:
+		return 1;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
