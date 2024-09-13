@@ -5,8 +5,12 @@
 #include <time.h>
 #include <pthread.h>
 
-#define SIZE 2048
-#define NR_THREADS 8
+#define SIZE 4096
+#define NR_THREADS 20
+#ifndef FINALIZE_PASSES
+//# define FINALIZE_PASSES 0
+#error
+#endif
 
 typedef float flt;
 
@@ -88,7 +92,7 @@ static void print_matrix(flt **mat, int size)
 static void gauss_single_thread(flt **mat, int size)
 {
 	// forward pass
-	for (int pass = 0; pass < size; pass++) {
+	for (int pass = 0; pass < size - 1; pass++) {
 		for (int row = pass + 1; row < size; row++) {
 			flt frac = mat[row][pass] / mat[pass][pass];
 
@@ -118,30 +122,67 @@ static pthread_barrier_t barrier;
 static void *gauss_worker_barrier(long tid)
 {
 	const int size = SIZE;
+	int pass;
 
 	// forward pass
-	for (int pass = 0; pass < size; pass++) {
-		for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
-			flt frac = Mat[row][pass] / Mat[pass][pass];
+	for (pass = 0; pass < size - 1; pass++) {
+		if ((size - 1) - pass < FINALIZE_PASSES) {
+			break;
+		} else {
+			/* multithread main body */
+			for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
+				flt frac = Mat[row][pass] / Mat[pass][pass];
 
-			for (int col = pass + 1; col <= size; col++) {
-				Mat[row][col] -= frac * Mat[pass][col];
+				for (int col = pass + 1; col <= size; col++) {
+					Mat[row][col] -= frac * Mat[pass][col];
+				}
 			}
 		}
 		pthread_barrier_wait(&barrier);
 	}
 
-	// backward pass
-	for (int pass = 0; pass < size; pass++) {
-		for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
-			flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+	/* single thread ending */
+	if (tid == 0) {
+		for (; pass < size - 1; pass++) {
+			for (int row = pass + 1; row < size; row++) {
+				flt frac = Mat[row][pass] / Mat[pass][pass];
 
-			Mat[row][size] -= frac * Mat[size - 1 - pass][size];
+				for (int col = pass + 1; col <= size; col++) {
+					Mat[row][col] -= frac * Mat[pass][col];
+				}
+			}
 		}
+	}
+	pthread_barrier_wait(&barrier);
 
-		pthread_barrier_wait(&barrier);
-		if (tid == 0)
+	// backward pass
+	for (pass = 0; pass < size; pass++) {
+		if (size - pass < FINALIZE_PASSES) {
+			break;
+		} else {
+			/* multithread main body */
+			for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
+				flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+
+				Mat[row][size] -= frac * Mat[size - 1 - pass][size];
+			}
+
+			pthread_barrier_wait(&barrier);
+			if (tid == 0)
+				Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
+		}
+	}
+
+	/* single thread ending */
+	if (tid == 0) {
+		for (; pass < size; pass++) {
+			for (int row = size - 2 - pass - tid; row >= 0; row--) {
+				flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+
+				Mat[row][size] -= frac * Mat[size - 1 - pass][size];
+			}
 			Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
+		}
 	}
 
 	return NULL;
@@ -170,7 +211,7 @@ static void *gauss_worker_forward_join(long tid)
 	const int size = SIZE;
 	const int pass = Pass;
 
-	for (int row = Pass + 1 + tid; row < size; row += NR_THREADS) {
+	for (int row = pass + 1 + tid; row < size - 1; row += NR_THREADS) {
 		flt frac = Mat[row][pass] / Mat[pass][pass];
 
 		for (int col = pass + 1; col <= size; col++) {
@@ -201,7 +242,7 @@ static void gauss_pthread_join(flt **mat, int size)
 	Mat = mat;
 
 	// forward pass
-	for (int pass = 0; pass < size; pass++) {
+	for (int pass = 0; pass < size - 1; pass++) {
 		Pass = pass;
 		for (long t = 0; t < NR_THREADS; t++) {
 			pthread_create(&threads[t], NULL, (void *)gauss_worker_forward_join, (void *)t);
@@ -227,8 +268,8 @@ static void gauss_pthread_join(flt **mat, int size)
 static void gauss_omp(flt **mat, int size)
 {
 	// forward pass
-	for (int pass = 0; pass < size; pass++) {
-		#pragma omp parallel for num_threads(NR_THREADS)
+	for (int pass = 0; pass < size - 1; pass++) {
+		#pragma omp parallel for
 		for (int row = pass + 1; row < size; row++) {
 			flt frac = mat[row][pass] / mat[pass][pass];
 
@@ -240,7 +281,7 @@ static void gauss_omp(flt **mat, int size)
 
 	// backward pass
 	for (int pass = 0; pass < size; pass++) {
-		#pragma omp parallel for num_threads(NR_THREADS)
+		#pragma omp parallel for
 		for (int row = size - 2 - pass; row >= 0; row--) {
 			flt frac = mat[row][size - 1 - pass] / mat[size - 1 - pass][size - 1 - pass];
 
