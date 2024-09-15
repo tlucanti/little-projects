@@ -7,32 +7,14 @@
 
 #define SIZE 4096
 #define NR_THREADS 20
-#ifndef FINALIZE_PASSES
-//# define FINALIZE_PASSES 0
-#error
-#endif
 
 typedef float flt;
-
-static flt random_float(void)
-{
-	flt r = (flt)random() / (flt)RAND_MAX;
-	return r * (flt)2 - (flt)1;
-}
 
 static double time_diff(struct timespec end, struct timespec start)
 {
 	double sec = end.tv_sec - start.tv_sec;
 	sec += (end.tv_nsec -  start.tv_nsec) * 1e-9;
 	return sec;
-}
-
-static flt absf(flt val)
-{
-	if (val < 0)
-		return -val;
-
-	return val;
 }
 
 static void allocate_matrix(flt ***mat, int size)
@@ -126,63 +108,27 @@ static void *gauss_worker_barrier(long tid)
 
 	// forward pass
 	for (pass = 0; pass < size - 1; pass++) {
-		if ((size - 1) - pass < FINALIZE_PASSES) {
-			break;
-		} else {
-			/* multithread main body */
-			for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
-				flt frac = Mat[row][pass] / Mat[pass][pass];
+		for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
+			flt frac = Mat[row][pass] / Mat[pass][pass];
 
-				for (int col = pass + 1; col <= size; col++) {
-					Mat[row][col] -= frac * Mat[pass][col];
-				}
+			for (int col = pass + 1; col <= size; col++) {
+				Mat[row][col] -= frac * Mat[pass][col];
 			}
 		}
 		pthread_barrier_wait(&barrier);
 	}
 
-	/* single thread ending */
-	if (tid == 0) {
-		for (; pass < size - 1; pass++) {
-			for (int row = pass + 1; row < size; row++) {
-				flt frac = Mat[row][pass] / Mat[pass][pass];
-
-				for (int col = pass + 1; col <= size; col++) {
-					Mat[row][col] -= frac * Mat[pass][col];
-				}
-			}
-		}
-	}
-	pthread_barrier_wait(&barrier);
-
 	// backward pass
 	for (pass = 0; pass < size; pass++) {
-		if (size - pass < FINALIZE_PASSES) {
-			break;
-		} else {
-			/* multithread main body */
-			for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
-				flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
+		for (int row = size - 2 - pass - tid; row >= 0; row -= NR_THREADS) {
+			flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
 
-				Mat[row][size] -= frac * Mat[size - 1 - pass][size];
-			}
-
-			pthread_barrier_wait(&barrier);
-			if (tid == 0)
-				Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
+			Mat[row][size] -= frac * Mat[size - 1 - pass][size];
 		}
-	}
 
-	/* single thread ending */
-	if (tid == 0) {
-		for (; pass < size; pass++) {
-			for (int row = size - 2 - pass - tid; row >= 0; row--) {
-				flt frac = Mat[row][size - 1 - pass] / Mat[size - 1 - pass][size - 1 - pass];
-
-				Mat[row][size] -= frac * Mat[size - 1 - pass][size];
-			}
+		pthread_barrier_wait(&barrier);
+		if (tid == 0)
 			Mat[size - pass - 1][size] /= Mat[size - 1 - pass][size - 1 - pass];
-		}
 	}
 
 	return NULL;
@@ -191,6 +137,7 @@ static void *gauss_worker_barrier(long tid)
 static void gauss_pthread_barrier(flt **mat, int size)
 {
 	pthread_t threads[NR_THREADS];
+	(void)size;
 
 	Mat = mat;
 	pthread_barrier_init(&barrier, NULL, NR_THREADS);
@@ -211,7 +158,7 @@ static void *gauss_worker_forward_join(long tid)
 	const int size = SIZE;
 	const int pass = Pass;
 
-	for (int row = pass + 1 + tid; row < size - 1; row += NR_THREADS) {
+	for (int row = pass + 1 + tid; row < size; row += NR_THREADS) {
 		flt frac = Mat[row][pass] / Mat[pass][pass];
 
 		for (int col = pass + 1; col <= size; col++) {
@@ -315,7 +262,7 @@ int main(int argc, char **argv)
 	if (argc != 2)
 		return 1;
 
-	srand(time(NULL));
+	srand(123);
 	allocate_matrix(&mat, SIZE);
 	generate_matrix(mat, SIZE);
 
