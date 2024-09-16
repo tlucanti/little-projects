@@ -75,10 +75,9 @@ static flt integral_omp(flt a, flt b, flt h)
 	flt ans = (function(a) + function(b)) * (flt)0.5;
 
 	a += h;
-	#pragma omp parallel for reduction (+:ans)
+	#pragma omp parallel for reduction(+:ans)
 	for (int i = 0; i < n - 2; i++) {
-		ans += function(a);
-		a += h;
+		ans += function(a + h * i);
 	}
 
 	return ans * h;
