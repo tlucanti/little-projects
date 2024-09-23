@@ -11,5 +11,5 @@ lab2:
 	$(CC) $(CFLAGS) lab2.c -o gauss-compare.elf
 
 lab3:
-	$(CC) $(CFLAGS) -lm lab3.c -o integral-compare.elf
+	$(CC) $(CFLAGS) lab3.c -lm -o integral-compare.elf
 

@@ -5,13 +5,20 @@
 #include <stdio.h>
 #include <time.h>
 
+#define SIZE 1000000
+
 #define START 0
-#define END 1000000
-#define H 0.01
+#define END SIZE
+#define H 0.001
 #define TRUE_ANSWER_1K 522761.6108534604
 #define TRUE_ANSWER_1M 1281128564.241842
 
-#define TRUE_ANSWER TRUE_ANSWER_1M
+#if SIZE == 1000
+# define TRUE_ANSWER TRUE_ANSWER_1K
+#elif SIZE == 1000000
+# define TRUE_ANSWER TRUE_ANSWER_1M
+#endif
+
 
 #define NR_THREADS 20
 
@@ -92,13 +99,19 @@ struct thr {
 static void *pthread_worker(struct thr *args)
 {
 	const int tid = args->tid;
+	const int n = (END - START) / H;
 	flt ans = 0;
-	flt a = START + H * tid;
-	flt b = END;
+	// flt c = 0;
+	flt a = START;
 
-	while (a <= b) {
-		ans += function(a);
-		a += H * NR_THREADS;
+	for (int i = tid; i < n; i += NR_THREADS) {
+		ans += function(a + i * H);
+
+		// flt y = function(a) - c;
+		// flt t = ans + y;
+		// c = (t - ans) - y ;
+		// ans = t;
+		// a += H * NR_THREADS;
 	}
 
 	args->res = ans;
@@ -111,6 +124,7 @@ static flt integral_pthread(flt a, flt b, flt h)
 	flt ans = 0;
 
 	for (unsigned long i = 0; i < NR_THREADS; i++) {
+		threads[i].tid = i;
 		pthread_create(&threads[i].thread, NULL, (void *)pthread_worker, (void *)&threads[i]);
 	}
 
