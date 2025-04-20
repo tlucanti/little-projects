@@ -1,44 +1,5 @@
 
-#include <time.h>
-#include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-
-#ifndef SIZE
-# define SIZE 10
-#endif
-
-#ifndef NR_THREADS
-# define NR_THREADS 8
-#endif
-
-static void init_matrix(float **array, int size)
-{
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			array[i][j] = (float)rand() / (float)RAND_MAX * 10;
-		}
-	}
-}
-
-static void zero_matrix(float **array, int size)
-{
-	for (int i = 0; i < size; ++i) {
-		for (int j = 0; j < size; ++j) {
-			array[i][j] = 0;
-		}
-	}
-}
-
-static void print_matrix(float **array, int size)
-{
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			printf("\t%f", array[i][j]);
-		}
-		printf("\n");
-	}
-}
+#include "common.h"
 
 static void multiply_single_thread(float **A, float **B, float **C, int size)
 {
@@ -77,7 +38,8 @@ static void multiply_pthread(float **A, float **B, float **C, int size)
 	pC = C;
 
 	for (unsigned long i = 0; i < NR_THREADS; i++) {
-		pthread_create(&threads[i], NULL, (void *)multiply_worker, (void *)i);
+		pthread_create(&threads[i], NULL, (void *)multiply_worker,
+			       (void *)i);
 	}
 
 	for (int i = 0; i < NR_THREADS; i++) {
@@ -97,28 +59,6 @@ static void multiply_omp(float **A, float **B, float **C, int size)
 	}
 }
 
-static float timer_diff(struct timespec *begin, struct timespec *end)
-{
-	float res = 0;
-
-	res += end->tv_sec - begin->tv_sec;
-	res += (end->tv_nsec - begin->tv_nsec) * 1e-9f;
-	return res;
-}
-
-static void alloc_matrix(float ***a, float ***b, float ***c, int size)
-{
-	*a = malloc(sizeof(float *) * size);
-	*b = malloc(sizeof(float *) * size);
-	*c = malloc(sizeof(float *) * size);
-
-	for (int i = 0; i < size; ++i) {
-		(*a)[i] = malloc(sizeof(float) * size);
-		(*b)[i] = malloc(sizeof(float) * size);
-		(*c)[i] = malloc(sizeof(float) * size);
-	}
-}
-
 int main(int argc, char **argv)
 {
 	float **A, **B, **C;
@@ -132,6 +72,9 @@ int main(int argc, char **argv)
 	init_matrix((float **)A, SIZE);
 	init_matrix((float **)B, SIZE);
 	zero_matrix((float **)C, SIZE);
+	print_matrix(A, SIZE);
+	print_matrix(B, SIZE);
+	printf("==============================================\n");
 
 	clock_gettime(CLOCK_MONOTONIC, &begin);
 	switch (argv[1][0]) {
@@ -144,6 +87,8 @@ int main(int argc, char **argv)
 	case 'p':
 		multiply_pthread(A, B, C, SIZE);
 		break;
+	default:
+		abort();
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
