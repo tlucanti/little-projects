@@ -72,9 +72,6 @@ int main(int argc, char **argv)
 	init_matrix((float **)A, SIZE);
 	init_matrix((float **)B, SIZE);
 	zero_matrix((float **)C, SIZE);
-	print_matrix(A, SIZE);
-	print_matrix(B, SIZE);
-	printf("==============================================\n");
 
 	clock_gettime(CLOCK_MONOTONIC, &begin);
 	switch (argv[1][0]) {
