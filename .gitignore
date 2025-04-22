@@ -1,4 +1,6 @@
 # gitignore
 
 a.out
+*.elf
+compile_commands.json
 
