@@ -43,6 +43,7 @@ static void multiply_mpi(float **A, float **B, float **C, int size)
 int main(int argc, char **argv)
 {
 	float **A, **B, **C;
+	struct timespec begin, end;
 	int rank, num_procs;
 
 	call_mpi(MPI_Init(&argc, &argv), "mpi init");
@@ -58,17 +59,25 @@ int main(int argc, char **argv)
 		init_matrix(B, SIZE);
 	}
 
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 	for (int i = 0; i < SIZE; i++) {
 		call_mpi(MPI_Bcast(A[i], SIZE, MPI_FLOAT, 0, MPI_COMM_WORLD),
 			 "broadcast a");
 		call_mpi(MPI_Bcast(B[i], SIZE, MPI_FLOAT, 0, MPI_COMM_WORLD),
 			 "broadcast b");
 	}
-
 	multiply_mpi(A, B, C, SIZE);
+	clock_gettime(CLOCK_MONOTONIC, &end);
+
 	if (rank == 0 && SIZE <= 20) {
 		print_matrix(C, SIZE);
 	}
 
 	call_mpi(MPI_Finalize(), "mpi finalize");
+
+	if (rank == 0) {
+		printf("%fs\n", timer_diff(&begin, &end));
+	}
+
+	return 0;
 }
