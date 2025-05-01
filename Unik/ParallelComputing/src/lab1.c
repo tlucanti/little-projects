@@ -92,7 +92,7 @@ int main(int argc, char **argv)
 	if (SIZE < 20)
 		print_matrix(C, SIZE);
 
-	printf("%fs\n", time_diff(&begin, &end));
+	printf("time: %fs\n", time_diff(&begin, &end));
 
 	return 0;
 

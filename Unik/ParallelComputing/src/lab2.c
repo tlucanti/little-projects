@@ -182,19 +182,6 @@ static void gauss_omp(flt **mat, int size)
 	}
 }
 
-static void check_solution(flt **orig, flt **res, int size)
-{
-	for (int row = 0; row < size; row++) {
-		flt r = 0;
-
-		for (int col = 0; col < size; col++) {
-			r += res[col][size] * orig[row][col];
-		}
-		r -= orig[row][size];
-		printf("root %d (%f) error: %f\n", row, res[row][size], r);
-	}
-}
-
 int main(int argc, char **argv)
 {
 	flt **mat = NULL;
@@ -205,12 +192,12 @@ int main(int argc, char **argv)
 		goto args;
 
 	srand(123);
-	alloc_matrix(&mat, SIZE);
-	init_matrix(mat, SIZE);
+	alloc_matrix_gauss(&mat, SIZE);
+	init_matrix_gauss(mat, SIZE);
 
 	if (SIZE < 20) {
-		alloc_matrix(&orig, SIZE);
-		copy_matrix(orig, mat, SIZE);
+		alloc_matrix_gauss(&orig, SIZE);
+		copy_matrix_gauss(orig, mat, SIZE);
 
 		printf("initial matrix\n");
 		print_matrix(mat, SIZE);
@@ -236,9 +223,9 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
 	if (SIZE < 20)
-		check_solution(orig, mat, SIZE);
+		check_solution_gauss(orig, mat, SIZE);
 
-	printf("time: %f\n", time_diff(&end, &end));
+	printf("time: %fs\n", time_diff(&begin, &end));
 	return 0;
 
 args:
