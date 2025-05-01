@@ -2,14 +2,6 @@
 #define RUN_MPI
 #include "common.h"
 
-void call_mpi(int ret, char *message)
-{
-	if (ret) {
-		printf("failed to run %s: error code %d\n", message, ret);
-		abort();
-	}
-}
-
 static void multiply_mpi(float **A, float **B, float **C, int size)
 {
 	int rank, num_procs;
@@ -50,7 +42,7 @@ int main(int argc, char **argv)
 	call_mpi(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "comm rank");
 	call_mpi(MPI_Comm_size(MPI_COMM_WORLD, &num_procs), "comm size");
 
-	alloc_matrix(&A, &B, &C, SIZE);
+	alloc_matrix3(&A, &B, &C, SIZE);
 	zero_matrix(C, SIZE);
 
 	if (rank == 0) {
@@ -76,7 +68,7 @@ int main(int argc, char **argv)
 	call_mpi(MPI_Finalize(), "mpi finalize");
 
 	if (rank == 0) {
-		printf("%fs\n", timer_diff(&begin, &end));
+		printf("%fs\n", time_diff(&begin, &end));
 	}
 
 	return 0;

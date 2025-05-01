@@ -16,6 +16,8 @@
 # define NR_THREADS 8
 #endif
 
+typedef float flt;
+
 static inline void *call_malloc(unsigned long size)
 {
 	void *ret = malloc(size);
@@ -26,6 +28,16 @@ static inline void *call_malloc(unsigned long size)
 	}
 	return ret;
 }
+
+#ifdef RUN_MPI
+void call_mpi(int ret, char *message)
+{
+	if (ret) {
+		printf("failed to run %s: error code %d\n", message, ret);
+		abort();
+	}
+}
+#endif
 
 static inline void init_matrix(float **array, int size)
 {
@@ -45,6 +57,15 @@ static inline void zero_matrix(float **array, int size)
 	}
 }
 
+static inline void copy_matrix(flt **dst, flt **src, int size)
+{
+	for (int y = 0; y < size; y++) {
+		for (int x = 0; x <= size; x++) {
+			dst[y][x] = src[y][x];
+		}
+	}
+}
+
 static inline void print_matrix(float **array, int size)
 {
 	for (int i = 0; i < size; i++) {
@@ -55,7 +76,7 @@ static inline void print_matrix(float **array, int size)
 	}
 }
 
-static inline float timer_diff(struct timespec *begin, struct timespec *end)
+static inline float time_diff(struct timespec *begin, struct timespec *end)
 {
 	float res = 0;
 
@@ -64,16 +85,18 @@ static inline float timer_diff(struct timespec *begin, struct timespec *end)
 	return res;
 }
 
-static inline void alloc_matrix(float ***a, float ***b, float ***c, int size)
+static inline void alloc_matrix(float ***a, int size)
 {
 	*a = call_malloc(sizeof(float *) * size);
-	*b = call_malloc(sizeof(float *) * size);
-	*c = call_malloc(sizeof(float *) * size);
-
 	for (int i = 0; i < size; ++i) {
 		(*a)[i] = call_malloc(sizeof(float) * size);
-		(*b)[i] = call_malloc(sizeof(float) * size);
-		(*c)[i] = call_malloc(sizeof(float) * size);
 	}
+}
+
+static inline void alloc_matrix3(float ***a, float ***b, float ***c, int size)
+{
+	alloc_matrix(a, size);
+	alloc_matrix(b, size);
+	alloc_matrix(c, size);
 }
 
