@@ -1,117 +1,191 @@
 
 #define RUN_MPI
+#include <unistd.h>
 #include "common.h"
+
+/* helper function to find next closest number from @start that will give
+ * reminder @rank by modulo @num_procs
+ */
+static inline int __fmg_begin(int begin, int rank, int num_procs)
+{
+	while (begin % num_procs != rank) {
+		begin++;
+	}
+	return begin;
+	/*                                     num_procs
+	 * Xprev           begin         X<------------------>Xnext
+	 *
+	 * Xprev, X, Xnext will give @rank in reminder when devided over
+	 * @num_procs
+	 *
+	 * so we need to find next closest value that will give @rank when
+	 * divided over @num_procs - that is value X
+	 *
+	 * to find X we need to find distance between @begin and X and add this
+	 * value to begin
+	 */
+
+	if (begin % num_procs == 0) {
+		return begin;
+	}
+
+	/* sice Xprev is equivalent to @rank by mudulo @num_procs, to get
+	 * distance from Xprev and begin we can just subtruct them by modilo
+	 * @num_procs
+	 *
+	 *          dist
+	 * Xprev<--------->begin         X                    Xnext
+	 */
+	int dist = (begin - rank) % num_procs;
+
+	/* now the distaance betweem @begin and X is just @num_procs - @dist
+	 */
+	int shift = num_procs - dist;
+
+	/* if begin is already equals X: @dist will be equal to 0 and @shift
+	 * will be equal to @num_procs, so we need to take modulo here again
+	 * to cover this case
+	 */
+	return begin + shift;
+}
+
+/* for_mpi_gap iterates through numbers from @begin to @end but only includes
+ * numbers where: @var % @num_procs == @rank
+ *
+ * example of resulting sequence per rank:
+ * with begin = 0, end = 14, num_procs = 4
+ *
+         iterations
+ * rank \
+ *  0     0  4  8  12
+ *  1     1  5  9  13
+ *  2     2  6  10
+ *  3     3  7  11
+ */
+
+#define for_mpi_gap(var, begin, end, rank, num_procs)                  \
+	for (int var = __fmg_begin(begin, rank, num_procs); var < end; \
+	     var += num_procs)
 
 static void gauss_mpi(flt **mat, int size)
 {
-    int rank, num_procs;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+	int rank, num_procs;
 
-    // Calculate row distribution
-    int rows_per_proc = size / num_procs;
-    int remainder = size % num_procs;
+	call_mpi(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "comm rank");
+	call_mpi(MPI_Comm_size(MPI_COMM_WORLD, &num_procs), "comm size");
 
-    // Calculate start and end rows for this process
-    int start_row = rank * rows_per_proc + (rank < remainder ? rank : remainder);
-    int end_row = start_row + rows_per_proc + (rank < remainder ? 1 : 0);
+	/* forward pass */
+	for (int pass = 0; pass < size - 1; pass++) {
+		/* we assign each process to set of rows,
+		 * so processes can write only to this set,
+		 * and read only this set and pivot row
+		 *
+		 * pivot row is the row that will be subtracted from other rows
+		 */
+		if (pass != 0) {
+			call_mpi(MPI_Bcast(mat[pass], size + 1, MPI_FLOAT,
+					   pass % num_procs, MPI_COMM_WORLD),
+				 "broadcas pivot row");
+		}
+		for_mpi_gap(row, pass + 1, size, rank, num_procs) {
+			//printf("rank %d, row %d, beg %d\n", rank, row, pass + 1 + rank);
+			flt frac = mat[row][pass] / mat[pass][pass];
 
-    // Temporary buffer for pivot row
-    flt *pivot_row = malloc((size + 1) * sizeof(flt));
+			for (int col = pass /* + 1 */; col <= size; col++) {
+				mat[row][col] -= frac * mat[pass][col];
+			}
+		}
+	}
+	//usleep(rank * 100000);
+	//printf("rank %d\n", rank);
+	//print_matrix_gauss(mat, size);
+	//printf("\n");
 
-    // Forward pass
-    for (int pass = 0; pass < size - 1; pass++) {
-        // Determine which process has the current pivot row
-        int pivot_owner = 0;
-        while (pass >= start_row && pass < end_row) {
-            // This process owns the pivot row
+	/* backward pass */
+	for (int pass = 0; pass < size; pass++) {
+		call_mpi(MPI_Bcast(mat[size - 1 - pass], size + 1, MPI_FLOAT,
+				   (size - 1 - pass) % num_procs,
+				   MPI_COMM_WORLD),
+			 "broadcas pivot row");
 
-            // Send pivot row to all other processes
-            for (int col = 0; col <= size; col++) {
-                pivot_row[col] = mat[pass][col];
-            }
+		for_mpi_gap(row, 0, size - 1 - pass, rank, num_procs) {
+			//printf("rank %d, row %d, end %d\n", rank, row,
+			//       size - 1 - pass);
+			flt frac = mat[row][size - 1 - pass] /
+				   mat[size - 1 - pass][size - 1 - pass];
 
-            MPI_Bcast(pivot_row, size + 1, MPI_FLOAT, rank, MPI_COMM_WORLD);
-            break;
-        }
+			mat[row][size] -= frac * mat[size - 1 - pass][size];
+		}
 
-        // All processes wait for the pivot row
-        MPI_Bcast(pivot_row, size + 1, MPI_FLOAT, pivot_owner, MPI_COMM_WORLD);
+		if ((size - pass - 1) % num_procs == rank) {
+			mat[size - pass - 1][size] /=
+				mat[size - 1 - pass][size - 1 - pass];
+			mat[size - 1 - pass][size - 1 - pass] = 1;
+		}
+	}
 
-        // Each process processes its assigned rows
-        for (int row = start_row; row < end_row; row++) {
-            if (row > pass) {
-                flt frac = mat[row][pass] / pivot_row[pass];
-
-                for (int col = pass + 1; col <= size; col++) {
-                    mat[row][col] -= frac * pivot_row[col];
-                }
-            }
-        }
-
-        // Wait for all processes to finish this pass
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-
-    // Backward pass
-    for (int pass = 0; pass < size; pass++) {
-        int curr_row = size - 1 - pass;
-
-        // Determine which process has the current row
-        int row_owner = 0;
-        while (curr_row >= start_row && curr_row < end_row) {
-            // This process owns the current row
-
-            // Normalize the row
-            mat[curr_row][size] /= mat[curr_row][curr_row];
-
-            // Create broadcast data
-            pivot_row[0] = mat[curr_row][size];
-
-            MPI_Bcast(pivot_row, 1, MPI_FLOAT, rank, MPI_COMM_WORLD);
-            break;
-        }
-
-        // All processes wait for the result
-        MPI_Bcast(pivot_row, 1, MPI_FLOAT, row_owner, MPI_COMM_WORLD);
-
-        // If this process doesn't own the row, update the value
-        if (curr_row >= start_row && curr_row < end_row && rank != row_owner) {
-            mat[curr_row][size] = pivot_row[0];
-        }
-
-        // Each process updates its earlier rows
-        for (int row = start_row; row < end_row && row < curr_row; row++) {
-            flt frac = mat[row][curr_row] / mat[curr_row][curr_row];
-            mat[row][size] -= frac * pivot_row[0];
-        }
-
-        // Wait for all processes to finish this pass
-        MPI_Barrier(MPI_COMM_WORLD);
-    }
-
-    // Gather results back to rank 0
-    for (int i = 0; i < size; i++) {
-        // Determine which process has this row
-        int row_owner = 0;
-        for (int p = 0; p < num_procs; p++) {
-            int proc_start = p * rows_per_proc + (p < remainder ? p : remainder);
-            int proc_end = proc_start + rows_per_proc + (p < remainder ? 1 : 0);
-
-            if (i >= proc_start && i < proc_end) {
-                row_owner = p;
-                break;
-            }
-        }
-
-        if (rank == row_owner && rank != 0) {
-            // Send result to rank 0
-            MPI_Send(&mat[i][size], 1, MPI_FLOAT, 0, i, MPI_COMM_WORLD);
-        } else if (rank == 0 && row_owner != 0) {
-            // Receive result from the owner
-            MPI_Recv(&mat[i][size], 1, MPI_FLOAT, row_owner, i, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        }
-    }
-
-    free(pivot_row);
+	if (rank != 0) {
+		for_mpi_gap(row, 0, size, rank, num_procs) {
+			call_mpi(MPI_Send(mat[row], size + 1, MPI_FLOAT, 0, row,
+					  MPI_COMM_WORLD),
+				 "send");
+		}
+	} else {
+		for (int row = 0; row < size; row++) {
+			if (row % num_procs == 0) {
+				continue;
+			}
+			call_mpi(MPI_Recv(mat[row], size + 1, MPI_FLOAT,
+					  row % num_procs, row, MPI_COMM_WORLD,
+					  MPI_STATUS_IGNORE),
+				 "recv");
+		}
+	}
 }
+
+int main(int argc, char **argv)
+{
+	float **mat, **orig;
+	struct timespec begin, end;
+	int rank, num_procs;
+
+	call_mpi(MPI_Init(&argc, &argv), "mpi init");
+	call_mpi(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "comm rank");
+	call_mpi(MPI_Comm_size(MPI_COMM_WORLD, &num_procs), "comm size");
+
+	alloc_matrix_gauss(&mat, SIZE);
+
+	if (rank == 0) {
+		srand(123);
+		init_matrix_gauss(mat, SIZE);
+
+		if (SIZE < 20) {
+			alloc_matrix_gauss(&orig, SIZE);
+			copy_matrix_gauss(orig, mat, SIZE);
+			printf("original matrix\n");
+			print_matrix_gauss(orig, SIZE);
+		}
+	}
+
+	clock_gettime(CLOCK_MONOTONIC, &begin);
+	for (int i = 0; i < SIZE; i++) {
+		call_mpi(MPI_Bcast(mat[i], SIZE + 1, MPI_FLOAT, 0,
+				   MPI_COMM_WORLD),
+			 "broadcast mat");
+	}
+	gauss_mpi(mat, SIZE);
+	clock_gettime(CLOCK_MONOTONIC, &end);
+
+	if (rank == 0) {
+		printf("time: %fs\n", time_diff(&begin, &end));
+
+		if (SIZE < 20) {
+			print_matrix_gauss(mat, SIZE);
+			check_solution_gauss(orig, mat, SIZE);
+		}
+	}
+
+	call_mpi(MPI_Finalize(), "mpi finalize");
+	return 0;
+}
+
