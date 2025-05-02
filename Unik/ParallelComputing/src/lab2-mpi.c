@@ -6,7 +6,7 @@
 /* helper function to find next closest number from @start that will give
  * reminder @rank by modulo @num_procs
  */
-static inline int __fmg_begin(int begin, int rank, int num_procs)
+static inline int __fm_begin(int begin, int rank, int num_procs)
 {
 	while (begin % num_procs != rank) {
 		begin++;
@@ -49,7 +49,7 @@ static inline int __fmg_begin(int begin, int rank, int num_procs)
 	return begin + shift;
 }
 
-/* for_mpi_gap iterates through numbers from @begin to @end but only includes
+/* for_mpi iterates through numbers from @begin to @end but only includes
  * numbers where: @var % @num_procs == @rank
  *
  * example of resulting sequence per rank:
@@ -63,8 +63,8 @@ static inline int __fmg_begin(int begin, int rank, int num_procs)
  *  3     3  7  11
  */
 
-#define for_mpi_gap(var, begin, end, rank, num_procs)                  \
-	for (int var = __fmg_begin(begin, rank, num_procs); var < end; \
+#define for_mpi(var, begin, end, rank, num_procs)                     \
+	for (int var = __fm_begin(begin, rank, num_procs); var < end; \
 	     var += num_procs)
 
 static void gauss_mpi(flt **mat, int size)
@@ -82,24 +82,25 @@ static void gauss_mpi(flt **mat, int size)
 		 *
 		 * pivot row is the row that will be subtracted from other rows
 		 */
-		if (pass != 0) {
-			call_mpi(MPI_Bcast(mat[pass], size + 1, MPI_FLOAT,
-					   pass % num_procs, MPI_COMM_WORLD),
-				 "broadcas pivot row");
-		}
-		for_mpi_gap(row, pass + 1, size, rank, num_procs) {
-			//printf("rank %d, row %d, beg %d\n", rank, row, pass + 1 + rank);
+
+		for_mpi(row, pass + 1, size, rank, num_procs) {
 			flt frac = mat[row][pass] / mat[pass][pass];
 
-			for (int col = pass /* + 1 */; col <= size; col++) {
+			for (int col = pass + 1; col <= size; col++) {
 				mat[row][col] -= frac * mat[pass][col];
 			}
 		}
+
+		/* broadcast pivot row to other processes
+		 *
+		 * but we do not broadcast whole row, only part that will be
+		 * used in substruction in following passes
+		 */
+		call_mpi(MPI_Bcast(mat[pass + 1] + pass + 1,
+				   size - pass, MPI_FLOAT,
+				   (pass + 1) % num_procs, MPI_COMM_WORLD),
+			 "broadcas pivot row");
 	}
-	//usleep(rank * 100000);
-	//printf("rank %d\n", rank);
-	//print_matrix_gauss(mat, size);
-	//printf("\n");
 
 	/* backward pass */
 	for (int pass = 0; pass < size; pass++) {
@@ -108,7 +109,7 @@ static void gauss_mpi(flt **mat, int size)
 				   MPI_COMM_WORLD),
 			 "broadcas pivot row");
 
-		for_mpi_gap(row, 0, size - 1 - pass, rank, num_procs) {
+		for_mpi(row, 0, size - 1 - pass, rank, num_procs) {
 			//printf("rank %d, row %d, end %d\n", rank, row,
 			//       size - 1 - pass);
 			flt frac = mat[row][size - 1 - pass] /
@@ -120,12 +121,11 @@ static void gauss_mpi(flt **mat, int size)
 		if ((size - pass - 1) % num_procs == rank) {
 			mat[size - pass - 1][size] /=
 				mat[size - 1 - pass][size - 1 - pass];
-			mat[size - 1 - pass][size - 1 - pass] = 1;
 		}
 	}
 
 	if (rank != 0) {
-		for_mpi_gap(row, 0, size, rank, num_procs) {
+		for_mpi(row, 0, size, rank, num_procs) {
 			call_mpi(MPI_Send(mat[row], size + 1, MPI_FLOAT, 0, row,
 					  MPI_COMM_WORLD),
 				 "send");
