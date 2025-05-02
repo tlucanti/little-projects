@@ -16,6 +16,15 @@
 #define NR_THREADS 8
 #endif
 
+#ifndef min
+#define min(a, b)                      \
+	({                             \
+		typeof(a) __a = (a);   \
+		typeof(b) __b = (b);   \
+		__a < __b ? __a : __b; \
+	})
+#endif
+
 typedef float flt;
 
 static inline void *call_malloc(unsigned long size)
