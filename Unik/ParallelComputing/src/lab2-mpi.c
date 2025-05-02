@@ -96,22 +96,23 @@ static void gauss_mpi(flt **mat, int size)
 		 * but we do not broadcast whole row, only part that will be
 		 * used in substruction in following passes
 		 */
-		call_mpi(MPI_Bcast(mat[pass + 1] + pass + 1,
-				   size - pass, MPI_FLOAT,
-				   (pass + 1) % num_procs, MPI_COMM_WORLD),
+		call_mpi(MPI_Bcast(mat[pass + 1] + pass + 1, size - pass,
+				   MPI_FLOAT, (pass + 1) % num_procs,
+				   MPI_COMM_WORLD),
 			 "broadcas pivot row");
 	}
 
 	/* backward pass */
 	for (int pass = 0; pass < size; pass++) {
-		call_mpi(MPI_Bcast(mat[size - 1 - pass], size + 1, MPI_FLOAT,
+		/* broadcast free coefficient for following operation from
+		 * process that owns this row
+		 */
+		call_mpi(MPI_Bcast(&mat[size - 1 - pass][size], 1, MPI_FLOAT,
 				   (size - 1 - pass) % num_procs,
 				   MPI_COMM_WORLD),
 			 "broadcas pivot row");
 
 		for_mpi(row, 0, size - 1 - pass, rank, num_procs) {
-			//printf("rank %d, row %d, end %d\n", rank, row,
-			//       size - 1 - pass);
 			flt frac = mat[row][size - 1 - pass] /
 				   mat[size - 1 - pass][size - 1 - pass];
 
@@ -119,23 +120,28 @@ static void gauss_mpi(flt **mat, int size)
 		}
 
 		if ((size - pass - 1) % num_procs == rank) {
+			/* reduce free coefficient after subtructing it from
+			 * other rows
+			 */
 			mat[size - pass - 1][size] /=
 				mat[size - 1 - pass][size - 1 - pass];
 		}
 	}
 
 	if (rank != 0) {
+		/* send free coefficients back to root process */
 		for_mpi(row, 0, size, rank, num_procs) {
-			call_mpi(MPI_Send(mat[row], size + 1, MPI_FLOAT, 0, row,
+			call_mpi(MPI_Send(&mat[row][size], 1, MPI_FLOAT, 0, row,
 					  MPI_COMM_WORLD),
 				 "send");
 		}
 	} else {
+		/* receive free coefficients in root process */
 		for (int row = 0; row < size; row++) {
 			if (row % num_procs == 0) {
 				continue;
 			}
-			call_mpi(MPI_Recv(mat[row], size + 1, MPI_FLOAT,
+			call_mpi(MPI_Recv(&mat[row][size], 1, MPI_FLOAT,
 					  row % num_procs, row, MPI_COMM_WORLD,
 					  MPI_STATUS_IGNORE),
 				 "recv");
@@ -180,7 +186,6 @@ int main(int argc, char **argv)
 		printf("time: %fs\n", time_diff(&begin, &end));
 
 		if (SIZE < 20) {
-			print_matrix_gauss(mat, SIZE);
 			check_solution_gauss(orig, mat, SIZE);
 		}
 	}
