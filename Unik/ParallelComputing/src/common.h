@@ -135,10 +135,11 @@ static inline void print_matrix_gauss(float **array, int size)
 {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			printf("\t%f", array[i][j]);
+			printf("\t% 6.2f", array[i][j]);
 		}
-		printf("\n");
+		printf(" | %6.2f\n", array[i][size]);
 	}
+	printf("\n");
 }
 
 static inline void check_solution_gauss(flt **orig, flt **res, int size)
