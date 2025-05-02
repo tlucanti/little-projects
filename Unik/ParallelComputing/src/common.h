@@ -27,6 +27,15 @@
 
 typedef float flt;
 
+#define FLOAT_TYPE_MPI                                          \
+	(sizeof(flt) == sizeof(float) ?                         \
+		 MPI_FLOAT :                                    \
+		 (sizeof(flt) == sizeof(double) ?               \
+			  MPI_DOUBLE :                          \
+			  (sizeof(flt) == sizeof(long double) ? \
+				   MPI_LONG_DOUBLE :            \
+				   0)))
+
 static inline void *call_malloc(unsigned long size)
 {
 	void *ret = malloc(size);

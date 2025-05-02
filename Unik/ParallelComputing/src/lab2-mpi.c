@@ -97,7 +97,7 @@ static void gauss_mpi(flt **mat, int size)
 		 * used in substruction in following passes
 		 */
 		call_mpi(MPI_Bcast(mat[pass + 1] + pass + 1, size - pass,
-				   MPI_FLOAT, (pass + 1) % num_procs,
+				   FLOAT_TYPE_MPI, (pass + 1) % num_procs,
 				   MPI_COMM_WORLD),
 			 "broadcas pivot row");
 	}
@@ -107,7 +107,7 @@ static void gauss_mpi(flt **mat, int size)
 		/* broadcast free coefficient for following operation from
 		 * process that owns this row
 		 */
-		call_mpi(MPI_Bcast(&mat[size - 1 - pass][size], 1, MPI_FLOAT,
+		call_mpi(MPI_Bcast(&mat[size - 1 - pass][size], 1, FLOAT_TYPE_MPI,
 				   (size - 1 - pass) % num_procs,
 				   MPI_COMM_WORLD),
 			 "broadcas pivot row");
@@ -131,7 +131,7 @@ static void gauss_mpi(flt **mat, int size)
 	if (rank != 0) {
 		/* send free coefficients back to root process */
 		for_mpi(row, 0, size, rank, num_procs) {
-			call_mpi(MPI_Send(&mat[row][size], 1, MPI_FLOAT, 0, row,
+			call_mpi(MPI_Send(&mat[row][size], 1, FLOAT_TYPE_MPI, 0, row,
 					  MPI_COMM_WORLD),
 				 "send");
 		}
@@ -141,7 +141,7 @@ static void gauss_mpi(flt **mat, int size)
 			if (row % num_procs == 0) {
 				continue;
 			}
-			call_mpi(MPI_Recv(&mat[row][size], 1, MPI_FLOAT,
+			call_mpi(MPI_Recv(&mat[row][size], 1, FLOAT_TYPE_MPI,
 					  row % num_procs, row, MPI_COMM_WORLD,
 					  MPI_STATUS_IGNORE),
 				 "recv");
@@ -151,7 +151,7 @@ static void gauss_mpi(flt **mat, int size)
 
 int main(int argc, char **argv)
 {
-	float **mat, **orig;
+	flt **mat, **orig;
 	struct timespec begin, end;
 	int rank, num_procs;
 
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 
 	clock_gettime(CLOCK_MONOTONIC, &begin);
 	for (int i = 0; i < SIZE; i++) {
-		call_mpi(MPI_Bcast(mat[i], SIZE + 1, MPI_FLOAT, 0,
+		call_mpi(MPI_Bcast(mat[i], SIZE + 1, FLOAT_TYPE_MPI, 0,
 				   MPI_COMM_WORLD),
 			 "broadcast mat");
 	}

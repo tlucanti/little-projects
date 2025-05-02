@@ -2,7 +2,7 @@
 #define RUN_MPI
 #include "common.h"
 
-static void multiply_mpi(float **A, float **B, float **C, int size)
+static void multiply_mpi(flt **A, flt **B, flt **C, int size)
 {
 	int rank, num_procs;
 	call_mpi(MPI_Comm_rank(MPI_COMM_WORLD, &rank), "comm rank");
@@ -18,14 +18,16 @@ static void multiply_mpi(float **A, float **B, float **C, int size)
 
 	if (rank != 0) {
 		for (int i = rank; i < SIZE; i += num_procs) {
-			call_mpi(MPI_Send(C[i], size, MPI_FLOAT, 0, i, MPI_COMM_WORLD),
+			call_mpi(MPI_Send(C[i], size, FLOAT_TYPE_MPI, 0, i,
+					  MPI_COMM_WORLD),
 				 "send");
 		}
 	} else {
 		for (int p = 1; p < num_procs; p++) {
 			for (int i = p; i < SIZE; i += num_procs) {
-				call_mpi(MPI_Recv(C[i], size, MPI_FLOAT, p, i,
-						  MPI_COMM_WORLD, MPI_STATUS_IGNORE),
+				call_mpi(MPI_Recv(C[i], size, FLOAT_TYPE_MPI, p, i,
+						  MPI_COMM_WORLD,
+						  MPI_STATUS_IGNORE),
 					 "recv");
 			}
 		}
@@ -34,7 +36,7 @@ static void multiply_mpi(float **A, float **B, float **C, int size)
 
 int main(int argc, char **argv)
 {
-	float **A, **B, **C;
+	flt **A, **B, **C;
 	struct timespec begin, end;
 	int rank, num_procs;
 
@@ -53,9 +55,9 @@ int main(int argc, char **argv)
 
 	clock_gettime(CLOCK_MONOTONIC, &begin);
 	for (int i = 0; i < SIZE; i++) {
-		call_mpi(MPI_Bcast(A[i], SIZE, MPI_FLOAT, 0, MPI_COMM_WORLD),
+		call_mpi(MPI_Bcast(A[i], SIZE, FLOAT_TYPE_MPI, 0, MPI_COMM_WORLD),
 			 "broadcast a");
-		call_mpi(MPI_Bcast(B[i], SIZE, MPI_FLOAT, 0, MPI_COMM_WORLD),
+		call_mpi(MPI_Bcast(B[i], SIZE, FLOAT_TYPE_MPI, 0, MPI_COMM_WORLD),
 			 "broadcast b");
 	}
 	multiply_mpi(A, B, C, SIZE);
