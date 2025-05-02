@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef RUN_MPI
 #include <mpi.h>
@@ -16,6 +17,24 @@
 #define NR_THREADS 8
 #endif
 
+#ifndef INT_SIZE
+#define INT_SIZE 1000000
+#endif
+
+#define INT_START 0
+#define INT_END INT_SIZE
+#define INT_H 0.001
+#define INT_TRUE_ANSWER_1K 522761.6108534604
+#define INT_TRUE_ANSWER_1M 1281128564.241842
+
+#if INT_SIZE == 1000
+#define INT_TRUE_ANSWER INT_TRUE_ANSWER_1K
+#elif INT_SIZE == 1000000
+#define INT_TRUE_ANSWER INT_TRUE_ANSWER_1M
+#else
+#error "invalid INT_SIZE"
+#endif
+
 #ifndef min
 #define min(a, b)                      \
 	({                             \
@@ -25,7 +44,19 @@
 	})
 #endif
 
-typedef float flt;
+#ifndef square
+#define square(x)                    \
+	({                           \
+		typeof(x) __x = (x); \
+		(__x * __x);         \
+	})
+#endif
+
+#ifndef FLOAT_TYPE
+#define FLOAT_TYPE float
+#endif
+
+typedef FLOAT_TYPE flt;
 
 #define FLOAT_TYPE_MPI                                          \
 	(sizeof(flt) == sizeof(float) ?                         \

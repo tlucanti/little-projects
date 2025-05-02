@@ -1,44 +1,10 @@
 
-#include <math.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <stdio.h>
-#include <time.h>
-
-#define SIZE 1000000
-
-#define START 0
-#define END SIZE
-#define H 0.001
-#define TRUE_ANSWER_1K 522761.6108534604
-#define TRUE_ANSWER_1M 1281128564.241842
-
-#if SIZE == 1000
-# define TRUE_ANSWER TRUE_ANSWER_1K
-#elif SIZE == 1000000
-# define TRUE_ANSWER TRUE_ANSWER_1M
-#endif
-
-
-#define NR_THREADS 20
-
-typedef double flt;
-
-static double time_diff(struct timespec end, struct timespec start)
-{
-	double sec = end.tv_sec - start.tv_sec;
-	sec += (end.tv_nsec -  start.tv_nsec) * 1e-9;
-	return sec;
-}
-
-static flt squaref(flt x)
-{
-	return x * x;
-}
+#define FLOAT_TYPE double
+#include "common.h"
 
 static flt function(flt x)
 {
-	return (100 * x * logf(x + 1)) / (x + 100 * squaref(cosf(0.1 * x)));
+	return (100 * x * logf(x + 1)) / (x + 100 * square(cosf(0.1 * x)));
 }
 
 /**
@@ -82,7 +48,7 @@ static flt integral_omp(flt a, flt b, flt h)
 	flt ans = (function(a) + function(b)) * (flt)0.5;
 
 	a += h;
-	#pragma omp parallel for reduction(+:ans)
+#pragma omp parallel for reduction(+ : ans)
 	for (int i = 0; i < n - 2; i++) {
 		ans += function(a + h * i);
 	}
@@ -99,13 +65,13 @@ struct thr {
 static void *pthread_worker(struct thr *args)
 {
 	const int tid = args->tid;
-	const int n = (END - START) / H;
+	const int n = (INT_END - INT_START) / INT_H;
 	flt ans = 0;
 	// flt c = 0;
-	flt a = START;
+	flt a = INT_START;
 
 	for (int i = tid; i < n; i += NR_THREADS) {
-		ans += function(a + i * H);
+		ans += function(a + i * INT_H);
 
 		// flt y = function(a) - c;
 		// flt t = ans + y;
@@ -125,7 +91,8 @@ static flt integral_pthread(flt a, flt b, flt h)
 
 	for (unsigned long i = 0; i < NR_THREADS; i++) {
 		threads[i].tid = i;
-		pthread_create(&threads[i].thread, NULL, (void *)pthread_worker, (void *)&threads[i]);
+		pthread_create(&threads[i].thread, NULL, (void *)pthread_worker,
+			       (void *)&threads[i]);
 	}
 
 	for (int i = 0; i < NR_THREADS; i++) {
@@ -139,29 +106,38 @@ static flt integral_pthread(flt a, flt b, flt h)
 
 int main(int argc, char **argv)
 {
-	struct timespec start, end;
+	struct timespec begin, end;
 	flt ans;
 
 	if (argc != 2)
-		return 1;
+		goto args;
 
-	clock_gettime(CLOCK_MONOTONIC, &start);
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 	switch (argv[1][0]) {
 	case 's':
-		ans = integral_single_thread(START, END, H);
+		ans = integral_single_thread(INT_START, INT_END, INT_H);
 		break;
 	case 'o':
-		ans = integral_omp(START, END, H);
+		ans = integral_omp(INT_START, INT_END, INT_H);
 		break;
 	case 'p':
-		ans = integral_pthread(START, END, H);
+		ans = integral_pthread(INT_START, INT_END, INT_H);
 		break;
 	default:
-		return 1;
+		goto args;
 	}
 	clock_gettime(CLOCK_MONOTONIC, &end);
 
-	double err = fabs(1 - TRUE_ANSWER / ans) * 100;
+	double err = fabs(1 - INT_TRUE_ANSWER / ans) * 100;
 	printf("answer: %f (relative error: %f%%)\n", ans, err);
-	printf("time: %fs\n", time_diff(end, start));
+	printf("time: %fs\n", time_diff(&begin, &end));
+
+	return 0;
+
+args:
+	printf("invalid args, expected 's', 'o', 'p'\n"
+	       "\ts: single thread execution\n"
+	       "\tp: pthread multithreaded execution\n"
+	       "\to: OMP multithreaded execution\n");
+	return 1;
 }
