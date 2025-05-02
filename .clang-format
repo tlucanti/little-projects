@@ -65,6 +65,7 @@ ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 
 ForEachMacros:
+ - 'for_mpi'
 
 IncludeBlocks: Preserve
 IncludeCategories:
